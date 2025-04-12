@@ -78,7 +78,7 @@ function fmtStatus(status) {
 // ポリシー結果説明
 function explainPolicy(val) {
   const s = val.toLowerCase();
-  if (s === 'none')       return 'none (ポリシー未設定)';
+  if (s === 'none')       return 'none (何もしない)';
   if (s === 'quarantine') return 'quarantine (隔離を推奨)';
   if (s === 'reject')     return 'reject (拒否)';
   return val;
