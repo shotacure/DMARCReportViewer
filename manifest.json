@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "DMARC Report Analyzer",
+  "version": "1.0",
+  "description": "メールプレビュー画面に添付されたDMARCレポートのXMLを解析して情報を表示します。",
+  "applications": {
+    "gecko": {
+      "id": "dmarc-report-analyzer@precure.tv",
+      "strict_min_version": "78.0"
+    }
+  },
+  "permissions": [
+    "messagesRead",
+    "messagesModify"
+  ],
+  "background": {
+    "scripts": [
+      "libs/jszip.min.js",
+      "libs/pako.min.js",
+      "background.js"
+    ]
+  }
+}
