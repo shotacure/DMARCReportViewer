@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build XPI (Windows)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "build.ps1"],
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build XPI (Linux/macOS)",
+      "type": "shell",
+      "command": "bash",
+      "args": ["build.sh"],
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    }
+  ]
+}
