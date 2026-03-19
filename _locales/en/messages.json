@@ -1,0 +1,146 @@
+{
+  "extensionName": {
+    "message": "DMARC Report Viewer",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "Visualize and analyze DMARC aggregate (rua) and forensic (ruf) reports locally within Thunderbird.",
+    "description": "Description of the extension"
+  },
+  "btnScan": {
+    "message": "Scan Reports",
+    "description": "Button to start scanning"
+  },
+  "btnSettings": {
+    "message": "Settings",
+    "description": "Button to open settings"
+  },
+  "btnSave": {
+    "message": "Save",
+    "description": "Save settings button"
+  },
+  "msgSaved": {
+    "message": "✓ Saved",
+    "description": "Settings saved confirmation"
+  },
+  "noFolderNotice": {
+    "message": "No DMARC folders configured. Please open Settings to select your rua/ruf folders.",
+    "description": "Notice when no folders are set"
+  },
+  "statusScanning": {
+    "message": "Scanning folders…",
+    "description": "Status while scanning"
+  },
+  "statusComplete": {
+    "message": "Scan complete.",
+    "description": "Status when scan finishes"
+  },
+  "ruaReports": {
+    "message": "rua reports",
+    "description": "Label for aggregate report count"
+  },
+  "rufReports": {
+    "message": "ruf reports",
+    "description": "Label for forensic report count"
+  },
+  "sectionSummary": {
+    "message": "Summary",
+    "description": "Summary section title"
+  },
+  "sectionDomains": {
+    "message": "By Domain",
+    "description": "Domain section title"
+  },
+  "sectionReporters": {
+    "message": "By Reporter",
+    "description": "Reporter section title"
+  },
+  "sectionTopIps": {
+    "message": "Top Source IPs",
+    "description": "Source IP section title"
+  },
+  "sectionForensic": {
+    "message": "Forensic Reports (ruf)",
+    "description": "Forensic reports section title"
+  },
+  "totalEmails": {
+    "message": "Total Emails",
+    "description": "Total emails card label"
+  },
+  "fullPassRate": {
+    "message": "Full Pass Rate",
+    "description": "Full pass rate card label"
+  },
+  "dkimPassRate": {
+    "message": "DKIM Pass Rate",
+    "description": "DKIM pass rate card label"
+  },
+  "spfPassRate": {
+    "message": "SPF Pass Rate",
+    "description": "SPF pass rate card label"
+  },
+  "rejected": {
+    "message": "Rejected",
+    "description": "Rejected count card label"
+  },
+  "quarantined": {
+    "message": "Quarantined",
+    "description": "Quarantined count card label"
+  },
+  "colDomain": {
+    "message": "Domain",
+    "description": "Table column: Domain"
+  },
+  "colTotal": {
+    "message": "Total",
+    "description": "Table column: Total"
+  },
+  "colPassRate": {
+    "message": "Pass Rate",
+    "description": "Table column: Pass Rate"
+  },
+  "colReports": {
+    "message": "Reports",
+    "description": "Table column: Reports"
+  },
+  "colReporter": {
+    "message": "Reporter",
+    "description": "Table column: Reporter"
+  },
+  "colSourceIp": {
+    "message": "Source IP",
+    "description": "Table column: Source IP"
+  },
+  "colCount": {
+    "message": "Count",
+    "description": "Table column: Count"
+  },
+  "colDate": {
+    "message": "Date",
+    "description": "Table column: Date"
+  },
+  "colAuthFailure": {
+    "message": "Auth Failure",
+    "description": "Table column: Auth Failure"
+  },
+  "labelRuaFolder": {
+    "message": "rua Folder (Aggregate Reports)",
+    "description": "Settings label for rua folder"
+  },
+  "labelRufFolder": {
+    "message": "ruf Folder (Forensic Reports)",
+    "description": "Settings label for ruf folder"
+  },
+  "hintRuaFolder": {
+    "message": "Select the IMAP folder where DMARC aggregate reports (rua) are delivered.",
+    "description": "Hint text for rua folder selection"
+  },
+  "hintRufFolder": {
+    "message": "Select the IMAP folder where DMARC forensic reports (ruf) are delivered. Optional.",
+    "description": "Hint text for ruf folder selection"
+  },
+  "privacyNote": {
+    "message": "All processing is local. No external requests.",
+    "description": "Privacy footer note"
+  }
+}

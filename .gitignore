@@ -1,0 +1,5 @@
+.release/
+node_modules/
+lib/jszip.min.js
+lib/pako.min.js
+*.xpi

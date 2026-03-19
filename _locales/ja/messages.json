@@ -1,0 +1,146 @@
+{
+  "extensionName": {
+    "message": "DMARC Report Viewer",
+    "description": "アドオン名"
+  },
+  "extensionDescription": {
+    "message": "DMARC集約レポート(rua)とフォレンジックレポート(ruf)をThunderbird内でローカルに解析・可視化します。",
+    "description": "アドオンの説明"
+  },
+  "btnScan": {
+    "message": "レポートをスキャン",
+    "description": "スキャン開始ボタン"
+  },
+  "btnSettings": {
+    "message": "設定",
+    "description": "設定画面を開くボタン"
+  },
+  "btnSave": {
+    "message": "保存",
+    "description": "設定保存ボタン"
+  },
+  "msgSaved": {
+    "message": "✓ 保存しました",
+    "description": "設定保存完了メッセージ"
+  },
+  "noFolderNotice": {
+    "message": "DMARCフォルダが設定されていません。設定画面からrua/rufフォルダを選択してください。",
+    "description": "フォルダ未設定時の案内"
+  },
+  "statusScanning": {
+    "message": "フォルダをスキャン中…",
+    "description": "スキャン中のステータス"
+  },
+  "statusComplete": {
+    "message": "スキャン完了。",
+    "description": "スキャン完了時のステータス"
+  },
+  "ruaReports": {
+    "message": "件の集約レポート",
+    "description": "集約レポート数のラベル"
+  },
+  "rufReports": {
+    "message": "件のフォレンジックレポート",
+    "description": "フォレンジックレポート数のラベル"
+  },
+  "sectionSummary": {
+    "message": "サマリー",
+    "description": "サマリーセクションタイトル"
+  },
+  "sectionDomains": {
+    "message": "ドメイン別",
+    "description": "ドメイン別セクションタイトル"
+  },
+  "sectionReporters": {
+    "message": "レポーター別",
+    "description": "レポーター別セクションタイトル"
+  },
+  "sectionTopIps": {
+    "message": "送信元IP上位",
+    "description": "送信元IPセクションタイトル"
+  },
+  "sectionForensic": {
+    "message": "フォレンジックレポート (ruf)",
+    "description": "フォレンジックレポートセクションタイトル"
+  },
+  "totalEmails": {
+    "message": "メール総数",
+    "description": "メール総数カードラベル"
+  },
+  "fullPassRate": {
+    "message": "完全パス率",
+    "description": "完全パス率カードラベル"
+  },
+  "dkimPassRate": {
+    "message": "DKIM パス率",
+    "description": "DKIMパス率カードラベル"
+  },
+  "spfPassRate": {
+    "message": "SPF パス率",
+    "description": "SPFパス率カードラベル"
+  },
+  "rejected": {
+    "message": "拒否",
+    "description": "拒否数カードラベル"
+  },
+  "quarantined": {
+    "message": "隔離",
+    "description": "隔離数カードラベル"
+  },
+  "colDomain": {
+    "message": "ドメイン",
+    "description": "テーブル列: ドメイン"
+  },
+  "colTotal": {
+    "message": "合計",
+    "description": "テーブル列: 合計"
+  },
+  "colPassRate": {
+    "message": "パス率",
+    "description": "テーブル列: パス率"
+  },
+  "colReports": {
+    "message": "レポート数",
+    "description": "テーブル列: レポート数"
+  },
+  "colReporter": {
+    "message": "レポーター",
+    "description": "テーブル列: レポーター"
+  },
+  "colSourceIp": {
+    "message": "送信元IP",
+    "description": "テーブル列: 送信元IP"
+  },
+  "colCount": {
+    "message": "件数",
+    "description": "テーブル列: 件数"
+  },
+  "colDate": {
+    "message": "日時",
+    "description": "テーブル列: 日時"
+  },
+  "colAuthFailure": {
+    "message": "認証失敗",
+    "description": "テーブル列: 認証失敗"
+  },
+  "labelRuaFolder": {
+    "message": "ruaフォルダ（集約レポート）",
+    "description": "設定画面のruaフォルダラベル"
+  },
+  "labelRufFolder": {
+    "message": "rufフォルダ（フォレンジックレポート）",
+    "description": "設定画面のrufフォルダラベル"
+  },
+  "hintRuaFolder": {
+    "message": "DMARC集約レポート(rua)が配信されるIMAPフォルダを選択してください。",
+    "description": "ruaフォルダ選択のヒントテキスト"
+  },
+  "hintRufFolder": {
+    "message": "DMARCフォレンジックレポート(ruf)が配信されるIMAPフォルダを選択してください。任意です。",
+    "description": "rufフォルダ選択のヒントテキスト"
+  },
+  "privacyNote": {
+    "message": "すべての処理はローカルで完結します。外部通信は一切行いません。",
+    "description": "プライバシーフッター"
+  }
+}

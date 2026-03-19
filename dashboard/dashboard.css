@@ -1,0 +1,273 @@
+/* DMARCReportViewer - dashboard.css
+ * ダッシュボード画面のスタイル定義
+ * CSS変数によるダークモード完全対応 (MailAuthInfoViewer と同じアプローチ)
+ */
+
+/* === CSS カスタムプロパティ (ライトモード) === */
+:root {
+  --drv-bg: #f5f6f8;
+  --drv-surface: #ffffff;
+  --drv-border: #ddd;
+  --drv-text: #333;
+  --drv-text-secondary: #555;
+  --drv-text-muted: #888;
+  --drv-text-strong: #111;
+  --drv-accent: #1565c0;
+  --drv-accent-hover: #0d47a1;
+  --drv-pass: #2e7d32;
+  --drv-pass-bg: #e8f5e9;
+  --drv-fail: #c62828;
+  --drv-fail-bg: #ffebee;
+  --drv-warn: #e65100;
+  --drv-warn-bg: #fff3e0;
+  --drv-shadow: rgba(0, 0, 0, 0.06);
+  --drv-table-stripe: #f9f9fb;
+  --drv-table-hover: #f0f4ff;
+  --drv-notice-bg: #e3f2fd;
+  --drv-notice-text: #1565c0;
+  --drv-status-bg: #e8f5e9;
+  --drv-status-text: #2e7d32;
+}
+
+/* === ダークモード === */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --drv-bg: #1e1e1e;
+    --drv-surface: #2b2b2b;
+    --drv-border: #444;
+    --drv-text: #e0e0e0;
+    --drv-text-secondary: #bbb;
+    --drv-text-muted: #888;
+    --drv-text-strong: #f0f0f0;
+    --drv-accent: #64b5f6;
+    --drv-accent-hover: #90caf9;
+    --drv-pass: #66bb6a;
+    --drv-pass-bg: #1b3a1b;
+    --drv-fail: #ef5350;
+    --drv-fail-bg: #3a1b1b;
+    --drv-warn: #ffb74d;
+    --drv-warn-bg: #3a2e1b;
+    --drv-shadow: rgba(0, 0, 0, 0.3);
+    --drv-table-stripe: #323232;
+    --drv-table-hover: #2a3a4a;
+    --drv-notice-bg: #1a2a3a;
+    --drv-notice-text: #64b5f6;
+    --drv-status-bg: #1b3a1b;
+    --drv-status-text: #66bb6a;
+  }
+}
+
+/* === 基本レイアウト === */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Segoe UI", Meiryo, sans-serif;
+  background: var(--drv-bg);
+  color: var(--drv-text);
+  font-size: 14px;
+  line-height: 1.5;
+  min-width: 600px;
+  min-height: 400px;
+}
+
+.drv-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px 20px;
+}
+
+/* === ヘッダー === */
+.drv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--drv-accent);
+}
+
+.drv-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--drv-text-strong);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drv-icon { font-size: 22px; }
+
+.drv-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* === ボタン === */
+.drv-btn {
+  padding: 6px 16px;
+  border: 1px solid var(--drv-border);
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.drv-btn-primary {
+  background: var(--drv-accent);
+  color: white;
+  border-color: var(--drv-accent);
+}
+.drv-btn-primary:hover {
+  background: var(--drv-accent-hover);
+}
+.drv-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.drv-btn-secondary {
+  background: var(--drv-surface);
+  color: var(--drv-text);
+}
+.drv-btn-secondary:hover {
+  border-color: var(--drv-accent);
+}
+
+/* === ステータスバー === */
+.drv-status-bar {
+  background: var(--drv-status-bg);
+  color: var(--drv-status-text);
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+/* === 通知 === */
+.drv-notice {
+  background: var(--drv-notice-bg);
+  color: var(--drv-notice-text);
+  padding: 16px;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* === セクション === */
+.drv-section {
+  margin-bottom: 20px;
+}
+
+.drv-section-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--drv-text-strong);
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--drv-border);
+}
+
+/* === サマリーカード === */
+.drv-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.drv-card {
+  background: var(--drv-surface);
+  border: 1px solid var(--drv-border);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px var(--drv-shadow);
+}
+
+.drv-card-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--drv-text-muted);
+  margin-bottom: 4px;
+}
+
+.drv-card-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--drv-text-strong);
+}
+
+.drv-card-pass .drv-card-value { color: var(--drv-pass); }
+.drv-card-warn .drv-card-value { color: var(--drv-fail); }
+
+/* === テーブル === */
+.drv-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--drv-surface);
+  border: 1px solid var(--drv-border);
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.drv-table th {
+  background: var(--drv-bg);
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--drv-text-muted);
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--drv-border);
+}
+
+.drv-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--drv-border);
+  color: var(--drv-text-secondary);
+}
+
+.drv-table tbody tr:nth-child(even) {
+  background: var(--drv-table-stripe);
+}
+
+.drv-table tbody tr:hover {
+  background: var(--drv-table-hover);
+}
+
+/* === フッター === */
+.drv-footer {
+  margin-top: 24px;
+  padding-top: 12px;
+  border-top: 1px solid var(--drv-border);
+  font-size: 11px;
+  color: var(--drv-text-muted);
+  text-align: center;
+}
+
+.drv-footer-sep { margin: 0 8px; }
+
+/* === ユーティリティ === */
+.drv-hidden { display: none !important; }
+
+.drv-pass-text { color: var(--drv-pass); font-weight: bold; }
+.drv-fail-text { color: var(--drv-fail); font-weight: bold; }
+.drv-warn-text { color: var(--drv-warn); font-weight: bold; }
+
+/* === スピナー === */
+.drv-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--drv-border);
+  border-top-color: var(--drv-accent);
+  border-radius: 50%;
+  animation: drv-spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes drv-spin {
+  to { transform: rotate(360deg); }
+}
