@@ -14,6 +14,13 @@ const DEFAULT_SETTINGS = {
 };
 
 // =========================================================
+// スキャン結果のメモリキャッシュ
+// popup が閉じるとメモリが消えるため、background のグローバル変数に保持する。
+// Thunderbird の background script は拡張が無効化されるまで永続する。
+// =========================================================
+let cachedResults = null;
+
+// =========================================================
 // 設定の読み書き
 // =========================================================
 const getSettings = async () => {
@@ -74,11 +81,9 @@ const autoDetectFolders = async () => {
 
       // "dmarc" を含むフォルダの直下の子フォルダをチェック
       if (parentIsDmarc) {
-        // 集約レポートフォルダの候補: "aggregate" または "ar" を含む
         if (!detectedAr && (lowerName.includes("aggregate") || lowerName.includes("ar"))) {
           detectedAr = { accountId: folder.accountId, path: folder.path };
         }
-        // フォレンジックレポートフォルダの候補: "forensic" または "fr" を含む
         if (!detectedFr && (lowerName.includes("forensic") || lowerName.includes("fr"))) {
           detectedFr = { accountId: folder.accountId, path: folder.path };
         }
@@ -92,7 +97,6 @@ const autoDetectFolders = async () => {
 
   for (const account of accounts) {
     walk(account.folders, account.name, false);
-    // 両方見つかったら探索を打ち切る
     if (detectedAr && detectedFr) break;
   }
 
@@ -107,7 +111,6 @@ const resolveFolders = async (settings) => {
   let needsSave = false;
   const allFolders = await getAllFolders();
 
-  // 保存済みパスが現在のフォルダ一覧に存在するか検証
   const folderExists = (folderId) => {
     if (!folderId) return false;
     return allFolders.some(f =>
@@ -118,7 +121,6 @@ const resolveFolders = async (settings) => {
   const arValid = folderExists(settings.arFolderId);
   const frValid = folderExists(settings.frFolderId);
 
-  // いずれかが無効なら自動検出を試みる
   if (!arValid || !frValid) {
     const detected = await autoDetectFolders();
 
@@ -147,7 +149,6 @@ const listMessagesInFolder = async (accountId, path) => {
   const account = accounts.find(a => a.id === accountId);
   if (!account) return [];
 
-  // フォルダを再帰的に検索
   const findFolder = (folders, targetPath) => {
     for (const f of folders) {
       if (f.path === targetPath) return f;
@@ -189,7 +190,6 @@ const extractReportAttachments = async (messageId) => {
   const reportFiles = [];
 
   for (const att of attachments) {
-    // MIME type または拡張子で判定
     const isReportType = ATTACHMENT_MIME_TYPES.includes(att.contentType?.toLowerCase());
     const name = (att.name || "").toLowerCase();
     const isReportExt = name.endsWith(".zip") || name.endsWith(".gz") ||
@@ -238,17 +238,14 @@ const decompressAttachment = async (attachment) => {
       const entryName = filename.toLowerCase();
 
       if (entryName.endsWith(".xml")) {
-        // ZIP 内の XML をそのまま取得
         xmlTexts.push(await zipEntry.async("string"));
       } else if (entryName.endsWith(".gz") || entryName.endsWith(".gzip")) {
-        // ZIP 内にさらに gz が入っている場合（入れ子対応）
         const gzData = await zipEntry.async("arraybuffer");
         const xml = decompressGzip(gzData);
         if (xml) xmlTexts.push(xml);
       }
     }
   } else if (lowerName.endsWith(".xml") || contentType.includes("xml")) {
-    // 非圧縮 XML
     const decoder = new TextDecoder("utf-8");
     xmlTexts.push(decoder.decode(data));
   }
@@ -288,28 +285,40 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       case "getFolders":
         return await getAllFolders();
 
-      // --- フォルダ自動検出 ---
       case "autoDetectFolders":
         return await autoDetectFolders();
+
+      // --- 設定を検証・自動検出してから返す (popup 初期化時用) ---
+      case "resolveSettings": {
+        let settings = await getSettings();
+        settings = await resolveFolders(settings);
+        return settings;
+      }
+
+      // --- キャッシュされたスキャン結果を取得 (popup 再表示時) ---
+      case "getLastResults":
+        return cachedResults;
 
       // --- スキャン実行 ---
       // パース処理は background 側で行い、解析済みデータを返す。
       // popup は閉じるとメモリが消えるため、重い処理は background で完結させる。
       case "scanReports": {
         let settings = await getSettings();
-        // フォルダの存在を検証し、見つからなければ自動検出にフォールバック
         settings = await resolveFolders(settings);
 
-        const results = { ar: [], fr: [], errors: [] };
-        const seenKeys = new Set(); // 重複排除用
+        // スキャン期間フィルタ: since (Unix ms) が指定された場合、
+        // それ以降の日付のメッセージのみ処理する
+        const sinceMs = request.since || 0;
 
-        // 問題のあるメールをカテゴリ別に分類
+        const results = { ar: [], fr: [], errors: [] };
+        const seenKeys = new Set();
+
         results.issues = {
-          noAttachment: [],       // DMARC レポートの添付がないメール
-          decompressFailed: [],   // 解凍失敗
-          parseFailed: [],        // XML パース失敗
-          incompleteReport: [],   // パースできたが情報欠落あり (warnings)
-          unknownFormat: []       // 拡張子/MIME が想定外
+          noAttachment: [],
+          decompressFailed: [],
+          parseFailed: [],
+          incompleteReport: [],
+          unknownFormat: []
         };
 
         // 集約レポートフォルダのスキャン
@@ -318,10 +327,14 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const { accountId, path } = settings.arFolderId;
             const messages = await listMessagesInFolder(accountId, path);
             for (const msg of messages) {
+              // 期間フィルタ: 指定期間より古いメッセージをスキップ
+              if (sinceMs > 0 && msg.date && msg.date.getTime() < sinceMs) {
+                continue;
+              }
+
               try {
                 const attachments = await extractReportAttachments(msg.id);
 
-                // 添付ファイルが1つもない場合を記録
                 if (attachments.length === 0) {
                   results.issues.noAttachment.push({
                     messageId: msg.id,
@@ -337,7 +350,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                   try {
                     xmlTexts = await decompressAttachment(att);
                   } catch (decompErr) {
-                    // 解凍失敗を個別に記録
                     results.issues.decompressFailed.push({
                       messageId: msg.id,
                       date: msg.date?.toISOString(),
@@ -348,7 +360,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     continue;
                   }
 
-                  // 解凍できたが XML が空 (想定外フォーマットの可能性)
                   if (xmlTexts.length === 0) {
                     results.issues.unknownFormat.push({
                       messageId: msg.id,
@@ -363,12 +374,10 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                   for (const xml of xmlTexts) {
                     try {
                       const report = ArParser.parse(xml);
-                      // 重複排除 (reportKey ベース)
                       if (!seenKeys.has(report.reportKey)) {
                         seenKeys.add(report.reportKey);
                         results.ar.push(report);
 
-                        // 警告があるレポートを issues に記録
                         if (report.warnings.length > 0) {
                           results.issues.incompleteReport.push({
                             messageId: msg.id,
@@ -412,6 +421,11 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const { accountId, path } = settings.frFolderId;
             const messages = await listMessagesInFolder(accountId, path);
             for (const msg of messages) {
+              // 期間フィルタ
+              if (sinceMs > 0 && msg.date && msg.date.getTime() < sinceMs) {
+                continue;
+              }
+
               try {
                 const full = await browser.messages.getFull(msg.id);
                 const report = FrParser.parse(
@@ -424,7 +438,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                   seenKeys.add(report.reportKey);
                   results.fr.push(report);
 
-                  // 警告があるフォレンジックレポートを issues に記録
                   if (report.warnings.length > 0) {
                     results.issues.incompleteReport.push({
                       messageId: msg.id,
@@ -451,7 +464,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
           }
         }
 
-        // issues の件数サマリーを事前計算
+        // issues サマリーを事前計算
         results.issuesSummary = {
           noAttachment: results.issues.noAttachment.length,
           decompressFailed: results.issues.decompressFailed.length,
@@ -466,11 +479,11 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
           fatalErrors: results.errors.length
         };
 
-        // 集約サマリーを事前計算して含める
+        // 集約サマリーとドメイン別詳細を事前計算
         if (results.ar.length > 0) {
           results.aggregate = ArParser.aggregateSummaries(results.ar);
 
-          // ドメイン別集計も事前計算
+          // ドメイン別にレポートを分類し、各ドメインの完全な統計を計算
           const byDomain = new Map();
           for (const r of results.ar) {
             const d = r.policy.domain;
@@ -479,13 +492,18 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
           }
           results.domainDetails = [];
           for (const [domain, domainReports] of byDomain) {
+            // 各ドメインの最新のポリシー情報を取得 (最新レポートのものを使用)
+            const latestReport = domainReports.reduce((a, b) =>
+              a.dateRange.end > b.dateRange.end ? a : b
+            );
             results.domainDetails.push({
               domain,
               reportCount: domainReports.length,
+              policy: latestReport.policy,
+              // ドメインごとの完全な統計 (IP範囲集約含む)
               aggregate: ArParser.aggregateSummaries(domainReports)
             });
           }
-          // メール数降順でソート
           results.domainDetails.sort((a, b) =>
             b.aggregate.totalCount - a.aggregate.totalCount
           );
@@ -495,6 +513,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         settings.lastScanTime = Date.now();
         await saveSettings(settings);
 
+        // 結果をキャッシュに保存
+        cachedResults = results;
+
         return results;
       }
 
@@ -503,7 +524,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   };
 
-  // 非同期処理のため Promise を返す
   handle().then(sendResponse).catch(e => sendResponse({ error: e.toString() }));
   return true;
 });

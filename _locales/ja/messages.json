@@ -43,25 +43,53 @@
     "message": "件のフォレンジックレポート",
     "description": "フォレンジックレポート数のラベル"
   },
+  "period1w": {
+    "message": "1週間",
+    "description": "期間選択: 1週間"
+  },
+  "period1m": {
+    "message": "1か月",
+    "description": "期間選択: 1か月"
+  },
+  "period3m": {
+    "message": "3か月",
+    "description": "期間選択: 3か月"
+  },
+  "period6m": {
+    "message": "半年",
+    "description": "期間選択: 半年"
+  },
+  "period1y": {
+    "message": "1年",
+    "description": "期間選択: 1年"
+  },
+  "periodAll": {
+    "message": "全期間",
+    "description": "期間選択: 全期間"
+  },
   "sectionSummary": {
     "message": "サマリー",
     "description": "サマリーセクションタイトル"
-  },
-  "sectionDomains": {
-    "message": "ドメイン別",
-    "description": "ドメイン別セクションタイトル"
   },
   "sectionReporters": {
     "message": "レポーター別",
     "description": "レポーター別セクションタイトル"
   },
   "sectionTopIps": {
-    "message": "送信元IP上位",
-    "description": "送信元IPセクションタイトル"
+    "message": "IPアドレス範囲",
+    "description": "送信元IPアドレス範囲セクションタイトル"
   },
   "sectionForensic": {
     "message": "フォレンジックレポート",
     "description": "フォレンジックレポートセクションタイトル"
+  },
+  "sectionOverrides": {
+    "message": "ポリシーオーバーライド理由",
+    "description": "ポリシーオーバーライド理由セクションタイトル"
+  },
+  "sectionIssues": {
+    "message": "問題のあるメール",
+    "description": "Issuesセクションタイトル"
   },
   "totalEmails": {
     "message": "メール総数",
@@ -111,6 +139,10 @@
     "message": "送信元IP",
     "description": "テーブル列: 送信元IP"
   },
+  "colIpRange": {
+    "message": "IPアドレス範囲",
+    "description": "テーブル列: IPアドレス範囲 (Class C)"
+  },
   "colCount": {
     "message": "件数",
     "description": "テーブル列: 件数"
@@ -122,6 +154,18 @@
   "colAuthFailure": {
     "message": "認証失敗",
     "description": "テーブル列: 認証失敗"
+  },
+  "colOverrideType": {
+    "message": "理由",
+    "description": "テーブル列: ポリシーオーバーライド理由"
+  },
+  "colIssueCategory": {
+    "message": "カテゴリ",
+    "description": "テーブル列: 問題カテゴリ"
+  },
+  "colIssueDetail": {
+    "message": "詳細",
+    "description": "テーブル列: 問題の詳細"
   },
   "labelArFolder": {
     "message": "集約レポートフォルダ",
@@ -138,18 +182,6 @@
   "hintFrFolder": {
     "message": "DMARCフォレンジックレポートが配信されるIMAPフォルダを選択してください。任意です。",
     "description": "フォレンジックレポートフォルダ選択のヒントテキスト"
-  },
-  "privacyNote": {
-    "message": "すべての処理はローカルで完結します。外部通信は一切行いません。",
-    "description": "プライバシーフッター"
-  },
-  "sectionIssues": {
-    "message": "問題のあるメール",
-    "description": "Issuesセクションタイトル"
-  },
-  "sectionOverrides": {
-    "message": "ポリシーオーバーライド理由",
-    "description": "ポリシーオーバーライド理由セクションタイトル"
   },
   "issueParseFailed": {
     "message": "パース失敗",
@@ -175,16 +207,8 @@
     "message": "不明な形式",
     "description": "問題カテゴリ: 認識できないファイル形式"
   },
-  "colIssueCategory": {
-    "message": "カテゴリ",
-    "description": "テーブル列: 問題カテゴリ"
-  },
-  "colIssueDetail": {
-    "message": "詳細",
-    "description": "テーブル列: 問題の詳細"
-  },
-  "colOverrideType": {
-    "message": "理由",
-    "description": "テーブル列: ポリシーオーバーライド理由"
+  "privacyNote": {
+    "message": "すべての処理はローカルで完結します。外部通信は一切行いません。",
+    "description": "プライバシーフッター"
   }
 }

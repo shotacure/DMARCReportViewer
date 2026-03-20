@@ -43,25 +43,53 @@
     "message": "forensic reports",
     "description": "Label for forensic report count"
   },
+  "period1w": {
+    "message": "1 Week",
+    "description": "Period selector: 1 week"
+  },
+  "period1m": {
+    "message": "1 Month",
+    "description": "Period selector: 1 month"
+  },
+  "period3m": {
+    "message": "3 Months",
+    "description": "Period selector: 3 months"
+  },
+  "period6m": {
+    "message": "6 Months",
+    "description": "Period selector: 6 months"
+  },
+  "period1y": {
+    "message": "1 Year",
+    "description": "Period selector: 1 year"
+  },
+  "periodAll": {
+    "message": "All",
+    "description": "Period selector: all time"
+  },
   "sectionSummary": {
     "message": "Summary",
     "description": "Summary section title"
-  },
-  "sectionDomains": {
-    "message": "By Domain",
-    "description": "Domain section title"
   },
   "sectionReporters": {
     "message": "By Reporter",
     "description": "Reporter section title"
   },
   "sectionTopIps": {
-    "message": "Top Source IPs",
-    "description": "Source IP section title"
+    "message": "IP Address Ranges",
+    "description": "Source IP ranges section title"
   },
   "sectionForensic": {
     "message": "Forensic Reports",
     "description": "Forensic reports section title"
+  },
+  "sectionOverrides": {
+    "message": "Policy Override Reasons",
+    "description": "Policy override reasons section title"
+  },
+  "sectionIssues": {
+    "message": "Issues",
+    "description": "Issues section title"
   },
   "totalEmails": {
     "message": "Total Emails",
@@ -111,6 +139,10 @@
     "message": "Source IP",
     "description": "Table column: Source IP"
   },
+  "colIpRange": {
+    "message": "IP Address Range",
+    "description": "Table column: IP address range (Class C)"
+  },
   "colCount": {
     "message": "Count",
     "description": "Table column: Count"
@@ -122,6 +154,18 @@
   "colAuthFailure": {
     "message": "Auth Failure",
     "description": "Table column: Auth Failure"
+  },
+  "colOverrideType": {
+    "message": "Reason",
+    "description": "Table column: policy override reason type"
+  },
+  "colIssueCategory": {
+    "message": "Category",
+    "description": "Table column: issue category"
+  },
+  "colIssueDetail": {
+    "message": "Detail",
+    "description": "Table column: issue detail"
   },
   "labelArFolder": {
     "message": "Aggregate Report Folder",
@@ -138,18 +182,6 @@
   "hintFrFolder": {
     "message": "Select the IMAP folder where DMARC forensic reports are delivered. Optional.",
     "description": "Hint text for forensic report folder selection"
-  },
-  "privacyNote": {
-    "message": "All processing is local. No external requests.",
-    "description": "Privacy footer note"
-  },
-  "sectionIssues": {
-    "message": "Issues",
-    "description": "Issues section title"
-  },
-  "sectionOverrides": {
-    "message": "Policy Override Reasons",
-    "description": "Policy override reasons section title"
   },
   "issueParseFailed": {
     "message": "Parse Failed",
@@ -175,16 +207,8 @@
     "message": "Unknown Format",
     "description": "Issue category: unrecognized file format"
   },
-  "colIssueCategory": {
-    "message": "Category",
-    "description": "Table column: issue category"
-  },
-  "colIssueDetail": {
-    "message": "Detail",
-    "description": "Table column: issue detail"
-  },
-  "colOverrideType": {
-    "message": "Reason",
-    "description": "Table column: policy override reason type"
+  "privacyNote": {
+    "message": "All processing is local. No external requests.",
+    "description": "Privacy footer note"
   }
 }

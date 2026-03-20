@@ -24,7 +24,6 @@
   // フォルダ一覧をドロップダウンに追加 (dmarc を含むフォルダのみ)
   // =========================================================
   const populateFolders = async () => {
-    // background.js の getAllFolders() は dmarc を含むフォルダのみ返す
     const folders = await browser.runtime.sendMessage({ command: "getFolders" });
 
     for (const folder of folders) {
@@ -67,7 +66,6 @@
 
     await browser.runtime.sendMessage({ command: "saveSettings", settings });
 
-    // 保存完了のフィードバック
     savedMsg.classList.add("show");
     setTimeout(() => savedMsg.classList.remove("show"), 2000);
   });

@@ -1,6 +1,6 @@
 /* DMARCReportViewer - dashboard.css
  * ダッシュボード画面のスタイル定義
- * CSS変数によるダークモード完全対応 (MailAuthInfoViewer と同じアプローチ)
+ * CSS変数によるダークモード完全対応
  */
 
 /* === CSS カスタムプロパティ (ライトモード) === */
@@ -27,6 +27,10 @@
   --drv-notice-text: #1565c0;
   --drv-status-bg: #e8f5e9;
   --drv-status-text: #2e7d32;
+  --drv-bar-bg: #e0e0e0;
+  --drv-bar-none: #4caf50;
+  --drv-bar-quarantine: #ff9800;
+  --drv-bar-reject: #f44336;
 }
 
 /* === ダークモード === */
@@ -54,6 +58,10 @@
     --drv-notice-text: #64b5f6;
     --drv-status-bg: #1b3a1b;
     --drv-status-text: #66bb6a;
+    --drv-bar-bg: #444;
+    --drv-bar-none: #66bb6a;
+    --drv-bar-quarantine: #ffb74d;
+    --drv-bar-reject: #ef5350;
   }
 }
 
@@ -99,7 +107,19 @@ body {
 
 .drv-header-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+/* === 期間セレクタ === */
+.drv-period-select {
+  padding: 5px 8px;
+  border: 1px solid var(--drv-border);
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--drv-surface);
+  color: var(--drv-text);
 }
 
 /* === ボタン === */
@@ -118,21 +138,14 @@ body {
   color: white;
   border-color: var(--drv-accent);
 }
-.drv-btn-primary:hover {
-  background: var(--drv-accent-hover);
-}
-.drv-btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.drv-btn-primary:hover { background: var(--drv-accent-hover); }
+.drv-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .drv-btn-secondary {
   background: var(--drv-surface);
   color: var(--drv-text);
 }
-.drv-btn-secondary:hover {
-  border-color: var(--drv-accent);
-}
+.drv-btn-secondary:hover { border-color: var(--drv-accent); }
 
 /* === ステータスバー === */
 .drv-status-bar {
@@ -200,6 +213,24 @@ body {
 .drv-card-pass .drv-card-value { color: var(--drv-pass); }
 .drv-card-warn .drv-card-value { color: var(--drv-fail); }
 
+/* === コンパクトカード (ドメインセクション内用) === */
+.drv-card-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 6px;
+}
+
+.drv-card-compact {
+  background: var(--drv-surface);
+  border: 1px solid var(--drv-border);
+  border-radius: 4px;
+  padding: 8px;
+  text-align: center;
+}
+
+.drv-card-compact .drv-card-label { font-size: 10px; margin-bottom: 2px; }
+.drv-card-compact .drv-card-value { font-size: 18px; }
+
 /* === テーブル === */
 .drv-table {
   width: 100%;
@@ -228,12 +259,145 @@ body {
   color: var(--drv-text-secondary);
 }
 
-.drv-table tbody tr:nth-child(even) {
-  background: var(--drv-table-stripe);
+.drv-table tbody tr:nth-child(even) { background: var(--drv-table-stripe); }
+.drv-table tbody tr:hover { background: var(--drv-table-hover); }
+
+/* === CSS バーチャート === */
+.drv-bar-chart { margin: 10px 0; }
+
+.drv-bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 12px;
 }
 
-.drv-table tbody tr:hover {
-  background: var(--drv-table-hover);
+.drv-bar-label {
+  width: 140px;
+  flex-shrink: 0;
+  color: var(--drv-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drv-bar-track {
+  flex: 1;
+  height: 16px;
+  background: var(--drv-bar-bg);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 8px;
+}
+
+.drv-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.drv-bar-fill-pass { background: var(--drv-bar-none); }
+.drv-bar-fill-warn { background: var(--drv-bar-quarantine); }
+.drv-bar-fill-fail { background: var(--drv-bar-reject); }
+.drv-bar-fill-accent { background: var(--drv-accent); }
+
+.drv-bar-value {
+  width: 60px;
+  flex-shrink: 0;
+  text-align: right;
+  color: var(--drv-text-muted);
+  font-size: 11px;
+}
+
+/* === Disposition 分布バー (積み上げ) === */
+.drv-stacked-bar {
+  display: flex;
+  height: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.drv-stacked-bar-segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  min-width: 2px;
+}
+
+.drv-stacked-none { background: var(--drv-bar-none); }
+.drv-stacked-quarantine { background: var(--drv-bar-quarantine); }
+.drv-stacked-reject { background: var(--drv-bar-reject); }
+
+.drv-stacked-legend {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--drv-text-muted);
+  margin-top: 4px;
+}
+
+.drv-stacked-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.drv-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* === ドメインセクション === */
+.drv-domain-section {
+  background: var(--drv-surface);
+  border: 1px solid var(--drv-border);
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.drv-domain-header {
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--drv-text-strong);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drv-domain-policy {
+  font-size: 11px;
+  color: var(--drv-text-muted);
+  font-weight: normal;
+  background: var(--drv-bg);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.drv-domain-subsection {
+  margin-top: 10px;
+}
+
+.drv-domain-subtitle {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--drv-text-muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+/* === レポート期間表示 === */
+.drv-period-info {
+  font-size: 12px;
+  color: var(--drv-text-muted);
+  margin-bottom: 12px;
 }
 
 /* === フッター === */
@@ -250,7 +414,6 @@ body {
 
 /* === ユーティリティ === */
 .drv-hidden { display: none !important; }
-
 .drv-pass-text { color: var(--drv-pass); font-weight: bold; }
 .drv-fail-text { color: var(--drv-fail); font-weight: bold; }
 .drv-warn-text { color: var(--drv-warn); font-weight: bold; }

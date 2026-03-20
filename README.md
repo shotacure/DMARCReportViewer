@@ -3,30 +3,32 @@
 **A Thunderbird add-on to visualize and analyze DMARC aggregate and forensic reports.**
 **DMARC集約レポートとフォレンジックレポートを可視化・解析するThunderbirdアドオンです。**
 
-DMARC Report Viewer scans designated mail folders for DMARC reports, decompresses and parses the XML attachments, and presents a clear dashboard with authentication statistics, domain breakdowns, and source IP analysis — all processed entirely locally within Thunderbird.
+DMARC Report Viewer scans designated mail folders for DMARC reports, decompresses and parses the XML attachments, and presents a clear dashboard with authentication statistics, per-domain breakdowns, and source IP range analysis — all processed entirely locally within Thunderbird.
 
-DMARC Report Viewer は、指定されたメールフォルダからDMARCレポートをスキャンし、添付XMLを解凍・解析して、認証統計・ドメイン別分析・送信元IP分析を分かりやすいダッシュボードで表示します。すべての処理はThunderbird内でローカルに完結します。
+DMARC Report Viewer は、指定されたメールフォルダからDMARCレポートをスキャンし、添付XMLを解凍・解析して、認証統計・ドメイン別詳細分析・送信元IPアドレス範囲分析を分かりやすいダッシュボードで表示します。すべての処理はThunderbird内でローカルに完結します。
 
 ---
 
 ## 🌟 Key Features / 主な機能
 
-* **Aggregate Report Analysis:** Parses RFC 7489 compliant DMARC XML reports from ZIP/GZ attachments.
-    * **集約レポート解析:** ZIP/GZ添付のDMARC XMLレポート（RFC 7489準拠）を解析します。
+* **Aggregate Report Analysis:** Parses RFC 7489 compliant DMARC XML reports from ZIP/GZ attachments with ISP-specific XML sanitization.
+    * **集約レポート解析:** ZIP/GZ添付のDMARC XMLレポート（RFC 7489準拠）を、ISP固有のXML不整合修正を含めて解析します。
+* **Per-Domain Detail Sections:** Displays comprehensive statistics for each domain including pass rates, disposition distribution, IP address ranges, reporters, policy override reasons, and published DMARC policy.
+    * **ドメイン別詳細セクション:** 各ドメインのパス率、disposition分布、IPアドレス範囲、レポーター、ポリシーオーバーライド理由、公開DMARCポリシーを含む包括的な統計を表示します。
+* **IP Address Range Aggregation:** Groups source IPs by Class C range (e.g. `192.168.1.xxx`) for meaningful network-level analysis.
+    * **IPアドレス範囲集約:** 送信元IPをClass C範囲（例: `192.168.1.xxx`）で集約し、ネットワークレベルの分析を可能にします。
+* **Scan Period Selection:** Choose to scan reports from the last week, month, 3 months, 6 months, year, or all time.
+    * **スキャン期間選択:** 直近1週間、1か月、3か月、半年、1年、または全期間からスキャン範囲を選択できます。
+* **Result Persistence:** Scan results are cached and restored when reopening the dashboard popup.
+    * **結果の永続化:** スキャン結果はキャッシュされ、ダッシュボードを再度開いた際に復元されます。
+* **Visual Charts:** CSS-based bar charts show domain email distribution and disposition breakdown without external dependencies.
+    * **視覚的なチャート:** CSSベースの棒グラフでドメイン別メール分布とdisposition内訳を外部ライブラリなしで表示します。
 * **Forensic Report Viewing:** Displays individual authentication failure reports for investigation and abuse reporting.
     * **フォレンジックレポート閲覧:** 個別の認証失敗レポートを表示し、調査や通報の材料とします。
-* **Automatic Folder Detection:** Automatically detects report folders based on naming conventions (e.g. `DMARC/Aggregate`, `DMARC/Forensic`). Recovers gracefully when IMAP folder names are changed.
-    * **フォルダ自動検出:** 命名規則（例: `DMARC/Aggregate`、`DMARC/Forensic`）に基づきレポートフォルダを自動検出します。IMAPフォルダ名が変更された場合も自動的に再検出します。
-* **Comprehensive Data Extraction:** Extracts all available information from reports including metadata errors, policy override reasons, and extended AFRF fields.
-    * **網羅的なデータ抽出:** メタデータエラー、ポリシーオーバーライド理由、拡張AFRFフィールドを含む全情報を抽出します。
-* **Data Completeness Validation:** Detects and reports missing or incomplete fields in DMARC reports, identifying problematic messages by category (parse failure, decompression failure, missing attachments, incomplete data, unknown formats).
-    * **データ完全性検証:** DMARCレポート内の欠落・不完全なフィールドを検出・報告し、問題のあるメールをカテゴリ別（パース失敗、解凍失敗、添付なし、情報欠落、不明な形式）に特定します。
-* **ISP Compatibility:** Handles known XML inconsistencies from major ISPs (e.g. Microsoft tag typos, non-standard element names).
-    * **ISP互換性:** 主要ISPの既知のXML不整合（Microsoftのタグ誤記、非標準要素名など）に対応します。
-* **Multi-Domain Support:** Handles reports for multiple domains in a single dashboard.
-    * **複数ドメイン対応:** 複数ドメインのレポートを1つのダッシュボードで管理します。
-* **Statistics Dashboard:** Total emails, DKIM/SPF pass rates, rejection counts, top source IPs, reporter breakdown, and policy override reason tracking.
-    * **統計ダッシュボード:** メール総数、DKIM/SPFパス率、拒否数、送信元IP上位、レポーター別集計、ポリシーオーバーライド理由を表示します。
+* **Automatic Folder Detection:** Automatically detects report folders based on naming conventions. Recovers gracefully when IMAP folder names are changed.
+    * **フォルダ自動検出:** 命名規則に基づきレポートフォルダを自動検出します。IMAPフォルダ名が変更された場合も自動的に再検出します。
+* **Data Completeness Validation:** Detects and reports missing or incomplete fields in DMARC reports, identifying problematic messages by category.
+    * **データ完全性検証:** DMARCレポート内の欠落・不完全なフィールドを検出・報告し、問題のあるメールをカテゴリ別に特定します。
 * **Dark Mode:** Full dark mode support following system preference.
     * **ダークモード:** システムの設定に連動した完全なダークモード対応。
 * **Privacy First:** All processing is performed strictly locally within Thunderbird. No external network requests are made.
@@ -99,14 +101,15 @@ Both scripts read the version from `manifest.json`, stage the required files, pr
 ```
 manifest.json               Extension manifest with i18n support
 background.js               Message scanning, attachment extraction, decompression pipeline,
-                             folder auto-detection and IMAP rename recovery
+                             folder auto-detection, result caching, period filtering
 parser/
-├─ ar_parser.js             Aggregate report XML parser (RFC 7489) with validation
+├─ ar_parser.js             Aggregate report XML parser (RFC 7489) with validation,
+│                            IP range aggregation, ISP XML sanitization
 └─ fr_parser.js             Forensic report parser (RFC 6591 / AFRF) with validation
 dashboard/
-├─ dashboard.html           Main dashboard UI
-├─ dashboard.css            Styles with CSS variables & dark mode
-└─ dashboard.js             Dashboard logic — scan, render, issues display
+├─ dashboard.html           Main dashboard UI with period selector
+├─ dashboard.css            Styles with CSS variables, dark mode, bar charts
+└─ dashboard.js             Dashboard logic — per-domain sections, charts, cache restore
 options/
 ├─ options.html             Settings page (filtered to DMARC folders only)
 └─ options.js               Folder selection & persistence
@@ -123,13 +126,11 @@ _locales/
 ### Processing Pipeline / 処理パイプライン
 
 ```
-Auto-Detect Folders → Mail Folder → Message Scan → Attachment Extraction
-→ Decompress (GZ/ZIP) → XML Sanitize → Parse → Validate
-→ Deduplicate → Aggregate → Dashboard Render
+Period Filter → Auto-Detect Folders → Message Scan → Attachment Extraction
+→ Decompress (GZ/ZIP) → XML Sanitize → Parse → Validate → Deduplicate
+→ Per-Domain Aggregation (with IP range grouping) → Cache → Dashboard Render
          ↓
   Issues Classification
-  (no attachment / decompress failed /
-   parse failed / incomplete / unknown format)
 ```
 
 ---

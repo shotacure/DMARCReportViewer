@@ -4,126 +4,47 @@
   <meta charset="utf-8">
   <title data-i18n="btnSettings">Settings</title>
   <style>
-    /* ライトモード */
     :root {
-      --drv-bg: #f5f6f8;
-      --drv-surface: #ffffff;
-      --drv-border: #ddd;
-      --drv-text: #333;
-      --drv-text-muted: #888;
-      --drv-text-strong: #111;
-      --drv-accent: #1565c0;
-      --drv-accent-hover: #0d47a1;
-      --drv-pass: #2e7d32;
+      --drv-bg: #f5f6f8; --drv-surface: #ffffff; --drv-border: #ddd;
+      --drv-text: #333; --drv-text-muted: #888; --drv-text-strong: #111;
+      --drv-accent: #1565c0; --drv-accent-hover: #0d47a1; --drv-pass: #2e7d32;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --drv-bg: #1e1e1e;
-        --drv-surface: #2b2b2b;
-        --drv-border: #444;
-        --drv-text: #e0e0e0;
-        --drv-text-muted: #888;
-        --drv-text-strong: #f0f0f0;
-        --drv-accent: #64b5f6;
-        --drv-accent-hover: #90caf9;
-        --drv-pass: #66bb6a;
+        --drv-bg: #1e1e1e; --drv-surface: #2b2b2b; --drv-border: #444;
+        --drv-text: #e0e0e0; --drv-text-muted: #888; --drv-text-strong: #f0f0f0;
+        --drv-accent: #64b5f6; --drv-accent-hover: #90caf9; --drv-pass: #66bb6a;
       }
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: "Segoe UI", Meiryo, sans-serif;
-      background: var(--drv-bg);
-      color: var(--drv-text);
-      font-size: 14px;
-      padding: 20px;
-    }
-    h2 {
-      font-size: 16px;
-      color: var(--drv-text-strong);
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--drv-accent);
-    }
-    .opt-group {
-      background: var(--drv-surface);
-      border: 1px solid var(--drv-border);
-      border-radius: 6px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-    .opt-label {
-      display: block;
-      font-size: 12px;
-      font-weight: bold;
-      text-transform: uppercase;
-      color: var(--drv-text-muted);
-      margin-bottom: 6px;
-    }
-    .opt-select {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid var(--drv-border);
-      border-radius: 4px;
-      font-size: 13px;
-      font-family: inherit;
-      background: var(--drv-surface);
-      color: var(--drv-text);
-    }
-    .opt-hint {
-      font-size: 11px;
-      color: var(--drv-text-muted);
-      margin-top: 4px;
-    }
-    .opt-btn {
-      padding: 8px 24px;
-      background: var(--drv-accent);
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 14px;
-      cursor: pointer;
-      font-family: inherit;
-    }
+    body { font-family: "Segoe UI", Meiryo, sans-serif; background: var(--drv-bg); color: var(--drv-text); font-size: 14px; padding: 20px; }
+    h2 { font-size: 16px; color: var(--drv-text-strong); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--drv-accent); }
+    .opt-group { background: var(--drv-surface); border: 1px solid var(--drv-border); border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+    .opt-label { display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; color: var(--drv-text-muted); margin-bottom: 6px; }
+    .opt-select { width: 100%; padding: 8px; border: 1px solid var(--drv-border); border-radius: 4px; font-size: 13px; font-family: inherit; background: var(--drv-surface); color: var(--drv-text); }
+    .opt-hint { font-size: 11px; color: var(--drv-text-muted); margin-top: 4px; }
+    .opt-btn { padding: 8px 24px; background: var(--drv-accent); color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; font-family: inherit; }
     .opt-btn:hover { background: var(--drv-accent-hover); }
-    .opt-saved {
-      color: var(--drv-pass);
-      font-weight: bold;
-      margin-left: 12px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
+    .opt-saved { color: var(--drv-pass); font-weight: bold; margin-left: 12px; opacity: 0; transition: opacity 0.3s; }
     .opt-saved.show { opacity: 1; }
   </style>
 </head>
 <body>
   <h2>📊 DMARC Report Viewer — <span data-i18n="btnSettings">Settings</span></h2>
-
   <div class="opt-group">
     <label class="opt-label" data-i18n="labelArFolder">Aggregate Report Folder</label>
-    <select id="ar-folder" class="opt-select">
-      <option value="">— Select folder —</option>
-    </select>
-    <div class="opt-hint" data-i18n="hintArFolder">
-      Select the IMAP folder where DMARC aggregate reports are delivered.
-    </div>
+    <select id="ar-folder" class="opt-select"><option value="">— Select folder —</option></select>
+    <div class="opt-hint" data-i18n="hintArFolder">Select the IMAP folder where DMARC aggregate reports are delivered.</div>
   </div>
-
   <div class="opt-group">
     <label class="opt-label" data-i18n="labelFrFolder">Forensic Report Folder</label>
-    <select id="fr-folder" class="opt-select">
-      <option value="">— Select folder —</option>
-    </select>
-    <div class="opt-hint" data-i18n="hintFrFolder">
-      Select the IMAP folder where DMARC forensic reports are delivered. Optional.
-    </div>
+    <select id="fr-folder" class="opt-select"><option value="">— Select folder —</option></select>
+    <div class="opt-hint" data-i18n="hintFrFolder">Select the IMAP folder where DMARC forensic reports are delivered. Optional.</div>
   </div>
-
   <div>
     <button id="btn-save" class="opt-btn" data-i18n="btnSave">Save</button>
     <span id="saved-msg" class="opt-saved" data-i18n="msgSaved">✓ Saved</span>
   </div>
-
   <script src="options.js"></script>
 </body>
 </html>
