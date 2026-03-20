@@ -1,6 +1,6 @@
 // DMARCReportViewer - dashboard/dashboard.js
 // ダッシュボード画面のメインロジック
-// background.js へメッセージを送信してデータ取得 → パーサーで解析 → UI 描画
+// background.js へメッセージを送信してデータ取得 → UI 描画
 
 (() => {
   "use strict";
@@ -43,7 +43,7 @@
   const domainSection = $("domain-section");
   const reporterSection = $("reporter-section");
   const ipSection = $("ip-section");
-  const rufSection = $("ruf-section");
+  const frSection = $("fr-section");
   const issuesSection = $("issues-section");
   const overrideSection = $("override-section");
 
@@ -77,7 +77,7 @@
     applyI18n();
 
     const settings = await browser.runtime.sendMessage({ command: "getSettings" });
-    if (!settings.ruaFolderId && !settings.rufFolderId) {
+    if (!settings.arFolderId && !settings.frFolderId) {
       show(noFolderNotice);
     } else {
       hide(noFolderNotice);
@@ -109,7 +109,7 @@
       }
 
       // 2. UI 描画 (データは background 側で重複排除・パース済み)
-      if (results.rua.length > 0 && results.aggregate) {
+      if (results.ar.length > 0 && results.aggregate) {
         renderSummary(results.aggregate);
         renderDomainTable(results.domainDetails || []);
         renderReporterTable(results.aggregate);
@@ -121,8 +121,8 @@
         }
       }
 
-      if (results.ruf.length > 0) {
-        renderRufTable(results.ruf);
+      if (results.fr.length > 0) {
+        renderFrTable(results.fr);
       }
 
       // Issues セクション: 問題のあるメールをカテゴリ別に表示
@@ -133,8 +133,8 @@
       // 3. ステータス更新
       const totalErrors = results.errors.length;
       const statusText = (msg("statusComplete") || "Scan complete.") +
-        ` ${results.rua.length} ` + (msg("ruaReports") || "rua reports") +
-        `, ${results.ruf.length} ` + (msg("rufReports") || "ruf reports") +
+        ` ${results.ar.length} ` + (msg("arReports") || "aggregate reports") +
+        `, ${results.fr.length} ` + (msg("frReports") || "forensic reports") +
         (totalErrors > 0 ? ` (${totalErrors} errors)` : "");
       showStatus(statusText);
 
@@ -230,14 +230,14 @@
   };
 
   // =========================================================
-  // ruf テーブル描画
+  // フォレンジックレポートテーブル描画
   // =========================================================
-  const renderRufTable = (rufReports) => {
-    const tbody = $("ruf-table").querySelector("tbody");
+  const renderFrTable = (frReports) => {
+    const tbody = $("fr-table").querySelector("tbody");
     tbody.innerHTML = "";
 
     // 日付降順でソート
-    const sorted = [...rufReports].sort((a, b) =>
+    const sorted = [...frReports].sort((a, b) =>
       new Date(b.messageDate) - new Date(a.messageDate)
     );
 
@@ -255,7 +255,7 @@
       tbody.appendChild(tr);
     }
 
-    show(rufSection);
+    show(frSection);
   };
 
   // =========================================================

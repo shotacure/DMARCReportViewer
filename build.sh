@@ -38,8 +38,8 @@ cp dashboard/dashboard.css     "${STAGE_DIR}/dashboard/"
 cp dashboard/dashboard.js      "${STAGE_DIR}/dashboard/"
 cp options/options.html        "${STAGE_DIR}/options/"
 cp options/options.js          "${STAGE_DIR}/options/"
-cp parser/rua_parser.js        "${STAGE_DIR}/parser/"
-cp parser/ruf_parser.js        "${STAGE_DIR}/parser/"
+cp parser/ar_parser.js         "${STAGE_DIR}/parser/"
+cp parser/fr_parser.js         "${STAGE_DIR}/parser/"
 
 # --- lib ディレクトリ (存在する場合のみ) ---
 if ls lib/*.js 1>/dev/null 2>&1; then

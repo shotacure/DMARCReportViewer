@@ -1,10 +1,10 @@
-// DMARCReportViewer - parser/rua_parser.js
-// rua (集約レポート) XML パーサー
+// DMARCReportViewer - parser/ar_parser.js
+// 集約レポート (Aggregate Report) XML パーサー
 // RFC 7489 に準拠した DMARC 集約レポート XML を正規化データに変換する。
 // DOMParser を使用し、外部ライブラリに依存しない。
 // 全要素を網羅的に取得し、情報欠落を warnings として報告する。
 
-const RuaParser = (() => {
+const ArParser = (() => {
   "use strict";
 
   // =========================================================

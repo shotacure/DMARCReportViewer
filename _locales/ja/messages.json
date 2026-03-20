@@ -4,7 +4,7 @@
     "description": "アドオン名"
   },
   "extensionDescription": {
-    "message": "DMARC集約レポート(rua)とフォレンジックレポート(ruf)をThunderbird内でローカルに解析・可視化します。",
+    "message": "DMARC集約レポートとフォレンジックレポートをThunderbird内でローカルに解析・可視化します。",
     "description": "アドオンの説明"
   },
   "btnScan": {
@@ -24,7 +24,7 @@
     "description": "設定保存完了メッセージ"
   },
   "noFolderNotice": {
-    "message": "DMARCフォルダが設定されていません。設定画面からrua/rufフォルダを選択してください。",
+    "message": "DMARCフォルダが設定されていません。設定画面からレポートフォルダを選択するか、命名規則に沿ったフォルダ（例: DMARC/Aggregate、DMARC/Forensic）を作成すると自動検出されます。",
     "description": "フォルダ未設定時の案内"
   },
   "statusScanning": {
@@ -35,11 +35,11 @@
     "message": "スキャン完了。",
     "description": "スキャン完了時のステータス"
   },
-  "ruaReports": {
+  "arReports": {
     "message": "件の集約レポート",
     "description": "集約レポート数のラベル"
   },
-  "rufReports": {
+  "frReports": {
     "message": "件のフォレンジックレポート",
     "description": "フォレンジックレポート数のラベル"
   },
@@ -60,7 +60,7 @@
     "description": "送信元IPセクションタイトル"
   },
   "sectionForensic": {
-    "message": "フォレンジックレポート (ruf)",
+    "message": "フォレンジックレポート",
     "description": "フォレンジックレポートセクションタイトル"
   },
   "totalEmails": {
@@ -123,21 +123,21 @@
     "message": "認証失敗",
     "description": "テーブル列: 認証失敗"
   },
-  "labelRuaFolder": {
-    "message": "ruaフォルダ（集約レポート）",
-    "description": "設定画面のruaフォルダラベル"
+  "labelArFolder": {
+    "message": "集約レポートフォルダ",
+    "description": "設定画面の集約レポートフォルダラベル"
   },
-  "labelRufFolder": {
-    "message": "rufフォルダ（フォレンジックレポート）",
-    "description": "設定画面のrufフォルダラベル"
+  "labelFrFolder": {
+    "message": "フォレンジックレポートフォルダ",
+    "description": "設定画面のフォレンジックレポートフォルダラベル"
   },
-  "hintRuaFolder": {
-    "message": "DMARC集約レポート(rua)が配信されるIMAPフォルダを選択してください。",
-    "description": "ruaフォルダ選択のヒントテキスト"
+  "hintArFolder": {
+    "message": "DMARC集約レポートが配信されるIMAPフォルダを選択してください。",
+    "description": "集約レポートフォルダ選択のヒントテキスト"
   },
-  "hintRufFolder": {
-    "message": "DMARCフォレンジックレポート(ruf)が配信されるIMAPフォルダを選択してください。任意です。",
-    "description": "rufフォルダ選択のヒントテキスト"
+  "hintFrFolder": {
+    "message": "DMARCフォレンジックレポートが配信されるIMAPフォルダを選択してください。任意です。",
+    "description": "フォレンジックレポートフォルダ選択のヒントテキスト"
   },
   "privacyNote": {
     "message": "すべての処理はローカルで完結します。外部通信は一切行いません。",

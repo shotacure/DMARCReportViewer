@@ -36,8 +36,8 @@ Copy-Item -Force "dashboard/dashboard.css"   (Join-Path $stageDir "dashboard")
 Copy-Item -Force "dashboard/dashboard.js"    (Join-Path $stageDir "dashboard")
 Copy-Item -Force "options/options.html"      (Join-Path $stageDir "options")
 Copy-Item -Force "options/options.js"        (Join-Path $stageDir "options")
-Copy-Item -Force "parser/rua_parser.js"      (Join-Path $stageDir "parser")
-Copy-Item -Force "parser/ruf_parser.js"      (Join-Path $stageDir "parser")
+Copy-Item -Force "parser/ar_parser.js"       (Join-Path $stageDir "parser")
+Copy-Item -Force "parser/fr_parser.js"       (Join-Path $stageDir "parser")
 
 # --- lib ディレクトリ (存在する場合のみ) ---
 $libFiles = Get-ChildItem "lib/*.js" -ErrorAction SilentlyContinue

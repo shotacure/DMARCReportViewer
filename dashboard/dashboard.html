@@ -31,7 +31,7 @@
     <!-- フォルダ未設定時の案内 -->
     <div id="no-folder-notice" class="drv-notice drv-hidden">
       <p data-i18n="noFolderNotice">
-        No DMARC folders configured. Please open Settings to select your rua/ruf folders.
+        No DMARC folders configured. Please open Settings to select your report folders.
       </p>
     </div>
 
@@ -110,10 +110,10 @@
       </table>
     </div>
 
-    <!-- ruf 一覧 -->
-    <div id="ruf-section" class="drv-section drv-hidden">
-      <h2 class="drv-section-title" data-i18n="sectionForensic">Forensic Reports (ruf)</h2>
-      <table class="drv-table" id="ruf-table">
+    <!-- フォレンジックレポート一覧 -->
+    <div id="fr-section" class="drv-section drv-hidden">
+      <h2 class="drv-section-title" data-i18n="sectionForensic">Forensic Reports</h2>
+      <table class="drv-table" id="fr-table">
         <thead>
           <tr>
             <th data-i18n="colDate">Date</th>
@@ -129,7 +129,6 @@
     <!-- Issues (問題のあるメール) -->
     <div id="issues-section" class="drv-section drv-hidden">
       <h2 class="drv-section-title" data-i18n="sectionIssues">Issues</h2>
-      <!-- Issues サマリーカード -->
       <div class="drv-card-grid" id="issues-cards" style="margin-bottom: 12px;">
         <div class="drv-card drv-card-warn">
           <div class="drv-card-label" data-i18n="issueParseFailed">Parse Failed</div>
@@ -152,7 +151,6 @@
           <div class="drv-card-value" id="issue-unknown-format">0</div>
         </div>
       </div>
-      <!-- Issues 詳細テーブル -->
       <table class="drv-table" id="issues-table">
         <thead>
           <tr>

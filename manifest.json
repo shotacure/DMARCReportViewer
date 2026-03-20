@@ -26,8 +26,8 @@
     "scripts": [
       "lib/pako.min.js",
       "lib/jszip.min.js",
-      "parser/rua_parser.js",
-      "parser/ruf_parser.js",
+      "parser/ar_parser.js",
+      "parser/fr_parser.js",
       "background.js"
     ]
   },

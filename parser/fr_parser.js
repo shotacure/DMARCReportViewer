@@ -1,17 +1,17 @@
-// DMARCReportViewer - parser/ruf_parser.js
-// ruf (フォレンジックレポート) パーサー
+// DMARCReportViewer - parser/fr_parser.js
+// フォレンジックレポート (Forensic Report) パーサー
 // AFRF (RFC 6591) 形式のフォレンジックレポートを正規化データに変換する。
-// ruf は来る ISP が少なく形式もバラつくため、防御的にパースする。
+// フォレンジックレポートは来る ISP が少なく形式もバラつくため、防御的にパースする。
 // 全要素を網羅的に取得し、情報欠落を warnings として報告する。
 
-const RufParser = (() => {
+const FrParser = (() => {
   "use strict";
 
   // =========================================================
   // メイン: メールヘッダ群 → 正規化済みフォレンジックレポート
   // =========================================================
   const parse = (messageId, messageDate, subject, headers) => {
-    // ruf メールのヘッダから情報を抽出
+    // フォレンジックメールのヘッダから情報を抽出
     // 多くの場合 AFRF (Authentication Failure Reporting Format) に準拠し、
     // Content-Type: multipart/report; report-type=feedback-report として届く
 
@@ -56,17 +56,17 @@ const RufParser = (() => {
     const parsedAuth = parseAuthenticationResults(authResults);
 
     // 一意キー
-    const reportKey = `ruf!${messageId}!${sourceIp}!${reportedDomain}`;
+    const reportKey = `fr!${messageId}!${sourceIp}!${reportedDomain}`;
 
     // 情報欠落チェック
-    const warnings = validateRufReport({
+    const warnings = validateFrReport({
       reportedDomain, sourceIp, authResults, authFailure,
       from, arrivalDate, originalMailFrom
     });
 
     return {
       reportKey,
-      type: "ruf",
+      type: "forensic",
       messageId,
       messageDate,
       subject,
@@ -103,9 +103,9 @@ const RufParser = (() => {
   };
 
   // =========================================================
-  // 情報欠落チェック: ruf レポートの完全性を検証
+  // 情報欠落チェック: フォレンジックレポートの完全性を検証
   // =========================================================
-  const validateRufReport = (fields) => {
+  const validateFrReport = (fields) => {
     const warnings = [];
 
     if (!fields.reportedDomain) {

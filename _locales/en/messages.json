@@ -4,7 +4,7 @@
     "description": "Name of the extension"
   },
   "extensionDescription": {
-    "message": "Visualize and analyze DMARC aggregate (rua) and forensic (ruf) reports locally within Thunderbird.",
+    "message": "Visualize and analyze DMARC aggregate and forensic reports locally within Thunderbird.",
     "description": "Description of the extension"
   },
   "btnScan": {
@@ -24,7 +24,7 @@
     "description": "Settings saved confirmation"
   },
   "noFolderNotice": {
-    "message": "No DMARC folders configured. Please open Settings to select your rua/ruf folders.",
+    "message": "No DMARC folders configured. Please open Settings to select your report folders, or create folders matching the naming convention (e.g. DMARC/Aggregate, DMARC/Forensic) for auto-detection.",
     "description": "Notice when no folders are set"
   },
   "statusScanning": {
@@ -35,12 +35,12 @@
     "message": "Scan complete.",
     "description": "Status when scan finishes"
   },
-  "ruaReports": {
-    "message": "rua reports",
+  "arReports": {
+    "message": "aggregate reports",
     "description": "Label for aggregate report count"
   },
-  "rufReports": {
-    "message": "ruf reports",
+  "frReports": {
+    "message": "forensic reports",
     "description": "Label for forensic report count"
   },
   "sectionSummary": {
@@ -60,7 +60,7 @@
     "description": "Source IP section title"
   },
   "sectionForensic": {
-    "message": "Forensic Reports (ruf)",
+    "message": "Forensic Reports",
     "description": "Forensic reports section title"
   },
   "totalEmails": {
@@ -123,21 +123,21 @@
     "message": "Auth Failure",
     "description": "Table column: Auth Failure"
   },
-  "labelRuaFolder": {
-    "message": "rua Folder (Aggregate Reports)",
-    "description": "Settings label for rua folder"
+  "labelArFolder": {
+    "message": "Aggregate Report Folder",
+    "description": "Settings label for aggregate report folder"
   },
-  "labelRufFolder": {
-    "message": "ruf Folder (Forensic Reports)",
-    "description": "Settings label for ruf folder"
+  "labelFrFolder": {
+    "message": "Forensic Report Folder",
+    "description": "Settings label for forensic report folder"
   },
-  "hintRuaFolder": {
-    "message": "Select the IMAP folder where DMARC aggregate reports (rua) are delivered.",
-    "description": "Hint text for rua folder selection"
+  "hintArFolder": {
+    "message": "Select the IMAP folder where DMARC aggregate reports are delivered.",
+    "description": "Hint text for aggregate report folder selection"
   },
-  "hintRufFolder": {
-    "message": "Select the IMAP folder where DMARC forensic reports (ruf) are delivered. Optional.",
-    "description": "Hint text for ruf folder selection"
+  "hintFrFolder": {
+    "message": "Select the IMAP folder where DMARC forensic reports are delivered. Optional.",
+    "description": "Hint text for forensic report folder selection"
   },
   "privacyNote": {
     "message": "All processing is local. No external requests.",
