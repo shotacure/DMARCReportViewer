@@ -3,109 +3,109 @@
     "message": "DMARC Report Viewer"
   },
   "extensionDescription": {
-    "message": "Analyze DMARC aggregate and forensic reports locally within Thunderbird. Identify threats, validate your email authentication, and take action."
+    "message": "Analysez les rapports DMARC agrégés et forensiques localement dans Thunderbird. Identifiez les menaces, validez votre authentification email et agissez."
   },
   "btnScan": {
-    "message": "Scan Reports"
+    "message": "Analyser les rapports"
   },
   "btnSettings": {
-    "message": "Settings"
+    "message": "Paramètres"
   },
   "btnSave": {
-    "message": "Save"
+    "message": "Enregistrer"
   },
   "btnExport": {
-    "message": "Export CSV"
+    "message": "Exporter CSV"
   },
   "msgSaved": {
-    "message": "✓ Saved"
+    "message": "✓ Enregistré"
   },
   "noFolderNotice": {
     "message": "No DMARC folders configured. Please open Settings to select your report folders, or create folders matching the naming convention (e.g. DMARC/Aggregate, DMARC/Forensic) for auto-detection."
   },
   "statusScanning": {
-    "message": "Scanning folders…"
+    "message": "Analyse des dossiers…"
   },
   "statusComplete": {
-    "message": "Scan complete."
+    "message": "Analyse terminée."
   },
   "statusErrors": {
-    "message": "errors"
+    "message": "erreurs"
   },
   "statusCached": {
-    "message": "cached"
+    "message": "en cache"
   },
   "arReports": {
-    "message": "aggregate reports"
+    "message": "rapports agrégés"
   },
   "frReports": {
-    "message": "forensic reports"
+    "message": "rapports forensiques"
   },
   "period1w": {
-    "message": "1 Week"
+    "message": "1 semaine"
   },
   "period1m": {
-    "message": "1 Month"
+    "message": "1 mois"
   },
   "period3m": {
-    "message": "3 Months"
+    "message": "3 mois"
   },
   "period6m": {
-    "message": "6 Months"
+    "message": "6 mois"
   },
   "period1y": {
-    "message": "1 Year"
+    "message": "1 an"
   },
   "periodAll": {
-    "message": "All"
+    "message": "Tout"
   },
   "sectionSummary": {
-    "message": "Summary"
+    "message": "Résumé"
   },
   "sectionReporters": {
-    "message": "By Reporter"
+    "message": "Par rapporteur"
   },
   "sectionTopIps": {
-    "message": "By IP Address"
+    "message": "Par adresse IP"
   },
   "sectionForensic": {
-    "message": "Forensic Reports"
+    "message": "Rapports forensiques"
   },
   "sectionOverrides": {
-    "message": "Policy Override Reasons"
+    "message": "Raisons de dérogation"
   },
   "sectionIssues": {
-    "message": "Unreadable Reports"
+    "message": "Rapports illisibles"
   },
   "sectionDkimSignatures": {
-    "message": "DKIM Signatures"
+    "message": "Signatures DKIM"
   },
   "sectionSpfDomains": {
-    "message": "SPF Authentication"
+    "message": "Authentification SPF"
   },
   "sectionEnvelopeAlignment": {
-    "message": "Envelope Alignment"
+    "message": "Alignement d'enveloppe"
   },
   "sectionSubdomains": {
-    "message": "Subdomains"
+    "message": "Sous-domaines"
   },
   "totalEmails": {
-    "message": "Total Emails"
+    "message": "Total des emails"
   },
   "deliveredPass": {
-    "message": "Delivered (Auth OK)"
+    "message": "Livré (Auth OK)"
   },
   "deliveredFail": {
-    "message": "Delivered (Auth Fail)"
+    "message": "Livré (Auth échouée)"
   },
   "dispositionTitle": {
     "message": "Disposition"
   },
   "quarantined": {
-    "message": "Quarantined"
+    "message": "Quarantaine"
   },
   "rejected": {
-    "message": "Rejected"
+    "message": "Rejeté"
   },
   "dkimSpfPass": {
     "message": "DKIM+SPF Pass"
@@ -117,7 +117,7 @@
     "message": "SPF Pass"
   },
   "colDomain": {
-    "message": "Domain"
+    "message": "Domaine"
   },
   "colTotal": {
     "message": "Total"
@@ -126,7 +126,7 @@
     "message": "Pass Rate"
   },
   "colReports": {
-    "message": "Reports"
+    "message": "Rapports"
   },
   "colReporter": {
     "message": "Reporter"
@@ -141,7 +141,7 @@
     "message": "Classification"
   },
   "colCount": {
-    "message": "Count"
+    "message": "Nombre"
   },
   "colDate": {
     "message": "Date"
@@ -168,13 +168,13 @@
     "message": "SPF Domain"
   },
   "colSubdomain": {
-    "message": "Subdomain"
+    "message": "Sous-domaine"
   },
   "labelArFolder": {
-    "message": "Aggregate Report Folder"
+    "message": "Dossier des rapports agrégés"
   },
   "labelFrFolder": {
-    "message": "Forensic Report Folder"
+    "message": "Dossier des rapports forensiques"
   },
   "hintArFolder": {
     "message": "Select the IMAP folder where DMARC aggregate reports are delivered."
@@ -231,10 +231,10 @@
     "message": "The Envelope From differs from Header From and all messages failed authentication. This may indicate domain spoofing."
   },
   "tagForwarder": {
-    "message": "Forwarder"
+    "message": "Relais"
   },
   "tagForwarderDesc": {
-    "message": "This IP range is associated with email forwarding, which commonly triggers policy overrides."
+    "message": "Cette plage IP est associée au transfert d'emails."
   },
   "healthHealthy": {
     "message": "Healthy"
@@ -267,10 +267,10 @@
     "message": "Policy is only applied to $1% of messages (pct=$1). If no issues are observed, consider setting pct=100."
   },
   "ipRangeCountLabel": {
-    "message": "IP ranges"
+    "message": "plages IP"
   },
   "chartTimeSeries": {
-    "message": "Disposition Over Time"
+    "message": "Disposition dans le temps"
   },
   "issueParseFailed": {
     "message": "Parse Failed"
@@ -297,7 +297,7 @@
     "message": "report(s) contain ISP-side metadata errors"
   },
   "privacyNote": {
-    "message": "All processing is local. No external requests."
+    "message": "Tout le traitement est local. Aucune requête externe."
   },
   "warnOrgName": {
     "message": "Reporter organization name is missing"

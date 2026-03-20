@@ -220,9 +220,17 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         let settings = await getSettings();
         settings = await resolveFolders(settings);
         const sinceMs = request.since || 0;
+        const sinceDays = request.sinceDay || 0;
+        // 前期比較用: 今期と同じ幅の前期も一緒にスキャン
+        // 例: 1か月選択 → 2か月前までスキャンして今期/前期に分離
+        const periodMs = sinceDays > 0 ? sinceDays * 24 * 60 * 60 * 1000 : 0;
+        const previousSinceMs = (sinceMs > 0 && periodMs > 0) ? sinceMs - periodMs : 0;
+        const scanSinceMs = previousSinceMs > 0 ? previousSinceMs : sinceMs;
+
         const results = { ar: [], fr: [], errors: [] };
+        const arPrevious = []; // 前期の集約レポート
         const seenKeys = new Set();
-        results.scanPeriodDays = request.sinceDay || 0;
+        results.scanPeriodDays = sinceDays;
         results.issues = { noAttachment: [], decompressFailed: [], parseFailed: [], incompleteReport: [], unknownFormat: [] };
 
         // 集約レポートフォルダのスキャン
@@ -231,7 +239,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const { accountId, path } = settings.arFolderId;
             const messages = await listMessagesInFolder(accountId, path);
             for (const msg of messages) {
-              if (sinceMs > 0 && msg.date && msg.date.getTime() < sinceMs) continue;
+              if (scanSinceMs > 0 && msg.date && msg.date.getTime() < scanSinceMs) continue;
               try {
                 const attachments = await extractReportAttachments(msg.id);
                 if (attachments.length === 0) {
@@ -248,7 +256,14 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                       const report = ArParser.parse(xml);
                       if (!seenKeys.has(report.reportKey)) {
                         seenKeys.add(report.reportKey);
-                        results.ar.push(report);
+                        // メッセージ日時で今期/前期に分類
+                        const msgTime = msg.date ? msg.date.getTime() : 0;
+                        const isCurrent = sinceMs === 0 || msgTime >= sinceMs;
+                        if (isCurrent) {
+                          results.ar.push(report);
+                        } else {
+                          arPrevious.push(report);
+                        }
                         if (report.warnings.length > 0) results.issues.incompleteReport.push({ messageId: msg.id, date: msg.date?.toISOString(), subject: msg.subject, reportKey: report.reportKey, reporter: report.reporter.orgName, domain: report.policy.domain, warningCount: report.warnings.length, warnings: report.warnings });
                       }
                     } catch (parseErr) { results.issues.parseFailed.push({ messageId: msg.id, date: msg.date?.toISOString(), subject: msg.subject, attachment: att.name, error: parseErr.message }); }
@@ -259,7 +274,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
           } catch (e) { results.errors.push({ folder: "aggregate", error: e.toString() }); }
         }
 
-        // フォレンジックレポートフォルダのスキャン
+        // フォレンジックレポートフォルダのスキャン (今期のみ)
         if (settings.frFolderId) {
           try {
             const { accountId, path } = settings.frFolderId;
@@ -289,16 +304,43 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         if (results.ar.length > 0) {
           results.aggregate = ArParser.aggregateSummaries(results.ar);
+
+          // 前期の集約サマリー (比較用)
+          if (arPrevious.length > 0) {
+            results.previousAggregate = ArParser.aggregateSummaries(arPrevious);
+          }
+
+          // フォレンジックレポートをドメイン別にグループ化
+          const frByDomain = new Map();
+          for (const fr of results.fr) {
+            const d = (fr.reportedDomain || "").toLowerCase();
+            if (!frByDomain.has(d)) frByDomain.set(d, []);
+            frByDomain.get(d).push(fr);
+          }
+
           const byDomain = new Map();
           for (const r of results.ar) { const d = r.policy.domain; if (!byDomain.has(d)) byDomain.set(d, []); byDomain.get(d).push(r); }
+
+          // 前期レポートもドメイン別にグループ化
+          const prevByDomain = new Map();
+          for (const r of arPrevious) { const d = r.policy.domain; if (!prevByDomain.has(d)) prevByDomain.set(d, []); prevByDomain.get(d).push(r); }
+
           results.domainDetails = [];
           for (const [domain, domainReports] of byDomain) {
             const latestReport = domainReports.reduce((a, b) => a.dateRange.end > b.dateRange.end ? a : b);
-            results.domainDetails.push({
+            const dd = {
               domain, reportCount: domainReports.length, policy: latestReport.policy,
               aggregate: ArParser.aggregateSummaries(domainReports),
-              timeSeries: domainReports.map(r => ({ begin: r.dateRange.begin, delivered: r.summary.noneCount, quarantine: r.summary.quarantineCount, reject: r.summary.rejectCount }))
-            });
+              timeSeries: domainReports.map(r => ({ begin: r.dateRange.begin, delivered: r.summary.noneCount, quarantine: r.summary.quarantineCount, reject: r.summary.rejectCount })),
+              // ドメインに紐づくフォレンジックレポート
+              forensicReports: frByDomain.get(domain.toLowerCase()) || []
+            };
+            // ドメイン別の前期サマリー
+            const prevReports = prevByDomain.get(domain);
+            if (prevReports && prevReports.length > 0) {
+              dd.previousAggregate = ArParser.aggregateSummaries(prevReports);
+            }
+            results.domainDetails.push(dd);
           }
           results.domainDetails.sort((a, b) => b.aggregate.totalCount - a.aggregate.totalCount);
         }

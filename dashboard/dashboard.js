@@ -24,7 +24,7 @@
   const COLOR_DELIVERED = "#4caf50";
   const COLOR_DELIVERED_FAIL = "#e53935";
   const COLOR_QUARANTINE = "#ff9800";
-  const COLOR_REJECT = "#f44336";
+  const COLOR_REJECT = "#1976d2";
 
   const formatUnixDate = (s) => !s ? "-" : new Date(s * 1000).toLocaleDateString();
   const pct = (n, t) => t > 0 ? (n / t * 100).toFixed(2) + "%" : "0.00%";
@@ -91,6 +91,41 @@
   };
 
   // =========================================================
+  // 前期比較: 変化の表示文字列を生成
+  // current/previous: 比較する値（率または絶対数）
+  // upIsPositive: true なら増加が緑(良い)、false なら増加が赤(悪い)
+  // =========================================================
+  const buildChangeIndicator = (current, previous, upIsPositive) => {
+    if (previous === undefined || previous === null) return "";
+    if (previous === 0 && current === 0) return `<div class="drv-change drv-change-flat">→ 0%</div>`;
+    if (previous === 0) {
+      const cls = upIsPositive ? "drv-change-pos" : "drv-change-neg";
+      return `<div class="drv-change ${cls}">↑ new</div>`;
+    }
+    const changePct = ((current - previous) / previous * 100);
+    if (Math.abs(changePct) < 1) return `<div class="drv-change drv-change-flat">→ ${changePct >= 0 ? "+" : ""}${changePct.toFixed(1)}%</div>`;
+    // 200%超の急増を検出 (ネガティブ方向のみ警告)
+    const isSurge = !upIsPositive && changePct >= 200;
+    if (changePct > 0) {
+      const cls = upIsPositive ? "drv-change-pos" : (isSurge ? "drv-change-surge" : "drv-change-neg");
+      return `<div class="drv-change ${cls}">↑ +${changePct.toFixed(1)}%${isSurge ? " 🔺" : ""}</div>`;
+    }
+    // 減少: upIsPositive なら減少は悪い(赤)、!upIsPositive なら減少は良い(緑)
+    const cls = upIsPositive ? "drv-change-neg" : "drv-change-pos";
+    return `<div class="drv-change ${cls}">↓ ${changePct.toFixed(1)}%</div>`;
+  };
+
+  // =========================================================
+  // 前期比較ヘルパー: 率の変化を計算
+  // =========================================================
+  const computeRateChange = (currentCount, currentTotal, prevCount, prevTotal) => {
+    if (prevTotal === undefined || prevTotal === null || prevTotal === 0) return { rateCur: 0, ratePrev: null };
+    const currentRate = currentTotal > 0 ? (currentCount / currentTotal * 100) : 0;
+    const previousRate = prevTotal > 0 ? (prevCount / prevTotal * 100) : 0;
+    return { rateCur: currentRate, ratePrev: previousRate };
+  };
+
+  // =========================================================
   // ポリシー推奨アドバイスを生成
   // =========================================================
   const buildPolicyAdvice = (agg, policy) => {
@@ -123,22 +158,40 @@
 
   // =========================================================
   // 8枠統計カード HTML
+  // 比較は率ベース (メール総数のみ絶対数で比較)
   // =========================================================
-  const buildStatCards = (agg) => {
+  const buildStatCards = (agg, previousAgg) => {
     const t = agg.totalCount;
+    const p = previousAgg || null;
+    const pt = p?.totalCount || 0;
+
+    // rc: rate change helper — 率の今期/前期を算出
+    const rc = (cur, prev) => p ? computeRateChange(cur, t, prev, pt) : { rateCur: 0, ratePrev: null };
+
+    // 各指標の定義: upPos = 増加がポジティブかどうか
     const items = [
-      { label: msg("totalEmails"), value: t.toLocaleString(), pctText: "", colorClass: "" },
-      { label: msg("deliveredPass"), value: agg.deliveredPassCount.toLocaleString(), pctText: pct(agg.deliveredPassCount, t), colorClass: "drv-delivered-text" },
-      { label: msg("deliveredFail"), value: agg.deliveredFailCount.toLocaleString(), pctText: pct(agg.deliveredFailCount, t), colorClass: "drv-delivered-fail-text" },
-      { label: msg("quarantined"), value: agg.quarantineCount.toLocaleString(), pctText: pct(agg.quarantineCount, t), colorClass: "drv-quarantine-text" },
-      { label: msg("rejected"), value: agg.rejectCount.toLocaleString(), pctText: pct(agg.rejectCount, t), colorClass: agg.rejectCount > 0 ? "drv-reject-text" : "" },
-      { label: msg("dkimSpfPass"), value: agg.passCount.toLocaleString(), pctText: pct(agg.passCount, t), colorClass: "" },
-      { label: msg("dkimPass"), value: agg.dkimPassCount.toLocaleString(), pctText: pct(agg.dkimPassCount, t), colorClass: "" },
-      { label: msg("spfPass"), value: agg.spfPassCount.toLocaleString(), pctText: pct(agg.spfPassCount, t), colorClass: "" }
+      { label: msg("totalEmails"), value: t.toLocaleString(), pctText: "", colorClass: "", upPos: true,
+        chgCur: t, chgPrev: p ? pt : null },
+      { label: msg("deliveredPass"), value: agg.deliveredPassCount.toLocaleString(), pctText: pct(agg.deliveredPassCount, t), colorClass: "drv-delivered-text", upPos: true,
+        ...rc(agg.deliveredPassCount, p?.deliveredPassCount) },
+      { label: msg("deliveredFail"), value: agg.deliveredFailCount.toLocaleString(), pctText: pct(agg.deliveredFailCount, t), colorClass: "drv-delivered-fail-text", upPos: false,
+        ...rc(agg.deliveredFailCount, p?.deliveredFailCount) },
+      { label: msg("quarantined"), value: agg.quarantineCount.toLocaleString(), pctText: pct(agg.quarantineCount, t), colorClass: "drv-quarantine-text", upPos: false,
+        ...rc(agg.quarantineCount, p?.quarantineCount) },
+      { label: msg("rejected"), value: agg.rejectCount.toLocaleString(), pctText: pct(agg.rejectCount, t), colorClass: agg.rejectCount > 0 ? "drv-reject-text" : "", upPos: false,
+        ...rc(agg.rejectCount, p?.rejectCount) },
+      { label: msg("dkimSpfPass"), value: agg.passCount.toLocaleString(), pctText: pct(agg.passCount, t), colorClass: "", upPos: true,
+        ...rc(agg.passCount, p?.passCount) },
+      { label: msg("dkimPass"), value: agg.dkimPassCount.toLocaleString(), pctText: pct(agg.dkimPassCount, t), colorClass: "", upPos: true,
+        ...rc(agg.dkimPassCount, p?.dkimPassCount) },
+      { label: msg("spfPass"), value: agg.spfPassCount.toLocaleString(), pctText: pct(agg.spfPassCount, t), colorClass: "", upPos: true,
+        ...rc(agg.spfPassCount, p?.spfPassCount) }
     ];
     return items.map(i => {
       const lc = i.colorClass ? ` ${i.colorClass}` : "";
-      return `<div class="drv-card"><div class="drv-card-label${lc}">${escapeHTML(i.label)}</div><div class="drv-card-value${lc}">${i.value}</div>${i.pctText ? `<div class="drv-card-pct">${i.pctText}</div>` : ""}</div>`;
+      // メール総数は絶対数比較 (chgCur/chgPrev)、他は率比較 (rateCur/ratePrev)
+      const change = p ? buildChangeIndicator(i.chgCur ?? i.rateCur, i.chgPrev ?? i.ratePrev, i.upPos) : "";
+      return `<div class="drv-card"><div class="drv-card-label${lc}">${escapeHTML(i.label)}</div><div class="drv-card-value${lc}">${i.value}</div><div class="drv-card-pct">${i.pctText || "&nbsp;"}</div>${change}</div>`;
     }).join("");
   };
 
@@ -318,6 +371,73 @@
   };
 
   // =========================================================
+  // サブドメインテーブル
+  // =========================================================
+  const buildSubdomainTable = (subdomains) => {
+    if (!subdomains || subdomains.length === 0) return "";
+    let html = `<table class="drv-table"><thead><tr>
+      <th>${escapeHTML(msg("colSubdomain"))}</th>
+      <th>${escapeHTML(msg("colCount"))}</th>
+      <th class="drv-pass-text">Pass</th>
+      <th class="drv-fail-text">Fail</th>
+      <th>${escapeHTML(msg("rejected"))}</th>
+    </tr></thead><tbody>`;
+    for (const s of subdomains) {
+      const pS = s.pass > 0 ? ' style="color:var(--drv-pass);font-weight:bold"' : "";
+      const fS = s.fail > 0 ? ' style="color:var(--drv-fail);font-weight:bold"' : "";
+      const rS = s.reject > 0 ? ' style="color:var(--drv-color-reject);font-weight:bold"' : "";
+      const f = (v) => v > 0 ? v.toLocaleString() : "-";
+      html += `<tr><td><code>${escapeHTML(s.subdomain)}</code></td><td>${s.count.toLocaleString()}</td>
+        <td${pS}>${f(s.pass)}</td><td${fS}>${f(s.fail)}</td><td${rS}>${f(s.reject)}</td></tr>`;
+    }
+    html += "</tbody></table>";
+    return html;
+  };
+
+  // =========================================================
+  // ポリシーオーバーライド詳細テーブル (理由 + IP範囲)
+  // =========================================================
+  const buildOverrideDetailTable = (details) => {
+    if (!details || details.length === 0) return "";
+    let html = `<table class="drv-table"><thead><tr>
+      <th>${escapeHTML(msg("colOverrideType"))}</th>
+      <th>${escapeHTML(msg("colIpRange"))}</th>
+      <th>${escapeHTML(msg("colCount"))}</th>
+      <th></th>
+    </tr></thead><tbody>`;
+    for (const d of details) {
+      // forwarded 理由のIP範囲にフォワーダータグ
+      const tag = d.type === "forwarded"
+        ? `<span class="drv-tag drv-tag-info" title="${escapeHTML(msg("tagForwarderDesc"))}">📨 ${escapeHTML(msg("tagForwarder"))}</span>`
+        : "";
+      html += `<tr><td>${escapeHTML(d.type)}</td><td><code>${escapeHTML(d.ipRange)}</code></td>
+        <td>${d.count.toLocaleString()}</td><td>${tag}</td></tr>`;
+    }
+    html += "</tbody></table>";
+    return html;
+  };
+
+  // =========================================================
+  // ドメイン内フォレンジックレポートのミニテーブル
+  // =========================================================
+  const buildDomainForensicTable = (frReports) => {
+    if (!frReports || frReports.length === 0) return "";
+    const sorted = [...frReports].sort((a, b) => new Date(b.messageDate) - new Date(a.messageDate)).slice(0, 10);
+    let html = `<table class="drv-table"><thead><tr>
+      <th>${escapeHTML(msg("colDate"))}</th>
+      <th>${escapeHTML(msg("colSourceIp"))}</th>
+      <th>${escapeHTML(msg("colAuthFailure"))}</th>
+    </tr></thead><tbody>`;
+    for (const r of sorted) {
+      html += `<tr><td>${escapeHTML(r.messageDate ? new Date(r.messageDate).toLocaleDateString() : "-")}</td>
+        <td><code>${escapeHTML(r.sourceIp)}</code></td><td>${escapeHTML(r.authFailure || "-")}</td></tr>`;
+    }
+    if (frReports.length > 10) html += `<tr><td colspan="3" style="text-align:center;color:var(--drv-text-muted)">… ${frReports.length - 10} more</td></tr>`;
+    html += "</tbody></table>";
+    return html;
+  };
+
+  // =========================================================
   // SVG 折れ線グラフ (欠落期間 0 埋め)
   // =========================================================
   const buildTimeSeriesChart = (timeSeries, periodDays) => {
@@ -430,15 +550,22 @@
   // =========================================================
   const renderResults = (results) => {
     lastResults = results;
+    // 全セクションを初期化してから再描画
     $("domains-container").innerHTML = "";
     $("pie-row").innerHTML = "";
+    $("summary-cards").innerHTML = "";
+    hide($("period-info"));
+    hide($("summary-section"));
+    hide($("fr-section"));
+    hide($("issues-section"));
+    hide($("btn-export"));
     if (results.ar.length > 0 && results.aggregate) {
       const agg = results.aggregate;
       if (agg.dateRangeMin && agg.dateRangeMax) {
         $("period-info").textContent = `${formatUnixDate(agg.dateRangeMin)} – ${formatUnixDate(agg.dateRangeMax)} | ${agg.reportCount} ${msg("colReports")} | ${agg.uniqueIpRanges} ${msg("ipRangeCountLabel")}`;
         show($("period-info"));
       }
-      $("summary-cards").innerHTML = buildStatCards(agg);
+      $("summary-cards").innerHTML = buildStatCards(agg, results.previousAggregate || null);
       renderPieCharts(agg);
       show($("summary-section"));
       show($("btn-export"));
@@ -533,22 +660,26 @@
     // ポリシー推奨アドバイス
     html += buildPolicyAdvice(agg, pol);
 
-    // 8枠コンパクトカード
+    // 8枠コンパクトカード (率ベースの前期比較付き)
     const t = agg.totalCount;
+    const pa = dd.previousAggregate || null;
+    const pat = pa?.totalCount || 0;
+    const rc2 = (cur, prev) => pa ? computeRateChange(cur, t, prev, pat) : { rateCur: 0, ratePrev: null };
     const ci = [
-      {label:msg("totalEmails"),value:t.toLocaleString(),pctText:"",cc:""},
-      {label:msg("deliveredPass"),value:agg.deliveredPassCount.toLocaleString(),pctText:pct(agg.deliveredPassCount,t),cc:"drv-delivered-text"},
-      {label:msg("deliveredFail"),value:agg.deliveredFailCount.toLocaleString(),pctText:pct(agg.deliveredFailCount,t),cc:"drv-delivered-fail-text"},
-      {label:msg("quarantined"),value:agg.quarantineCount.toLocaleString(),pctText:pct(agg.quarantineCount,t),cc:"drv-quarantine-text"},
-      {label:msg("rejected"),value:agg.rejectCount.toLocaleString(),pctText:pct(agg.rejectCount,t),cc:"drv-reject-text"},
-      {label:msg("dkimSpfPass"),value:agg.passCount.toLocaleString(),pctText:pct(agg.passCount,t),cc:""},
-      {label:msg("dkimPass"),value:agg.dkimPassCount.toLocaleString(),pctText:pct(agg.dkimPassCount,t),cc:""},
-      {label:msg("spfPass"),value:agg.spfPassCount.toLocaleString(),pctText:pct(agg.spfPassCount,t),cc:""}
+      {label:msg("totalEmails"),value:t.toLocaleString(),pctText:"",cc:"",upPos:true,chgCur:t,chgPrev:pa?pat:null},
+      {label:msg("deliveredPass"),value:agg.deliveredPassCount.toLocaleString(),pctText:pct(agg.deliveredPassCount,t),cc:"drv-delivered-text",upPos:true,...rc2(agg.deliveredPassCount,pa?.deliveredPassCount)},
+      {label:msg("deliveredFail"),value:agg.deliveredFailCount.toLocaleString(),pctText:pct(agg.deliveredFailCount,t),cc:"drv-delivered-fail-text",upPos:false,...rc2(agg.deliveredFailCount,pa?.deliveredFailCount)},
+      {label:msg("quarantined"),value:agg.quarantineCount.toLocaleString(),pctText:pct(agg.quarantineCount,t),cc:"drv-quarantine-text",upPos:false,...rc2(agg.quarantineCount,pa?.quarantineCount)},
+      {label:msg("rejected"),value:agg.rejectCount.toLocaleString(),pctText:pct(agg.rejectCount,t),cc:"drv-reject-text",upPos:false,...rc2(agg.rejectCount,pa?.rejectCount)},
+      {label:msg("dkimSpfPass"),value:agg.passCount.toLocaleString(),pctText:pct(agg.passCount,t),cc:"",upPos:true,...rc2(agg.passCount,pa?.passCount)},
+      {label:msg("dkimPass"),value:agg.dkimPassCount.toLocaleString(),pctText:pct(agg.dkimPassCount,t),cc:"",upPos:true,...rc2(agg.dkimPassCount,pa?.dkimPassCount)},
+      {label:msg("spfPass"),value:agg.spfPassCount.toLocaleString(),pctText:pct(agg.spfPassCount,t),cc:"",upPos:true,...rc2(agg.spfPassCount,pa?.spfPassCount)}
     ];
     html += '<div class="drv-card-grid-compact">';
     for (const item of ci) {
       const lc = item.cc ? ` ${item.cc}` : "";
-      html += `<div class="drv-card-compact"><div class="drv-card-label${lc}">${escapeHTML(item.label)}</div><div class="drv-card-value${lc}">${item.value}</div>${item.pctText?`<div class="drv-card-pct">${item.pctText}</div>`:""}</div>`;
+      const change = pa ? buildChangeIndicator(item.chgCur ?? item.rateCur, item.chgPrev ?? item.ratePrev, item.upPos) : "";
+      html += `<div class="drv-card-compact"><div class="drv-card-label${lc}">${escapeHTML(item.label)}</div><div class="drv-card-value${lc}">${item.value}</div><div class="drv-card-pct">${item.pctText || "&nbsp;"}</div>${change}</div>`;
     }
     html += '</div>';
 
@@ -577,12 +708,23 @@
     if (agg.envelopeMismatches?.length > 0)
       html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionEnvelopeAlignment"))}</div>${buildEnvelopeMismatchTable(agg.envelopeMismatches)}</div>`;
 
-    // ポリシーオーバーライド理由
-    if (agg.overrideReasons?.length > 0) {
+    // サブドメイン分析
+    if (agg.subdomains?.length > 0)
+      html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionSubdomains"))}</div>${buildSubdomainTable(agg.subdomains)}</div>`;
+
+    // ポリシーオーバーライド詳細 (理由 + IP範囲)
+    if (agg.overrideDetails?.length > 0) {
+      html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionOverrides"))}</div>${buildOverrideDetailTable(agg.overrideDetails)}</div>`;
+    } else if (agg.overrideReasons?.length > 0) {
+      // 詳細がない場合はフォールバックで従来の簡易テーブル
       html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionOverrides"))}</div><table class="drv-table"><thead><tr><th>${escapeHTML(msg("colOverrideType"))}</th><th>${escapeHTML(msg("colCount"))}</th></tr></thead><tbody>`;
       for (const entry of agg.overrideReasons) html += `<tr><td>${escapeHTML(entry.type)}</td><td>${entry.count.toLocaleString()}</td></tr>`;
       html += '</tbody></table></div>';
     }
+
+    // ドメインに紐づくフォレンジックレポート
+    if (dd.forensicReports?.length > 0)
+      html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionForensic"))} (${dd.forensicReports.length})</div>${buildDomainForensicTable(dd.forensicReports)}</div>`;
 
     // ISP メタデータエラー
     if (agg.warningsSummary?.reportsWithMetadataErrors > 0)

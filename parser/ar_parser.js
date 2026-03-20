@@ -155,6 +155,24 @@ const ArParser = (() => {
   };
 
   // =========================================================
+  // ポリシーオーバーライド詳細の集約:
+  // 理由(type) + IP範囲(ipRange) をキーにしてグループ化
+  // =========================================================
+  const aggregateOverrideDetails = (entries) => {
+    const map = new Map();
+    for (const e of entries) {
+      const key = `${e.type}|${e.ipRange}`;
+      const existing = map.get(key);
+      if (existing) {
+        existing.count += e.count;
+      } else {
+        map.set(key, { type: e.type, comment: e.comment, ipRange: e.ipRange, count: e.count });
+      }
+    }
+    return [...map.values()].sort((a, b) => b.count - a.count);
+  };
+
+  // =========================================================
   // XML サニタイズ: ISP 固有の XML 不整合を DOMParser に渡す前に修正
   // =========================================================
   const sanitizeXml = (xmlText) => {
@@ -321,6 +339,10 @@ const ArParser = (() => {
     const spfDomainMap = new Map();
     // Header From vs Envelope From の不一致検出
     const envelopeMap = new Map();
+    // サブドメイン別の集計 (header_from がポリシードメインのサブドメインの場合)
+    const subdomainMap = new Map();
+    // ポリシーオーバーライド理由と IP 範囲の紐づけ
+    const overrideDetailEntries = [];
 
     const lowerPolicyDomain = (policyDomain || "").toLowerCase();
 
@@ -367,6 +389,13 @@ const ArParser = (() => {
         if (reason.type) {
           const existing = overrideReasons.get(reason.type) || 0;
           overrideReasons.set(reason.type, existing + rec.count);
+          // オーバーライド理由と IP 範囲を紐づけて追跡
+          overrideDetailEntries.push({
+            type: reason.type,
+            comment: reason.comment || "",
+            ipRange: toIpRange(rec.sourceIp),
+            count: rec.count
+          });
         }
       }
 
@@ -436,6 +465,25 @@ const ArParser = (() => {
           });
         }
       }
+
+      // サブドメイン検出: headerFrom がポリシードメインのサブドメインかチェック
+      if (hf && lowerPolicyDomain && hf !== lowerPolicyDomain && hf.endsWith("." + lowerPolicyDomain)) {
+        const existing = subdomainMap.get(hf);
+        if (existing) {
+          existing.count += rec.count;
+          existing.pass += isFullPass ? rec.count : 0;
+          existing.fail += isFullPass ? 0 : rec.count;
+          existing.reject += rec.disposition === "reject" ? rec.count : 0;
+        } else {
+          subdomainMap.set(hf, {
+            subdomain: hf,
+            count: rec.count,
+            pass: isFullPass ? rec.count : 0,
+            fail: isFullPass ? 0 : rec.count,
+            reject: rec.disposition === "reject" ? rec.count : 0
+          });
+        }
+      }
     }
 
     return {
@@ -463,7 +511,12 @@ const ArParser = (() => {
         .map(s => ({ ...s, scopes: [...s.scopes] })),
       // Header From / Envelope From の不一致ペア (件数順)
       envelopeMismatches: [...envelopeMap.values()]
-        .sort((a, b) => b.count - a.count)
+        .sort((a, b) => b.count - a.count),
+      // サブドメイン別の集計 (検出されたもののみ)
+      subdomains: [...subdomainMap.values()]
+        .sort((a, b) => b.count - a.count),
+      // ポリシーオーバーライドの詳細 (理由 + IP 範囲)
+      overrideDetails: aggregateOverrideDetails(overrideDetailEntries)
     };
   };
 
@@ -484,10 +537,12 @@ const ArParser = (() => {
     let totalWarnings = 0, reportsWithWarnings = 0, reportsWithMetadataErrors = 0;
     const warningFieldCounts = new Map();
 
-    // 集約用: DKIM 署名 / SPF ドメイン / Envelope 不一致
+    // 集約用: DKIM 署名 / SPF ドメイン / Envelope 不一致 / サブドメイン / オーバーライド詳細
     const dkimSigMap = new Map();
     const spfDomainMap = new Map();
     const envelopeMap = new Map();
+    const subdomainMap = new Map();
+    const overrideDetailEntries = [];
 
     for (const report of reports) {
       const s = report.summary;
@@ -585,6 +640,24 @@ const ArParser = (() => {
         }
       }
 
+      // サブドメインの集約
+      for (const sd of (s.subdomains || [])) {
+        const existing = subdomainMap.get(sd.subdomain);
+        if (existing) {
+          existing.count += sd.count;
+          existing.pass += sd.pass;
+          existing.fail += sd.fail;
+          existing.reject += sd.reject;
+        } else {
+          subdomainMap.set(sd.subdomain, { ...sd });
+        }
+      }
+
+      // ポリシーオーバーライド詳細の集約
+      for (const od of (s.overrideDetails || [])) {
+        overrideDetailEntries.push(od);
+      }
+
       if (report.warnings && report.warnings.length > 0) {
         reportsWithWarnings++;
         totalWarnings += report.warnings.length;
@@ -632,6 +705,10 @@ const ArParser = (() => {
       spfDomains: [...spfDomainMap.values()].sort((a, b) => b.count - a.count),
       // Envelope 不一致の集約結果
       envelopeMismatches: [...envelopeMap.values()].sort((a, b) => b.count - a.count),
+      // サブドメイン別の集約結果
+      subdomains: [...subdomainMap.values()].sort((a, b) => b.count - a.count),
+      // ポリシーオーバーライド詳細の集約結果
+      overrideDetails: aggregateOverrideDetails(overrideDetailEntries),
       warningsSummary: {
         totalWarnings, reportsWithWarnings, reportsWithMetadataErrors,
         byField: [...warningFieldCounts.entries()]
