@@ -364,5 +364,14 @@
   },
   "warnFrMailFrom": {
     "message": "Original MAIL FROM is missing"
+  },
+  "btnExpandAll": {
+    "message": "모두 펼치기"
+  },
+  "btnCollapseAll": {
+    "message": "모두 접기"
+  },
+  "noResultsNotice": {
+    "message": "선택한 기간에 보고서가 없습니다. 기간을 늘리거나 폴더 설정을 확인하세요."
   }
 }

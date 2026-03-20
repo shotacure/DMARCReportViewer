@@ -364,5 +364,14 @@
   },
   "warnFrMailFrom": {
     "message": "元のMAIL FROMが欠落しています"
+  },
+  "btnExpandAll": {
+    "message": "全て展開"
+  },
+  "btnCollapseAll": {
+    "message": "全て折りたたむ"
+  },
+  "noResultsNotice": {
+    "message": "選択した期間にレポートが見つかりませんでした。期間を長くするか、フォルダ設定を確認してください。"
   }
 }

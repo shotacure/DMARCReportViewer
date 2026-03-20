@@ -364,5 +364,14 @@
   },
   "warnFrMailFrom": {
     "message": "Original MAIL FROM is missing"
+  },
+  "btnExpandAll": {
+    "message": "全部展開"
+  },
+  "btnCollapseAll": {
+    "message": "全部摺疊"
+  },
+  "noResultsNotice": {
+    "message": "在所選時段內未找到報告。請嘗試更長的時段或檢查資料夾設定。"
   }
 }
