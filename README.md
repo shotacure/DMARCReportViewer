@@ -71,6 +71,19 @@ The most critical insight: **"Delivered (Auth Fail)"** — emails that failed au
 
 最も重要なインサイト: **「配送済（認証失敗）」** — 認証に失敗したのに、ポリシーが `none` や `quarantine` だったために配送されてしまったメール。`p=reject` にすればブロックできるメール。この数字はゼロであるべきだ。ゼロでなければ、やるべきことがある。
 
+### Deep analysis — 認証基盤の深掘り
+
+- **DKIM signature analysis**: See which signing domains and selectors are in use. Third-party signatures (SendGrid, Mailchimp, etc.) are automatically tagged.
+- **SPF domain analysis**: Identify which domains are authenticating via SPF, with helo-only warnings when MAIL FROM alignment is missing.
+- **Envelope alignment**: Detect Header From / Envelope From mismatches. Distinguish legitimate third-party senders from possible spoofing attempts.
+- **Policy recommendations**: Actionable advice per domain — p=none → reject migration guidance, adkim strict suggestions, pct=100 readiness checks.
+- **CSV export**: Export all IP range statistics and forensic reports for incident reporting and compliance documentation.
+- **DKIM 署名分析**: 使用中の署名ドメインとセレクタを一覧表示。第三者署名（SendGrid、Mailchimp等）は自動タグ付け。
+- **SPF ドメイン分析**: SPF認証に使用されているドメインを特定。MAIL FROMアライメントがない場合はhelo-only警告を表示。
+- **Envelope アライメント**: Header FromとEnvelope Fromの不一致を検出。正当な第三者配信とドメイン詐称の疑いを区別。
+- **ポリシー推奨**: ドメインごとのアクション可能なアドバイス — p=none→reject移行ガイダンス、adkim strict提案、pct=100移行の準備状況確認。
+- **CSVエクスポート**: IP範囲統計とフォレンジックレポートをCSVでエクスポート。インシデント報告やコンプライアンス文書作成に対応。
+
 ---
 
 ## Features / 機能一覧
@@ -79,6 +92,11 @@ The most critical insight: **"Delivered (Auth Fail)"** — emails that failed au
 - **Collapsible domain sections** — Manage multiple domains without endless scrolling
 - **Automatic folder detection** — Finds DMARC report folders by naming convention
 - **ISP compatibility** — Handles gzip-first detection, Microsoft XML typos, zero-record reports
+- **DKIM signature analysis** — Signing domains, selectors, third-party signature detection
+- **SPF domain analysis** — Authentication domains, mfrom/helo scope tracking
+- **Envelope alignment** — Header From / Envelope From mismatch detection with spoofing indicators
+- **Policy recommendations** — Per-domain advice for p=none → reject migration
+- **CSV export** — Export IP range statistics and forensic reports
 - **Forensic report viewer** — Displays RFC 6591 failure reports
 - **Scan period selection** — 1 week / 1 month / 3 months / 6 months / 1 year / all time
 - **Result caching** — Scan results persist across tab reopens
@@ -127,14 +145,17 @@ background.js               Tab management, message scanning, decompression pipe
 parser/
 ├─ ar_parser.js             RFC 7489 aggregate report parser with validation,
 │                            IP range aggregation, deliveredPass/Fail classification,
-│                            per-IP/reporter detailed stats
+│                            per-IP/reporter detailed stats, DKIM signature analysis,
+│                            SPF domain analysis, envelope alignment detection
 └─ fr_parser.js             RFC 6591 forensic report parser with validation
 dashboard/
-├─ dashboard.html           Full-tab dashboard UI
+├─ dashboard.html           Full-tab dashboard UI with export button
 ├─ dashboard.css            CSS variables, dark mode, 8-column grid, IP tags,
-│                            health badges, collapsible sections, pie/line charts
+│                            health badges, collapsible sections, pie/line charts,
+│                            advice boxes, third-party/spoofing tags
 └─ dashboard.js             Rendering logic — IP classification, health scoring,
-│                            SVG charts, collapsible DOM, warning translation
+│                            SVG charts, collapsible DOM, warning translation,
+│                            DKIM/SPF/envelope tables, policy advice, CSV export
 options/
 ├─ options.html             Settings page
 └─ options.js               Folder selection & persistence
@@ -142,8 +163,8 @@ lib/
 ├─ jszip.min.js             ZIP decompression (user-provided)
 └─ pako.min.js              GZIP decompression (user-provided)
 _locales/
-├─ en/messages.json         English (96 keys)
-└─ ja/messages.json         日本語 (96 keys)
+├─ en/messages.json         English (117 keys)
+└─ ja/messages.json         日本語 (117 keys)
 ```
 
 ### Processing Pipeline
@@ -152,19 +173,13 @@ _locales/
 Period Filter → Auto-Detect Folders → Message Scan → Attachment Extraction
 → Decompress (GZ-first/ZIP) → XML Sanitize → Parse → Validate → Deduplicate
 → DeliveredPass/Fail Split → IP Range Classification → Domain Health Scoring
-→ Per-Domain Aggregation → Time Series Bucketing → Cache → Render
+→ DKIM Signature Aggregation → SPF Domain Aggregation → Envelope Alignment
+→ Per-Domain Aggregation → Time Series Bucketing → Policy Advice → Cache → Render
 ```
 
 ---
 
 ## Roadmap
-
-### v0.1.3 — Deep Analysis (planned)
-- DKIM selector & signing domain analysis
-- SPF domain analysis (mfrom vs helo)
-- Header From / Envelope From mismatch detection
-- Policy recommendation engine (p=none → reject migration guidance)
-- CSV/JSON export
 
 ### v0.1.4 — Operational Intelligence (planned)
 - Period comparison (previous vs current)

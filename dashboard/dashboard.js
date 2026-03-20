@@ -1,4 +1,4 @@
-// DMARCReportViewer - dashboard/dashboard.js v0.1.2
+// DMARCReportViewer - dashboard/dashboard.js v0.1.3
 
 (() => {
   "use strict";
@@ -31,6 +31,9 @@
 
   $("version").textContent = browser.runtime.getManifest().version;
 
+  // 最新のスキャン結果を保持 (エクスポート用)
+  let lastResults = null;
+
   // =========================================================
   // 警告メッセージの翻訳マップ
   // =========================================================
@@ -57,19 +60,14 @@
   // IP 範囲の自動分類タグを算出
   // =========================================================
   const classifyIpRange = (e) => {
-    // 全 pass + 全配送 → 正規の送信元
     if (e.fullPass === e.count && e.deliveredPass === e.count)
       return { tag: "legitimate", label: msg("tagLegitimate"), cls: "drv-ip-tag-legitimate", tip: msg("tagLegitimateDesc") };
-    // fail あり + deliveredFail あり → 認証失敗なのに素通り (最も危険)
     if (e.deliveredFail > 0)
       return { tag: "threat", label: msg("tagThreat"), cls: "drv-ip-tag-threat", tip: msg("tagThreatDesc") };
-    // 全 fail + 全 reject → 不正だがブロック済み
     if (e.fullPass === 0 && e.reject === e.count)
       return { tag: "blocked", label: msg("tagBlocked"), cls: "drv-ip-tag-blocked", tip: msg("tagBlockedDesc") };
-    // pass もあるが reject/quarantine もある → 設定不備の可能性
     if (e.fullPass > 0 && (e.reject > 0 || e.quarantine > 0))
       return { tag: "misconfigured", label: msg("tagMisconfigured"), cls: "drv-ip-tag-misconfigured", tip: msg("tagMisconfiguredDesc") };
-    // 全 fail + 全 reject/quarantine
     if (e.fullPass === 0 && e.count > 0)
       return { tag: "blocked", label: msg("tagBlocked"), cls: "drv-ip-tag-blocked", tip: msg("tagBlockedDesc") };
     return { tag: "unknown", label: "—", cls: "", tip: "" };
@@ -90,6 +88,37 @@
     if (hasDeliveredFail || !isRejectPolicy)
       return { cls: "drv-health-needs-attention", label: msg("healthNeedsAttention"), icon: "⚠️" };
     return { cls: "drv-health-at-risk", label: msg("healthAtRisk"), icon: "🔴" };
+  };
+
+  // =========================================================
+  // ポリシー推奨アドバイスを生成
+  // =========================================================
+  const buildPolicyAdvice = (agg, policy) => {
+    const advices = [];
+    // p=none → reject 移行の推奨
+    if (policy.p === "none") {
+      advices.push({ level: "danger", text: msg("advicePNone") });
+    } else if (policy.p === "quarantine") {
+      if (agg.deliveredFailCount === 0) {
+        advices.push({ level: "warn", text: msg("advicePQuarantine") });
+      } else {
+        advices.push({ level: "warn", text: msg("advicePQuarantineWithFail") });
+      }
+    } else if (policy.p === "reject" && agg.deliveredFailCount === 0 && agg.rejectCount === 0) {
+      advices.push({ level: "ok", text: msg("advicePRejectClean") });
+    }
+    // adkim=r の推奨
+    if (policy.adkim === "r") {
+      advices.push({ level: "warn", text: msg("adviceAdkimRelaxed") });
+    }
+    // pct < 100 の推奨
+    if (policy.pct < 100) {
+      advices.push({ level: "warn", text: msg("advicePctPartial").replace("$1", policy.pct) });
+    }
+    if (advices.length === 0) return "";
+    return advices.map(a =>
+      `<div class="drv-advice drv-advice-${a.level}">${escapeHTML(a.text)}</div>`
+    ).join("");
   };
 
   // =========================================================
@@ -140,7 +169,7 @@
   };
 
   // =========================================================
-  // Disposition 積み上げバー (4区分: 配送済(pass)/配送済(fail)/隔離/拒否)
+  // Disposition 積み上げバー (4区分)
   // =========================================================
   const buildDispositionBar = (agg) => {
     if (agg.totalCount === 0) return "";
@@ -176,10 +205,10 @@
     let html = `<table class="drv-table"><thead><tr>
       <th>${escapeHTML(headerLabel)}</th>${showIpTag ? `<th>${escapeHTML(msg("colClassification"))}</th>` : ""}
       <th>${escapeHTML(hCount)}</th>
-      <th style="color:var(--drv-color-delivered)">${escapeHTML(hDP)}</th>
-      <th style="color:var(--drv-color-delivered-fail)">${escapeHTML(hDF)}</th>
-      <th style="color:var(--drv-color-quarantine)">${escapeHTML(hQ)}</th>
-      <th style="color:var(--drv-color-reject)">${escapeHTML(hR)}</th>
+      <th>${escapeHTML(hDP)}</th>
+      <th>${escapeHTML(hDF)}</th>
+      <th>${escapeHTML(hQ)}</th>
+      <th>${escapeHTML(hR)}</th>
       <th>${escapeHTML(hFull)}</th><th>${escapeHTML(hDkim)}</th><th>${escapeHTML(hSpf)}</th>
     </tr></thead><tbody>`;
     const fmtOrDash = (v) => v > 0 ? v.toLocaleString() : "-";
@@ -198,6 +227,91 @@
         <td${dpS}>${fmtOrDash(e.deliveredPass)}</td><td${dfS}>${fmtOrDash(e.deliveredFail)}</td>
         <td${qS}>${fmtOrDash(e.quarantine)}</td><td${rS}>${fmtOrDash(e.reject)}</td>
         <td>${fmtOrDash(e.fullPass)}</td><td>${fmtOrDash(e.dkimPass)}</td><td>${fmtOrDash(e.spfPass)}</td></tr>`;
+    }
+    html += "</tbody></table>";
+    return html;
+  };
+
+  // =========================================================
+  // DKIM 署名テーブル
+  // =========================================================
+  const buildDkimSignaturesTable = (sigs) => {
+    if (!sigs || sigs.length === 0) return "";
+    let html = `<table class="drv-table"><thead><tr>
+      <th>${escapeHTML(msg("colSigningDomain"))}</th>
+      <th>${escapeHTML(msg("colSelector"))}</th>
+      <th>${escapeHTML(msg("colCount"))}</th>
+      <th class="drv-pass-text">Pass</th>
+      <th class="drv-fail-text">Fail</th>
+      <th></th>
+    </tr></thead><tbody>`;
+    for (const s of sigs) {
+      const tag = s.isThirdParty
+        ? `<span class="drv-tag drv-tag-info" title="${escapeHTML(msg("tagThirdPartyDesc"))}">🔗 ${escapeHTML(msg("tagThirdParty"))}</span>`
+        : "";
+      const pS = s.pass > 0 ? ' style="color:var(--drv-pass);font-weight:bold"' : "";
+      const fS = s.fail > 0 ? ' style="color:var(--drv-fail);font-weight:bold"' : "";
+      html += `<tr><td><code>${escapeHTML(s.domain)}</code></td><td><code>${escapeHTML(s.selector)}</code></td>
+        <td>${s.count.toLocaleString()}</td><td${pS}>${s.pass > 0 ? s.pass.toLocaleString() : "-"}</td>
+        <td${fS}>${s.fail > 0 ? s.fail.toLocaleString() : "-"}</td><td>${tag}</td></tr>`;
+    }
+    html += "</tbody></table>";
+    return html;
+  };
+
+  // =========================================================
+  // SPF ドメインテーブル
+  // =========================================================
+  const buildSpfDomainsTable = (spfDomains) => {
+    if (!spfDomains || spfDomains.length === 0) return "";
+    let html = `<table class="drv-table"><thead><tr>
+      <th>${escapeHTML(msg("colSpfDomain"))}</th>
+      <th>Scope</th>
+      <th>${escapeHTML(msg("colCount"))}</th>
+      <th class="drv-pass-text">Pass</th>
+      <th class="drv-fail-text">Fail</th>
+      <th></th>
+    </tr></thead><tbody>`;
+    for (const s of spfDomains) {
+      const scopeStr = s.scopes.join(", ");
+      // helo のみで mfrom がない場合は警告タグ
+      const heloOnly = s.scopes.length === 1 && s.scopes[0] === "helo";
+      const tag = heloOnly
+        ? `<span class="drv-tag drv-tag-warn" title="${escapeHTML(msg("tagHeloOnlyDesc"))}">⚠️ ${escapeHTML(msg("tagHeloOnly"))}</span>`
+        : "";
+      const pS = s.pass > 0 ? ' style="color:var(--drv-pass);font-weight:bold"' : "";
+      const fS = s.fail > 0 ? ' style="color:var(--drv-fail);font-weight:bold"' : "";
+      html += `<tr><td><code>${escapeHTML(s.domain)}</code></td><td>${escapeHTML(scopeStr)}</td>
+        <td>${s.count.toLocaleString()}</td><td${pS}>${s.pass > 0 ? s.pass.toLocaleString() : "-"}</td>
+        <td${fS}>${s.fail > 0 ? s.fail.toLocaleString() : "-"}</td><td>${tag}</td></tr>`;
+    }
+    html += "</tbody></table>";
+    return html;
+  };
+
+  // =========================================================
+  // Envelope From / Header From 不一致テーブル
+  // =========================================================
+  const buildEnvelopeMismatchTable = (mismatches) => {
+    if (!mismatches || mismatches.length === 0) return "";
+    let html = `<table class="drv-table"><thead><tr>
+      <th>Header From</th><th>Envelope From</th>
+      <th>${escapeHTML(msg("colCount"))}</th>
+      <th class="drv-pass-text">Pass</th>
+      <th class="drv-fail-text">Fail</th>
+      <th></th>
+    </tr></thead><tbody>`;
+    for (const m of mismatches) {
+      // 全 fail の場合はスプーフィングの疑い
+      const allFail = m.fail > 0 && m.pass === 0;
+      const tag = allFail
+        ? `<span class="drv-tag drv-tag-danger" title="${escapeHTML(msg("tagPossibleSpoofingDesc"))}">🔴 ${escapeHTML(msg("tagPossibleSpoofing"))}</span>`
+        : `<span class="drv-tag drv-tag-info" title="${escapeHTML(msg("tagThirdPartySenderDesc"))}">🔗 ${escapeHTML(msg("tagThirdPartySender"))}</span>`;
+      const pS = m.pass > 0 ? ' style="color:var(--drv-pass);font-weight:bold"' : "";
+      const fS = m.fail > 0 ? ' style="color:var(--drv-fail);font-weight:bold"' : "";
+      html += `<tr><td><code>${escapeHTML(m.headerFrom)}</code></td><td><code>${escapeHTML(m.envelopeFrom)}</code></td>
+        <td>${m.count.toLocaleString()}</td><td${pS}>${m.pass > 0 ? m.pass.toLocaleString() : "-"}</td>
+        <td${fS}>${m.fail > 0 ? m.fail.toLocaleString() : "-"}</td><td>${tag}</td></tr>`;
     }
     html += "</tbody></table>";
     return html;
@@ -271,20 +385,63 @@
   };
 
   // =========================================================
+  // CSV エクスポート: 全ドメインの IP 範囲統計を CSV で出力
+  // =========================================================
+  const exportCsv = (results) => {
+    if (!results || !results.domainDetails) return;
+    const rows = [];
+    // ヘッダー行
+    rows.push(["Domain","IP Range","Classification","Count",
+      "Delivered (Auth OK)","Delivered (Auth Fail)","Quarantined","Rejected",
+      "DKIM+SPF Pass","DKIM Pass","SPF Pass"].join(","));
+    for (const dd of results.domainDetails) {
+      const agg = dd.aggregate;
+      for (const e of (agg.topIpRanges || [])) {
+        const cl = classifyIpRange(e);
+        rows.push([
+          `"${dd.domain}"`, `"${e.key}"`, `"${cl.tag}"`,
+          e.count, e.deliveredPass, e.deliveredFail,
+          e.quarantine, e.reject, e.fullPass, e.dkimPass, e.spfPass
+        ].join(","));
+      }
+    }
+    // フォレンジックレポート
+    if (results.fr && results.fr.length > 0) {
+      rows.push(""); // 空行
+      rows.push(["Date","Domain","Source IP","Auth Failure","Feedback Type"].join(","));
+      for (const r of results.fr) {
+        rows.push([
+          `"${r.messageDate || ""}"`, `"${r.reportedDomain}"`, `"${r.sourceIp}"`,
+          `"${r.authFailure || ""}"`, `"${r.feedbackType || ""}"`
+        ].join(","));
+      }
+    }
+    const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `dmarc-report-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // =========================================================
   // 結果描画メイン
   // =========================================================
   const renderResults = (results) => {
+    lastResults = results;
     $("domains-container").innerHTML = "";
     $("pie-row").innerHTML = "";
     if (results.ar.length > 0 && results.aggregate) {
       const agg = results.aggregate;
       if (agg.dateRangeMin && agg.dateRangeMax) {
-        $("period-info").textContent = `${formatUnixDate(agg.dateRangeMin)} – ${formatUnixDate(agg.dateRangeMax)} | ${agg.reportCount} ${msg("colReports")} | ${agg.uniqueIpRanges} ${msg("sectionTopIps")}`;
+        $("period-info").textContent = `${formatUnixDate(agg.dateRangeMin)} – ${formatUnixDate(agg.dateRangeMax)} | ${agg.reportCount} ${msg("colReports")} | ${agg.uniqueIpRanges} ${msg("ipRangeCountLabel")}`;
         show($("period-info"));
       }
       $("summary-cards").innerHTML = buildStatCards(agg);
       renderPieCharts(agg);
       show($("summary-section"));
+      show($("btn-export"));
       if (results.domainDetails) {
         const pd = results.scanPeriodDays || 0;
         for (const dd of results.domainDetails) renderDomainSection(dd, pd);
@@ -315,6 +472,7 @@
   };
 
   $("btn-settings").addEventListener("click", () => browser.runtime.openOptionsPage());
+  $("btn-export").addEventListener("click", () => exportCsv(lastResults));
 
   $("btn-scan").addEventListener("click", async () => {
     $("btn-scan").disabled = true;
@@ -350,7 +508,7 @@
   };
 
   // =========================================================
-  // ドメイン別詳細セクション (折りたたみ + 健全度バッジ)
+  // ドメイン別詳細セクション (折りたたみ + 健全度バッジ + アドバイス + 深掘り分析)
   // =========================================================
   const renderDomainSection = (dd, periodDays) => {
     const agg = dd.aggregate;
@@ -361,7 +519,6 @@
     const policyStr = `p=${pol.p} sp=${pol.sp} adkim=${pol.adkim} aspf=${pol.aspf} pct=${pol.pct}${pol.fo !== "0" ? ` fo=${pol.fo}` : ""}`;
     const health = computeHealthBadge(agg, pol);
 
-    // ヘッダー (クリックで折りたたみ)
     const sectionId = `domain-${dd.domain.replace(/[^a-zA-Z0-9]/g, "_")}`;
     let html = `<div class="drv-domain-header" data-target="${sectionId}">
       <span>📋 ${escapeHTML(dd.domain)}</span>
@@ -371,10 +528,12 @@
       <span class="drv-toggle-icon expanded" data-toggle="${sectionId}">▼</span>
     </div>`;
 
-    // 折りたたみ本体
     html += `<div class="drv-domain-body" id="${sectionId}"><div class="drv-domain-body-inner"><div class="drv-domain-body-content">`;
 
-    // 8枠コンパクトカード (配送済pass/fail分離、色は常時)
+    // ポリシー推奨アドバイス
+    html += buildPolicyAdvice(agg, pol);
+
+    // 8枠コンパクトカード
     const t = agg.totalCount;
     const ci = [
       {label:msg("totalEmails"),value:t.toLocaleString(),pctText:"",cc:""},
@@ -398,22 +557,38 @@
     if (dd.timeSeries && dd.timeSeries.length >= 2)
       html += buildTimeSeriesChart(dd.timeSeries, periodDays);
 
+    // IP アドレス範囲テーブル (分類タグ付き)
     if (agg.topIpRanges?.length > 0)
       html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionTopIps"))}</div>${buildDetailedTable(msg("colIpRange"), agg.topIpRanges, true, true)}</div>`;
 
+    // レポーター別テーブル
     if (agg.topReporters?.length > 0)
       html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionReporters"))}</div>${buildDetailedTable(msg("colReporter"), agg.topReporters, false, false)}</div>`;
 
+    // DKIM 署名分析
+    if (agg.dkimSignatures?.length > 0)
+      html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionDkimSignatures"))}</div>${buildDkimSignaturesTable(agg.dkimSignatures)}</div>`;
+
+    // SPF ドメイン分析
+    if (agg.spfDomains?.length > 0)
+      html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionSpfDomains"))}</div>${buildSpfDomainsTable(agg.spfDomains)}</div>`;
+
+    // Envelope From / Header From 不一致
+    if (agg.envelopeMismatches?.length > 0)
+      html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionEnvelopeAlignment"))}</div>${buildEnvelopeMismatchTable(agg.envelopeMismatches)}</div>`;
+
+    // ポリシーオーバーライド理由
     if (agg.overrideReasons?.length > 0) {
       html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("sectionOverrides"))}</div><table class="drv-table"><thead><tr><th>${escapeHTML(msg("colOverrideType"))}</th><th>${escapeHTML(msg("colCount"))}</th></tr></thead><tbody>`;
       for (const entry of agg.overrideReasons) html += `<tr><td>${escapeHTML(entry.type)}</td><td>${entry.count.toLocaleString()}</td></tr>`;
       html += '</tbody></table></div>';
     }
 
+    // ISP メタデータエラー
     if (agg.warningsSummary?.reportsWithMetadataErrors > 0)
       html += `<div class="drv-domain-subsection"><div class="drv-domain-subtitle">${escapeHTML(msg("ispMetadataErrors"))}</div><p style="font-size:12px;color:var(--drv-warn);">${agg.warningsSummary.reportsWithMetadataErrors} ${escapeHTML(msg("ispMetadataErrorsDetail"))}</p></div>`;
 
-    html += '</div></div></div>'; // close body-content, body-inner, body
+    html += '</div></div></div>';
 
     section.innerHTML = html;
     $("domains-container").appendChild(section);
