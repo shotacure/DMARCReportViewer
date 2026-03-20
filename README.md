@@ -1,47 +1,96 @@
 # DMARC Report Viewer
 
-**A Thunderbird add-on to visualize and analyze DMARC aggregate and forensic reports.**
-**DMARC集約レポートとフォレンジックレポートを可視化・解析するThunderbirdアドオンです。**
+**Your DMARC reports are telling you something. This add-on helps you listen.**
 
-DMARC Report Viewer scans designated mail folders for DMARC reports, decompresses and parses the XML attachments, and presents a clear dashboard with authentication statistics, per-domain breakdowns with pie charts, and source IP range analysis — all processed entirely locally within Thunderbird.
-
-DMARC Report Viewer は、指定されたメールフォルダからDMARCレポートをスキャンし、添付XMLを解凍・解析して、円グラフ付きの認証統計・ドメイン別詳細分析・送信元IPアドレス範囲分析を分かりやすいダッシュボードで表示します。すべての処理はThunderbird内でローカルに完結します。
+**DMARCレポートが伝えていること。このアドオンはそれを読み解く手助けをします。**
 
 ---
 
-## 🌟 Key Features / 主な機能
+## Why This Exists / なぜこれを作ったか
 
-* **Aggregate Report Analysis:** Parses RFC 7489 compliant DMARC XML reports from ZIP/GZ attachments with ISP-specific XML sanitization.
-    * **集約レポート解析:** ZIP/GZ添付のDMARC XMLレポート（RFC 7489準拠）を、ISP固有のXML不整合修正を含めて解析します。
-* **Per-Domain Detail Sections:** Displays comprehensive statistics for each domain including DKIM+SPF/DKIM/SPF pass counts, disposition distribution (Delivered/Quarantine/Reject), IP address ranges, reporters, policy override reasons, and published DMARC policy. IP ranges and reporters show full breakdown counts.
-    * **ドメイン別詳細セクション:** 各ドメインのDKIM+SPF/DKIM/SPFパス数、disposition分布（配送済/隔離/拒否）、IPアドレス範囲、レポーター、ポリシーオーバーライド理由、公開DMARCポリシーを含む包括的な統計を表示します。IPアドレス範囲とレポーターには詳細な内訳を含みます。
-* **Pie Chart Visualization:** Summary section includes three CSS-based pie charts — domain email distribution, disposition breakdown (Delivered/Quarantine/Reject), and reporter distribution — without external dependencies.
-    * **円グラフによる可視化:** サマリーセクションにドメイン別メール分布、disposition内訳（配送済/隔離/拒否）、レポーター分布の3つのCSS円グラフを外部ライブラリなしで表示します。
-* **IP Address Range Aggregation:** Groups source IPs by Class C range (e.g. `192.168.1.xxx`) for meaningful network-level analysis.
-    * **IPアドレス範囲集約:** 送信元IPをClass C範囲（例: `192.168.1.xxx`）で集約し、ネットワークレベルの分析を可能にします。
-* **Scan Period Selection:** Choose to scan reports from the last week, month, 3 months, 6 months, year, or all time.
-    * **スキャン期間選択:** 直近1週間、1か月、3か月、半年、1年、または全期間からスキャン範囲を選択できます。
-* **Result Persistence:** Scan results are cached and restored when reopening the dashboard popup.
-    * **結果の永続化:** スキャン結果はキャッシュされ、ダッシュボードを再度開いた際に復元されます。
-* **Forensic Report Viewing:** Displays individual authentication failure reports for investigation and abuse reporting.
-    * **フォレンジックレポート閲覧:** 個別の認証失敗レポートを表示し、調査や通報の材料とします。
-* **Automatic Folder Detection:** Automatically detects report folders based on naming conventions. Recovers gracefully when IMAP folder names are changed.
-    * **フォルダ自動検出:** 命名規則に基づきレポートフォルダを自動検出します。IMAPフォルダ名が変更された場合も自動的に再検出します。
-* **Data Completeness Validation:** Detects and reports missing or incomplete fields in DMARC reports, identifying unreadable messages by category.
-    * **データ完全性検証:** DMARCレポート内の欠落・不完全なフィールドを検出・報告し、読み取り不能なメールをカテゴリ別に特定します。
-* **Dark Mode:** Full dark mode support following system preference.
-    * **ダークモード:** システムの設定に連動した完全なダークモード対応。
-* **Privacy First:** All processing is performed strictly locally within Thunderbird. No external network requests are made.
-    * **プライバシー重視:** すべての処理はThunderbird内でローカルに完結します。外部通信は一切行いません。
+You set up DMARC. You configured SPF. You rotated your DKIM keys. Now what?
+
+Every day, ISPs send you XML reports buried in ZIP and GZ attachments. They contain the ground truth about your email authentication — which IPs are sending as your domain, whether they pass or fail, and what the receiving server did about it. But nobody reads raw XML. The reports pile up. Threats go unnoticed. Misconfigurations persist.
+
+**DMARC Report Viewer turns those reports into actionable insight — entirely within Thunderbird, entirely offline, with zero data leaving your machine.**
+
+This is not a SaaS dashboard that wants your DNS credentials. This is a local tool for engineers who own their infrastructure and want to see exactly what's happening to their domains.
 
 ---
 
-## 📋 Prerequisites / 前提条件
+DMARC を設定した。SPF を書いた。DKIM 鍵もローテーションした。で、その後は？
+
+毎日 ISP から ZIP や GZ で圧縮された XML レポートが届く。そこにはメール認証の真実 — どの IP があなたのドメインで送信し、認証に成功したか失敗したか、受信サーバーがどう処理したか — がすべて記録されている。しかし誰も生の XML は読まない。レポートは積み上がり、脅威は見過ごされ、設定不備は放置される。
+
+**DMARC Report Viewer はそれらのレポートをアクションにつながるインサイトに変える。Thunderbird の中だけで、完全にオフラインで、データは一切外に出ない。**
+
+DNS の認証情報を要求する SaaS ダッシュボードではない。自分のインフラを自分で管理し、ドメインに何が起きているかを正確に把握したいエンジニアのためのローカルツールだ。
+
+---
+
+## What You Can Do / このツールでできること
+
+### See the real picture — 実態を把握する
+
+- **8-stat summary** per domain: Total emails, Delivered (Auth OK), Delivered (Auth Fail), Quarantined, Rejected, DKIM+SPF Pass, DKIM Pass, SPF Pass
+- **Pie charts**: Domain distribution, Disposition breakdown (4 categories), Reporter distribution
+- **Time series**: Disposition trends over time with automatic period aggregation (daily / weekly / monthly)
+- **ドメインごとの8項目サマリー**: メール総数、配送済(認証成功)、配送済(認証失敗)、隔離、拒否、DKIM+SPFパス、DKIMパス、SPFパス
+- **円グラフ**: ドメイン分布、Disposition内訳（4区分）、レポーター分布
+- **時系列グラフ**: 配送処理の推移を期間に応じて自動集計（日別/週別/月別）
+
+### Identify threats — 脅威を特定する
+
+- **IP range classification**: Each source IP range is automatically tagged:
+  - ✅ **Legitimate** — All pass, all delivered. Your real mail servers.
+  - 🛡️ **Blocked** — All fail, all rejected. Attackers being stopped by your policy.
+  - ⚠️ **Misconfigured** — Mix of pass and reject. A legitimate source with broken SPF/DKIM.
+  - 🔴 **Threat (Unblocked)** — Auth failed but delivered. Someone is spoofing your domain and getting through.
+- **IP範囲の自動分類**: 各送信元IP範囲にタグを自動付与
+  - ✅ **正規** — 全認証成功・全配送。あなたの正規メールサーバー。
+  - 🛡️ **ブロック済** — 全認証失敗・全拒否。ポリシーが攻撃者を正しくブロック中。
+  - ⚠️ **設定不備** — passとrejectが混在。正規の送信元だがSPF/DKIM設定に問題あり。
+  - 🔴 **脅威 (未ブロック)** — 認証失敗なのに配送されている。ドメイン詐称が素通りしている。
+
+### Know your domain health — ドメインの健全度を知る
+
+- **Health badges** per domain:
+  - ✅ **Healthy** — High pass rate, reject policy active, no unblocked failures
+  - 🛡️ **Under Attack** — Reject policy is blocking threats
+  - ⚠️ **Needs Attention** — Unblocked auth failures exist, or policy is not `reject`
+  - 🔴 **At Risk** — Significant volume of unblocked spoofing
+- **ドメインごとの健全度バッジ**:
+  - ✅ **健全** — 高いパス率、rejectポリシー有効、未ブロック認証失敗なし
+  - 🛡️ **攻撃検知中** — rejectポリシーが脅威をブロック中
+  - ⚠️ **要確認** — 未ブロックの認証失敗あり、またはポリシーが`reject`でない
+  - 🔴 **危険** — 大量のドメイン詐称が素通りしている
+
+### Spot the dangerous gap — 危険なギャップを見つける
+
+The most critical insight: **"Delivered (Auth Fail)"** — emails that failed authentication but were delivered anyway because your policy is `none` or `quarantine`. These are the emails that `p=reject` would block. This number should be zero. If it's not, you have work to do.
+
+最も重要なインサイト: **「配送済（認証失敗）」** — 認証に失敗したのに、ポリシーが `none` や `quarantine` だったために配送されてしまったメール。`p=reject` にすればブロックできるメール。この数字はゼロであるべきだ。ゼロでなければ、やるべきことがある。
+
+---
+
+## Features / 機能一覧
+
+- **Full tab dashboard** — Opens in a dedicated Thunderbird tab for comfortable analysis
+- **Collapsible domain sections** — Manage multiple domains without endless scrolling
+- **Automatic folder detection** — Finds DMARC report folders by naming convention
+- **ISP compatibility** — Handles gzip-first detection, Microsoft XML typos, zero-record reports
+- **Forensic report viewer** — Displays RFC 6591 failure reports
+- **Scan period selection** — 1 week / 1 month / 3 months / 6 months / 1 year / all time
+- **Result caching** — Scan results persist across tab reopens
+- **Dark mode** — Full dark mode following system preference
+- **i18n** — English and Japanese
+- **Privacy first** — Zero network requests. Everything stays on your machine.
+
+---
+
+## Prerequisites / 前提条件
 
 ### DNS Configuration / DNS設定
-
-Each domain needs a DMARC record with reporting addresses:
-各ドメインにレポート送信先アドレスを含むDMARCレコードが必要です:
 
 ```
 _dmarc.example.com. 300 IN TXT "v=DMARC1; p=reject; sp=reject; pct=100; adkim=s; aspf=s; fo=1; rua=mailto:dmarc-rua@example.com; ruf=mailto:dmarc-ruf@example.com"
@@ -49,92 +98,85 @@ _dmarc.example.com. 300 IN TXT "v=DMARC1; p=reject; sp=reject; pct=100; adkim=s;
 
 ### Mail Folder Setup / メールフォルダ設定
 
-Create two folders (or Gmail labels) under a parent folder containing "DMARC" in its name:
-「DMARC」を含む親フォルダの下に2つのサブフォルダ（またはGmailラベル）を作成します:
-
 ```
 DMARC/
-├── Aggregate    ← Aggregate reports / 集約レポート
-└── Forensic     ← Forensic reports / フォレンジックレポート
+├── Aggregate    ← rua reports (auto-detected)
+└── Forensic     ← ruf reports (auto-detected)
 ```
 
-The add-on automatically detects folders matching these patterns (case-insensitive):
-アドオンは以下のパターンに一致するフォルダを自動検出します（大文字小文字不問）:
-
-* **Aggregate reports:** A folder containing "aggregate" or "ar" inside a "dmarc" parent folder
-* **Forensic reports:** A folder containing "forensic" or "fr" inside a "dmarc" parent folder
-
-Set up mail filters to route reports by `To:` address.
-`To:` アドレスでフィルタ振り分けを設定してください。
+Route reports with mail filters by `To:` address.
 
 ---
 
-## 📥 Installation / インストール
+## Installation / インストール
 
-> **Note:** This add-on requires [JSZip](https://stuk.github.io/jszip/) and [pako](https://github.com/nicknisi/pako) libraries to be placed in the `lib/` directory for ZIP/GZ decompression.
+> Requires [JSZip](https://stuk.github.io/jszip/) and [pako](https://github.com/nodeca/pako) in the `lib/` directory.
 
-1. Download `jszip.min.js` and `pako.min.js` and place them in the `lib/` directory
-2. Build the XPI package (see below)
+1. `npm install` or manually place `jszip.min.js` and `pako.min.js` in `lib/`
+2. Build: `./build.sh` (Linux/macOS) or `pwsh build.ps1` (Windows)
 3. Install in Thunderbird: Tools → Add-ons → Install Add-on From File
 
 ---
 
-## 🏗️ Building from Source / ソースからのビルド
-
-### Windows (PowerShell)
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File build.ps1
-```
-
-### Linux / macOS (Bash)
-```bash
-chmod +x build.sh
-./build.sh
-```
-
-Both scripts read the version from `manifest.json`, stage the required files, produce a `.xpi` package in `.release/`, and generate a SHA-256 checksum file.
-
----
-
-## 🏛️ Architecture / アーキテクチャ
+## Architecture / アーキテクチャ
 
 ```
-manifest.json               Extension manifest with i18n support
-background.js               Message scanning, attachment extraction, decompression pipeline,
+manifest.json               Extension manifest (manifest_version 2)
+background.js               Tab management, message scanning, decompression pipeline,
                              folder auto-detection, result caching, period filtering
 parser/
-├─ ar_parser.js             Aggregate report XML parser (RFC 7489) with validation,
-│                            IP range aggregation, per-IP/reporter detailed stats
-└─ fr_parser.js             Forensic report parser (RFC 6591 / AFRF) with validation
+├─ ar_parser.js             RFC 7489 aggregate report parser with validation,
+│                            IP range aggregation, deliveredPass/Fail classification,
+│                            per-IP/reporter detailed stats
+└─ fr_parser.js             RFC 6591 forensic report parser with validation
 dashboard/
-├─ dashboard.html           Main dashboard UI with period selector
-├─ dashboard.css            Styles with CSS variables, dark mode, pie charts, bar charts
-└─ dashboard.js             Dashboard logic — pie charts, per-domain sections, cache restore
+├─ dashboard.html           Full-tab dashboard UI
+├─ dashboard.css            CSS variables, dark mode, 8-column grid, IP tags,
+│                            health badges, collapsible sections, pie/line charts
+└─ dashboard.js             Rendering logic — IP classification, health scoring,
+│                            SVG charts, collapsible DOM, warning translation
 options/
-├─ options.html             Settings page (filtered to DMARC folders only)
+├─ options.html             Settings page
 └─ options.js               Folder selection & persistence
 lib/
 ├─ jszip.min.js             ZIP decompression (user-provided)
 └─ pako.min.js              GZIP decompression (user-provided)
-images/
-└─ icon.svg                 Extension icon
 _locales/
-├─ en/messages.json         English (default)
-└─ ja/messages.json         日本語
+├─ en/messages.json         English (96 keys)
+└─ ja/messages.json         日本語 (96 keys)
 ```
 
-### Processing Pipeline / 処理パイプライン
+### Processing Pipeline
 
 ```
 Period Filter → Auto-Detect Folders → Message Scan → Attachment Extraction
-→ Decompress (GZ/ZIP) → XML Sanitize → Parse → Validate → Deduplicate
-→ Per-Domain Aggregation (IP range + reporter detailed stats) → Cache → Render
+→ Decompress (GZ-first/ZIP) → XML Sanitize → Parse → Validate → Deduplicate
+→ DeliveredPass/Fail Split → IP Range Classification → Domain Health Scoring
+→ Per-Domain Aggregation → Time Series Bucketing → Cache → Render
 ```
 
 ---
 
-## 📄 License / ライセンス
+## Roadmap
 
-This project is licensed under the [GNU General Public License v3.0](LICENSE).
+### v0.1.3 — Deep Analysis (planned)
+- DKIM selector & signing domain analysis
+- SPF domain analysis (mfrom vs helo)
+- Header From / Envelope From mismatch detection
+- Policy recommendation engine (p=none → reject migration guidance)
+- CSV/JSON export
+
+### v0.1.4 — Operational Intelligence (planned)
+- Period comparison (previous vs current)
+- Reporter coverage & gap detection
+- Subdomain analysis
+- Policy override deep analysis
+- Forensic report ↔ aggregate report cross-reference
+
+---
+
+## License / ライセンス
+
+[GNU General Public License v3.0](LICENSE)
 
 Copyright (C) 2025 Shota (SHOWTIME)

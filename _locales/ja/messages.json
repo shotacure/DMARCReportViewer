@@ -1,330 +1,98 @@
 {
-  "extensionName": {
-    "message": "DMARC Report Viewer",
-    "description": "アドオン名"
-  },
-  "extensionDescription": {
-    "message": "DMARC集約レポートとフォレンジックレポートをThunderbird内でローカルに解析・可視化します。",
-    "description": "アドオンの説明"
-  },
-  "btnScan": {
-    "message": "レポートをスキャン",
-    "description": "スキャン開始ボタン"
-  },
-  "btnSettings": {
-    "message": "設定",
-    "description": "設定画面を開くボタン"
-  },
-  "btnSave": {
-    "message": "保存",
-    "description": "設定保存ボタン"
-  },
-  "msgSaved": {
-    "message": "✓ 保存しました",
-    "description": "設定保存完了メッセージ"
-  },
-  "noFolderNotice": {
-    "message": "DMARCフォルダが設定されていません。設定画面からレポートフォルダを選択するか、命名規則に沿ったフォルダ（例: DMARC/Aggregate、DMARC/Forensic）を作成すると自動検出されます。",
-    "description": "フォルダ未設定時の案内"
-  },
-  "statusScanning": {
-    "message": "フォルダをスキャン中…",
-    "description": "スキャン中のステータス"
-  },
-  "statusComplete": {
-    "message": "スキャン完了。",
-    "description": "スキャン完了時のステータス"
-  },
-  "statusErrors": {
-    "message": "件のエラー",
-    "description": "ステータスバーのエラー数ラベル"
-  },
-  "statusCached": {
-    "message": "キャッシュ",
-    "description": "結果がキャッシュからの復元であることを示すラベル"
-  },
-  "arReports": {
-    "message": "件の集約レポート",
-    "description": "集約レポート数のラベル"
-  },
-  "frReports": {
-    "message": "件のフォレンジックレポート",
-    "description": "フォレンジックレポート数のラベル"
-  },
-  "period1w": {
-    "message": "1週間",
-    "description": "期間選択: 1週間"
-  },
-  "period1m": {
-    "message": "1か月",
-    "description": "期間選択: 1か月"
-  },
-  "period3m": {
-    "message": "3か月",
-    "description": "期間選択: 3か月"
-  },
-  "period6m": {
-    "message": "半年",
-    "description": "期間選択: 半年"
-  },
-  "period1y": {
-    "message": "1年",
-    "description": "期間選択: 1年"
-  },
-  "periodAll": {
-    "message": "全期間",
-    "description": "期間選択: 全期間"
-  },
-  "sectionSummary": {
-    "message": "サマリー",
-    "description": "サマリーセクションタイトル"
-  },
-  "sectionReporters": {
-    "message": "レポーター別",
-    "description": "レポーター別セクションタイトル"
-  },
-  "sectionTopIps": {
-    "message": "IPアドレス範囲",
-    "description": "送信元IPアドレス範囲セクションタイトル"
-  },
-  "sectionForensic": {
-    "message": "フォレンジックレポート",
-    "description": "フォレンジックレポートセクションタイトル"
-  },
-  "sectionOverrides": {
-    "message": "ポリシーオーバーライド理由",
-    "description": "ポリシーオーバーライド理由セクションタイトル"
-  },
-  "sectionIssues": {
-    "message": "読み取り不能なレポート",
-    "description": "読み取り不能なレポートセクションタイトル"
-  },
-  "totalEmails": {
-    "message": "メール総数",
-    "description": "メール総数カードラベル"
-  },
-  "dispositionDelivered": {
-    "message": "配送済",
-    "description": "Dispositionラベル: none（メールが通常配送された状態）"
-  },
-  "dispositionTitle": {
-    "message": "配送処理",
-    "description": "Disposition円グラフタイトル"
-  },
-  "quarantined": {
-    "message": "隔離",
-    "description": "隔離数カードラベル"
-  },
-  "rejected": {
-    "message": "拒否",
-    "description": "拒否数カードラベル"
-  },
-  "dkimSpfPass": {
-    "message": "DKIM+SPF パス",
-    "description": "カードラベル: DKIMとSPF両方パス"
-  },
-  "dkimPass": {
-    "message": "DKIM パス",
-    "description": "カードラベル: DKIMパス"
-  },
-  "spfPass": {
-    "message": "SPF パス",
-    "description": "カードラベル: SPFパス"
-  },
-  "colDomain": {
-    "message": "ドメイン",
-    "description": "テーブル列: ドメイン"
-  },
-  "colTotal": {
-    "message": "合計",
-    "description": "テーブル列: 合計"
-  },
-  "colPassRate": {
-    "message": "パス率",
-    "description": "テーブル列: パス率"
-  },
-  "colReports": {
-    "message": "レポート数",
-    "description": "テーブル列: レポート数"
-  },
-  "colReporter": {
-    "message": "レポーター",
-    "description": "テーブル列: レポーター"
-  },
-  "colSourceIp": {
-    "message": "送信元IP",
-    "description": "テーブル列: 送信元IP"
-  },
-  "colIpRange": {
-    "message": "IPアドレス範囲",
-    "description": "テーブル列: IPアドレス範囲 (Class C)"
-  },
-  "colCount": {
-    "message": "件数",
-    "description": "テーブル列: 件数"
-  },
-  "colDate": {
-    "message": "日時",
-    "description": "テーブル列: 日時"
-  },
-  "colAuthFailure": {
-    "message": "認証失敗",
-    "description": "テーブル列: 認証失敗"
-  },
-  "colOverrideType": {
-    "message": "理由",
-    "description": "テーブル列: ポリシーオーバーライド理由"
-  },
-  "colIssueCategory": {
-    "message": "カテゴリ",
-    "description": "テーブル列: 問題カテゴリ"
-  },
-  "colIssueDetail": {
-    "message": "詳細",
-    "description": "テーブル列: 問題の詳細"
-  },
-  "labelArFolder": {
-    "message": "集約レポートフォルダ",
-    "description": "設定画面の集約レポートフォルダラベル"
-  },
-  "labelFrFolder": {
-    "message": "フォレンジックレポートフォルダ",
-    "description": "設定画面のフォレンジックレポートフォルダラベル"
-  },
-  "hintArFolder": {
-    "message": "DMARC集約レポートが配信されるIMAPフォルダを選択してください。",
-    "description": "集約レポートフォルダ選択のヒントテキスト"
-  },
-  "hintFrFolder": {
-    "message": "DMARCフォレンジックレポートが配信されるIMAPフォルダを選択してください。任意です。",
-    "description": "フォレンジックレポートフォルダ選択のヒントテキスト"
-  },
-  "issueParseFailed": {
-    "message": "パース失敗",
-    "description": "問題カテゴリ: XMLパース失敗"
-  },
-  "issueDecompressFailed": {
-    "message": "解凍失敗",
-    "description": "問題カテゴリ: ZIP/GZ解凍失敗"
-  },
-  "issueIncomplete": {
-    "message": "情報欠落",
-    "description": "問題カテゴリ: パース成功だがフィールド欠落あり"
-  },
-  "issueNoAttachment": {
-    "message": "添付なし",
-    "description": "問題カテゴリ: DMARCレポートの添付がない"
-  },
-  "issueNoAttachmentDetail": {
-    "message": "このメールにDMARCレポートの添付ファイルが見つかりません",
-    "description": "添付なし問題の詳細テキスト"
-  },
-  "issueUnknownFormat": {
-    "message": "不明な形式",
-    "description": "問題カテゴリ: 認識できないファイル形式"
-  },
-  "ispMetadataErrors": {
-    "message": "ISPメタデータエラー",
-    "description": "ISPメタデータエラーサブセクションタイトル"
-  },
-  "ispMetadataErrorsDetail": {
-    "message": "件のレポートにISP側のメタデータエラーが含まれています",
-    "description": "ISPメタデータエラー詳細テキスト"
-  },
-  "privacyNote": {
-    "message": "すべての処理はローカルで完結します。外部通信は一切行いません。",
-    "description": "プライバシーフッター"
-  },
-  "warnOrgName": {
-    "message": "レポーター組織名が欠落しています",
-    "description": "警告: org_name欠落"
-  },
-  "warnReportId": {
-    "message": "レポートIDが欠落しています",
-    "description": "警告: report_id欠落"
-  },
-  "warnEmail": {
-    "message": "レポーター連絡先メールが欠落しています",
-    "description": "警告: email欠落"
-  },
-  "warnDateRangeBegin": {
-    "message": "レポート期間の開始日が欠落しています",
-    "description": "警告: date_range begin欠落"
-  },
-  "warnDateRangeEnd": {
-    "message": "レポート期間の終了日が欠落しています",
-    "description": "警告: date_range end欠落"
-  },
-  "warnPolicyDomain": {
-    "message": "公開ポリシーのドメインが欠落しています",
-    "description": "警告: policy domain欠落"
-  },
-  "warnPolicyP": {
-    "message": "公開ポリシーのdisposition (p=) が欠落しています",
-    "description": "警告: policy p欠落"
-  },
-  "warnNoRecords": {
-    "message": "レポートにレコードが含まれていません",
-    "description": "警告: レコードなし"
-  },
-  "warnRecordSourceIp": {
-    "message": "レコード内の送信元IPが欠落しています",
-    "description": "警告: レコードsource_ip欠落"
-  },
-  "warnRecordCount": {
-    "message": "レコード内のメッセージ数がゼロです",
-    "description": "警告: レコードcount=0"
-  },
-  "warnRecordDkim": {
-    "message": "レコード内のDKIM評価結果が欠落しています",
-    "description": "警告: レコードDKIM欠落"
-  },
-  "warnRecordSpf": {
-    "message": "レコード内のSPF評価結果が欠落しています",
-    "description": "警告: レコードSPF欠落"
-  },
-  "warnRecordDisposition": {
-    "message": "レコード内のdispositionが欠落しています",
-    "description": "警告: レコードdisposition欠落"
-  },
-  "warnRecordAuthResults": {
-    "message": "レコード内にDKIM/SPFのauth_resultsがありません",
-    "description": "警告: レコードauth_results欠落"
-  },
-  "warnRecordHeaderFrom": {
-    "message": "レコード内のheader_from識別子が欠落しています",
-    "description": "警告: レコードheader_from欠落"
-  },
-  "warnFrDomain": {
-    "message": "報告対象ドメインを特定できません",
-    "description": "警告: フォレンジックreported-domain欠落"
-  },
-  "warnFrSourceIp": {
-    "message": "送信元IPが欠落しています",
-    "description": "警告: フォレンジックsource-ip欠落"
-  },
-  "warnFrAuthResults": {
-    "message": "Authentication-Resultsヘッダが欠落しています",
-    "description": "警告: フォレンジックauth-results欠落"
-  },
-  "warnFrAuthFailure": {
-    "message": "Auth-Failure種別が欠落しています",
-    "description": "警告: フォレンジックauth-failure欠落"
-  },
-  "warnFrFrom": {
-    "message": "レポート送信元 (From) が欠落しています",
-    "description": "警告: フォレンジックfrom欠落"
-  },
-  "warnFrArrivalDate": {
-    "message": "到着日時を特定できません",
-    "description": "警告: フォレンジックarrival-date欠落"
-  },
-  "warnFrMailFrom": {
-    "message": "元のMAIL FROMが欠落しています",
-    "description": "警告: フォレンジックoriginal-mail-from欠落"
-  },
-  "chartTimeSeries": {
-    "message": "配送処理の推移",
-    "description": "時系列グラフタイトル"
-  }
+  "extensionName": { "message": "DMARC Report Viewer", "description": "アドオン名" },
+  "extensionDescription": { "message": "DMARC集約レポートとフォレンジックレポートをThunderbird内でローカルに解析。脅威の特定、認証状態の検証、対処の判断を支援します。", "description": "アドオンの説明" },
+  "btnScan": { "message": "レポートをスキャン", "description": "スキャン開始ボタン" },
+  "btnSettings": { "message": "設定", "description": "設定画面を開くボタン" },
+  "btnSave": { "message": "保存", "description": "設定保存ボタン" },
+  "msgSaved": { "message": "✓ 保存しました", "description": "設定保存完了メッセージ" },
+  "noFolderNotice": { "message": "DMARCフォルダが設定されていません。設定画面からレポートフォルダを選択するか、命名規則に沿ったフォルダ（例: DMARC/Aggregate、DMARC/Forensic）を作成すると自動検出されます。", "description": "フォルダ未設定時の案内" },
+  "statusScanning": { "message": "フォルダをスキャン中…", "description": "スキャン中のステータス" },
+  "statusComplete": { "message": "スキャン完了。", "description": "スキャン完了時のステータス" },
+  "statusErrors": { "message": "件のエラー", "description": "ステータスバーのエラー数ラベル" },
+  "statusCached": { "message": "キャッシュ", "description": "キャッシュからの復元を示すラベル" },
+  "arReports": { "message": "件の集約レポート", "description": "集約レポート数のラベル" },
+  "frReports": { "message": "件のフォレンジックレポート", "description": "フォレンジックレポート数のラベル" },
+  "period1w": { "message": "1週間", "description": "期間選択: 1週間" },
+  "period1m": { "message": "1か月", "description": "期間選択: 1か月" },
+  "period3m": { "message": "3か月", "description": "期間選択: 3か月" },
+  "period6m": { "message": "半年", "description": "期間選択: 半年" },
+  "period1y": { "message": "1年", "description": "期間選択: 1年" },
+  "periodAll": { "message": "全期間", "description": "期間選択: 全期間" },
+  "sectionSummary": { "message": "サマリー", "description": "サマリーセクションタイトル" },
+  "sectionReporters": { "message": "レポーター別", "description": "レポーター別セクションタイトル" },
+  "sectionTopIps": { "message": "IPアドレス範囲", "description": "送信元IPアドレス範囲セクションタイトル" },
+  "sectionForensic": { "message": "フォレンジックレポート", "description": "フォレンジックレポートセクションタイトル" },
+  "sectionOverrides": { "message": "ポリシーオーバーライド理由", "description": "ポリシーオーバーライド理由セクションタイトル" },
+  "sectionIssues": { "message": "読み取り不能なレポート", "description": "読み取り不能なレポートセクションタイトル" },
+  "totalEmails": { "message": "メール総数", "description": "メール総数カードラベル" },
+  "deliveredPass": { "message": "配送済 (認証成功)", "description": "Disposition: 認証成功で正常に配送されたメール" },
+  "deliveredFail": { "message": "配送済 (認証失敗)", "description": "Disposition: 認証失敗だが配送されたメール — p=noneの場合に発生" },
+  "dispositionTitle": { "message": "配送処理", "description": "Disposition円グラフタイトル" },
+  "quarantined": { "message": "隔離", "description": "隔離数カードラベル" },
+  "rejected": { "message": "拒否", "description": "拒否数カードラベル" },
+  "dkimSpfPass": { "message": "DKIM+SPF パス", "description": "カードラベル: DKIMとSPF両方パス" },
+  "dkimPass": { "message": "DKIM パス", "description": "カードラベル: DKIMパス" },
+  "spfPass": { "message": "SPF パス", "description": "カードラベル: SPFパス" },
+  "colDomain": { "message": "ドメイン", "description": "テーブル列: ドメイン" },
+  "colTotal": { "message": "合計", "description": "テーブル列: 合計" },
+  "colPassRate": { "message": "パス率", "description": "テーブル列: パス率" },
+  "colReports": { "message": "レポート数", "description": "テーブル列: レポート数" },
+  "colReporter": { "message": "レポーター", "description": "テーブル列: レポーター" },
+  "colSourceIp": { "message": "送信元IP", "description": "テーブル列: 送信元IP" },
+  "colIpRange": { "message": "IPアドレス範囲", "description": "テーブル列: IPアドレス範囲" },
+  "colClassification": { "message": "分類", "description": "テーブル列: IPアドレス範囲の分類タグ" },
+  "colCount": { "message": "件数", "description": "テーブル列: 件数" },
+  "colDate": { "message": "日時", "description": "テーブル列: 日時" },
+  "colAuthFailure": { "message": "認証失敗", "description": "テーブル列: 認証失敗" },
+  "colOverrideType": { "message": "理由", "description": "テーブル列: ポリシーオーバーライド理由" },
+  "colIssueCategory": { "message": "カテゴリ", "description": "テーブル列: 問題カテゴリ" },
+  "colIssueDetail": { "message": "詳細", "description": "テーブル列: 問題の詳細" },
+  "labelArFolder": { "message": "集約レポートフォルダ", "description": "設定画面の集約レポートフォルダラベル" },
+  "labelFrFolder": { "message": "フォレンジックレポートフォルダ", "description": "設定画面のフォレンジックレポートフォルダラベル" },
+  "hintArFolder": { "message": "DMARC集約レポートが配信されるIMAPフォルダを選択してください。", "description": "集約レポートフォルダ選択のヒントテキスト" },
+  "hintFrFolder": { "message": "DMARCフォレンジックレポートが配信されるIMAPフォルダを選択してください。任意です。", "description": "フォレンジックレポートフォルダ選択のヒントテキスト" },
+  "tagLegitimate": { "message": "✅ 正規", "description": "IP分類: 全pass・全配送" },
+  "tagLegitimateDesc": { "message": "すべてのメールが認証に成功し、正常に配送されています。正規の送信元です。", "description": "IP分類ツールチップ" },
+  "tagBlocked": { "message": "🛡️ ブロック済", "description": "IP分類: 全fail・全拒否" },
+  "tagBlockedDesc": { "message": "すべてのメールが認証に失敗し、拒否されています。DMARCポリシーがこの送信元に対して正しく機能しています。", "description": "IP分類ツールチップ" },
+  "tagMisconfigured": { "message": "⚠️ 設定不備", "description": "IP分類: passとrejectが混在" },
+  "tagMisconfiguredDesc": { "message": "一部のメールは認証に成功していますが、他は拒否/隔離されています。この送信元のSPF/DKIM設定を確認してください。", "description": "IP分類ツールチップ" },
+  "tagThreat": { "message": "🔴 脅威 (未ブロック)", "description": "IP分類: 認証失敗だが配送済" },
+  "tagThreatDesc": { "message": "認証に失敗したメールが配送されています。この送信元はドメインを詐称している可能性があります。p=rejectの設定を検討してください。", "description": "IP分類ツールチップ" },
+  "healthHealthy": { "message": "健全", "description": "ドメイン健全度: 問題なし" },
+  "healthUnderAttack": { "message": "攻撃検知中", "description": "ドメイン健全度: 攻撃をブロック中" },
+  "healthNeedsAttention": { "message": "要確認", "description": "ドメイン健全度: 未ブロックの認証失敗あり、またはポリシーが弱い" },
+  "healthAtRisk": { "message": "危険", "description": "ドメイン健全度: 重大な未ブロック脅威あり" },
+  "chartTimeSeries": { "message": "配送処理の推移", "description": "時系列グラフタイトル" },
+  "issueParseFailed": { "message": "パース失敗", "description": "問題カテゴリ: XMLパース失敗" },
+  "issueDecompressFailed": { "message": "解凍失敗", "description": "問題カテゴリ: ZIP/GZ解凍失敗" },
+  "issueIncomplete": { "message": "情報欠落", "description": "問題カテゴリ: パース成功だがフィールド欠落あり" },
+  "issueNoAttachment": { "message": "添付なし", "description": "問題カテゴリ: DMARCレポートの添付がない" },
+  "issueNoAttachmentDetail": { "message": "このメールにDMARCレポートの添付ファイルが見つかりません", "description": "添付なし問題の詳細テキスト" },
+  "issueUnknownFormat": { "message": "不明な形式", "description": "問題カテゴリ: 認識できないファイル形式" },
+  "ispMetadataErrors": { "message": "ISPメタデータエラー", "description": "ISPメタデータエラーサブセクションタイトル" },
+  "ispMetadataErrorsDetail": { "message": "件のレポートにISP側のメタデータエラーが含まれています", "description": "ISPメタデータエラー詳細テキスト" },
+  "privacyNote": { "message": "すべての処理はローカルで完結します。外部通信は一切行いません。", "description": "プライバシーフッター" },
+  "warnOrgName": { "message": "レポーター組織名が欠落しています", "description": "警告" },
+  "warnReportId": { "message": "レポートIDが欠落しています", "description": "警告" },
+  "warnEmail": { "message": "レポーター連絡先メールが欠落しています", "description": "警告" },
+  "warnDateRangeBegin": { "message": "レポート期間の開始日が欠落しています", "description": "警告" },
+  "warnDateRangeEnd": { "message": "レポート期間の終了日が欠落しています", "description": "警告" },
+  "warnPolicyDomain": { "message": "公開ポリシーのドメインが欠落しています", "description": "警告" },
+  "warnPolicyP": { "message": "公開ポリシーのdisposition (p=) が欠落しています", "description": "警告" },
+  "warnNoRecords": { "message": "レポートにレコードが含まれていません", "description": "警告" },
+  "warnRecordSourceIp": { "message": "レコード内の送信元IPが欠落しています", "description": "警告" },
+  "warnRecordCount": { "message": "レコード内のメッセージ数がゼロです", "description": "警告" },
+  "warnRecordDkim": { "message": "レコード内のDKIM評価結果が欠落しています", "description": "警告" },
+  "warnRecordSpf": { "message": "レコード内のSPF評価結果が欠落しています", "description": "警告" },
+  "warnRecordDisposition": { "message": "レコード内のdispositionが欠落しています", "description": "警告" },
+  "warnRecordAuthResults": { "message": "レコード内にDKIM/SPFのauth_resultsがありません", "description": "警告" },
+  "warnRecordHeaderFrom": { "message": "レコード内のheader_from識別子が欠落しています", "description": "警告" },
+  "warnFrDomain": { "message": "報告対象ドメインを特定できません", "description": "警告" },
+  "warnFrSourceIp": { "message": "送信元IPが欠落しています", "description": "警告" },
+  "warnFrAuthResults": { "message": "Authentication-Resultsヘッダが欠落しています", "description": "警告" },
+  "warnFrAuthFailure": { "message": "Auth-Failure種別が欠落しています", "description": "警告" },
+  "warnFrFrom": { "message": "レポート送信元 (From) が欠落しています", "description": "警告" },
+  "warnFrArrivalDate": { "message": "到着日時を特定できません", "description": "警告" },
+  "warnFrMailFrom": { "message": "元のMAIL FROMが欠落しています", "description": "警告" }
 }
