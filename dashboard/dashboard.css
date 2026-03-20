@@ -1,4 +1,4 @@
-/* DMARCReportViewer - dashboard.css v0.1.2 */
+/* DMARCReportViewer - dashboard.css v0.1.3 */
 
 :root {
   --drv-bg: #f5f6f8; --drv-surface: #ffffff; --drv-border: #ddd;
@@ -102,6 +102,17 @@ body { font-family: "Segoe UI", Meiryo, sans-serif; background: var(--drv-bg); c
   .drv-ip-tag-threat { background: #3a1b1b; color: #ef5350; }
 }
 
+/* 汎用タグ (第三者署名・spoofing・helo-only 等) */
+.drv-tag { display: inline-block; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 3px; white-space: nowrap; }
+.drv-tag-info { background: #e3f2fd; color: #1565c0; }
+.drv-tag-warn { background: #fff3e0; color: #e65100; }
+.drv-tag-danger { background: #ffebee; color: #c62828; }
+@media (prefers-color-scheme: dark) {
+  .drv-tag-info { background: #1a2a3a; color: #64b5f6; }
+  .drv-tag-warn { background: #3a2e1b; color: #ffb74d; }
+  .drv-tag-danger { background: #3a1b1b; color: #ef5350; }
+}
+
 /* ドメイン健全度バッジ */
 .drv-health-badge { font-size: 12px; font-weight: bold; padding: 2px 10px; border-radius: 10px; margin-left: 8px; white-space: nowrap; }
 .drv-health-healthy { background: #e8f5e9; color: #2e7d32; }
@@ -113,6 +124,17 @@ body { font-family: "Segoe UI", Meiryo, sans-serif; background: var(--drv-bg); c
   .drv-health-under-attack { background: #1a2a3a; color: #64b5f6; }
   .drv-health-needs-attention { background: #3a2e1b; color: #ffb74d; }
   .drv-health-at-risk { background: #3a1b1b; color: #ef5350; }
+}
+
+/* ポリシー推奨アドバイスボックス */
+.drv-advice { padding: 10px 14px; border-radius: 4px; font-size: 12px; margin-bottom: 10px; border-left: 4px solid; }
+.drv-advice-ok { background: #e8f5e9; border-color: #2e7d32; color: #1b5e20; }
+.drv-advice-warn { background: #fff3e0; border-color: #e65100; color: #bf360c; }
+.drv-advice-danger { background: #ffebee; border-color: #c62828; color: #b71c1c; }
+@media (prefers-color-scheme: dark) {
+  .drv-advice-ok { background: #1b3a1b; border-color: #66bb6a; color: #a5d6a7; }
+  .drv-advice-warn { background: #3a2e1b; border-color: #ffb74d; color: #ffe0b2; }
+  .drv-advice-danger { background: #3a1b1b; border-color: #ef5350; color: #ffcdd2; }
 }
 
 /* Disposition 積み上げバー */

@@ -90,6 +90,71 @@ const ArParser = (() => {
   };
 
   // =========================================================
+  // IP 範囲の適応的集約: 同じ /16 (IPv4) または /32 (IPv6) に
+  // 属するエントリが2つ以上ある場合、より広い範囲にマージする
+  // 例: 106.117.1.xxx + 106.117.5.xxx → 106.117.xxx.xxx
+  // =========================================================
+  const mergeIpRanges = (entries) => {
+    // 各エントリの親範囲 (/16 or /32) を判定
+    const getParentKey = (key) => {
+      // IPv4: "192.168.1.xxx" → 親 "192.168", マージ後 "192.168.xxx.xxx"
+      if (key.includes(".") && !key.includes(":")) {
+        const parts = key.split(".");
+        if (parts.length >= 2) {
+          return { parent: `${parts[0]}.${parts[1]}`, merged: `${parts[0]}.${parts[1]}.xxx.xxx` };
+        }
+      }
+      // IPv6: "2001:db8:85a3:xxxx:..." → 親 "2001:db8", マージ後 "2001:db8:xxxx:..."
+      if (key.includes(":")) {
+        const parts = key.split(":");
+        if (parts.length >= 2) {
+          return { parent: `${parts[0]}:${parts[1]}`, merged: `${parts[0]}:${parts[1]}:xxxx:...` };
+        }
+      }
+      return null;
+    };
+
+    // 親範囲ごとにグループ化
+    const parentGroups = new Map();
+    const noParent = [];
+    for (const e of entries) {
+      const pr = getParentKey(e.key);
+      if (!pr) { noParent.push(e); continue; }
+      if (!parentGroups.has(pr.parent)) {
+        parentGroups.set(pr.parent, { mergedKey: pr.merged, items: [] });
+      }
+      parentGroups.get(pr.parent).items.push(e);
+    }
+
+    // 同じ親に2つ以上のエントリがあればマージ、1つならそのまま
+    const result = [...noParent];
+    for (const [, group] of parentGroups) {
+      if (group.items.length >= 2) {
+        // 統計値を合算してマージ
+        const merged = {
+          key: group.mergedKey, count: 0, fullPass: 0, dkimPass: 0, spfPass: 0,
+          deliveredPass: 0, deliveredFail: 0, quarantine: 0, reject: 0
+        };
+        for (const item of group.items) {
+          merged.count += item.count;
+          merged.fullPass += item.fullPass;
+          merged.dkimPass += item.dkimPass;
+          merged.spfPass += item.spfPass;
+          merged.deliveredPass += item.deliveredPass;
+          merged.deliveredFail += item.deliveredFail;
+          merged.quarantine += item.quarantine;
+          merged.reject += item.reject;
+        }
+        result.push(merged);
+      } else {
+        result.push(...group.items);
+      }
+    }
+
+    return result.sort((a, b) => b.count - a.count);
+  };
+
+  // =========================================================
   // XML サニタイズ: ISP 固有の XML 不整合を DOMParser に渡す前に修正
   // =========================================================
   const sanitizeXml = (xmlText) => {
@@ -224,7 +289,7 @@ const ArParser = (() => {
       metadataErrors,
       policy: { domain, adkim: policyAdkim, aspf: policyAspf, p: policyP, sp: policySp, pct: policyPct, fo: policyFo, np: policyNp },
       records,
-      summary: computeSummary(records),
+      summary: computeSummary(records, domain),
       warnings: []
     };
     report.warnings = validateReport(report);
@@ -233,8 +298,9 @@ const ArParser = (() => {
 
   // =========================================================
   // サマリー計算: レコード群から統計値を算出
+  // policyDomain: Header From との一致判定に使用
   // =========================================================
-  const computeSummary = (records) => {
+  const computeSummary = (records, policyDomain) => {
     let totalCount = 0;
     let passCount = 0;
     let dkimPassCount = 0;
@@ -242,13 +308,21 @@ const ArParser = (() => {
     let rejectCount = 0;
     let quarantineCount = 0;
     let noneCount = 0;
-    // 配送済を認証成功/失敗で分離
     let deliveredPassCount = 0;
     let deliveredFailCount = 0;
     const sourceIps = new Map();
     const ipRanges = new Map();
     const overrideReasons = new Map();
     const ipRangeEntries = [];
+
+    // DKIM 署名ドメイン+セレクタの集計 (署名ドメインとセレクタで一意化)
+    const dkimSigMap = new Map();
+    // SPF 認証ドメインの集計
+    const spfDomainMap = new Map();
+    // Header From vs Envelope From の不一致検出
+    const envelopeMap = new Map();
+
+    const lowerPolicyDomain = (policyDomain || "").toLowerCase();
 
     for (const rec of records) {
       totalCount += rec.count;
@@ -262,7 +336,6 @@ const ArParser = (() => {
       if (isSpfPass) spfPassCount += rec.count;
       if (isFullPass) passCount += rec.count;
 
-      // 配送済 (disposition=none) を認証成功/失敗で分離
       if (isDelivered && isFullPass) deliveredPassCount += rec.count;
       if (isDelivered && !isFullPass) deliveredFailCount += rec.count;
 
@@ -296,6 +369,73 @@ const ArParser = (() => {
           overrideReasons.set(reason.type, existing + rec.count);
         }
       }
+
+      // DKIM 署名の集計: domain + selector をキーにしてグループ化
+      for (const dk of rec.dkimResults) {
+        if (!dk.domain) continue;
+        const sigKey = `${dk.domain.toLowerCase()}/${dk.selector || "(none)"}`;
+        const existing = dkimSigMap.get(sigKey);
+        const isPass = dk.result === "pass";
+        // 署名ドメインが Header From ドメインと一致するか (第三者署名の判定)
+        const isThirdParty = dk.domain.toLowerCase() !== lowerPolicyDomain;
+        if (existing) {
+          existing.count += rec.count;
+          existing.pass += isPass ? rec.count : 0;
+          existing.fail += isPass ? 0 : rec.count;
+        } else {
+          dkimSigMap.set(sigKey, {
+            domain: dk.domain.toLowerCase(),
+            selector: dk.selector || "(none)",
+            count: rec.count,
+            pass: isPass ? rec.count : 0,
+            fail: isPass ? 0 : rec.count,
+            isThirdParty
+          });
+        }
+      }
+
+      // SPF ドメインの集計: domain をキーにしてグループ化、scope を追跡
+      for (const sp of rec.spfResults) {
+        if (!sp.domain) continue;
+        const spKey = sp.domain.toLowerCase();
+        const isPass = sp.result === "pass";
+        const scope = sp.scope || "mfrom";
+        const existing = spfDomainMap.get(spKey);
+        if (existing) {
+          existing.count += rec.count;
+          existing.pass += isPass ? rec.count : 0;
+          existing.fail += isPass ? 0 : rec.count;
+          if (!existing.scopes.has(scope)) existing.scopes.add(scope);
+        } else {
+          spfDomainMap.set(spKey, {
+            domain: sp.domain.toLowerCase(),
+            count: rec.count,
+            pass: isPass ? rec.count : 0,
+            fail: isPass ? 0 : rec.count,
+            scopes: new Set([scope])
+          });
+        }
+      }
+
+      // Envelope From と Header From の不一致検出
+      const hf = (rec.headerFrom || "").toLowerCase();
+      const ef = (rec.envelopeFrom || "").toLowerCase();
+      if (hf && ef && hf !== ef) {
+        const mismatchKey = `${hf}|${ef}`;
+        const existing = envelopeMap.get(mismatchKey);
+        if (existing) {
+          existing.count += rec.count;
+          existing.pass += isFullPass ? rec.count : 0;
+          existing.fail += isFullPass ? 0 : rec.count;
+        } else {
+          envelopeMap.set(mismatchKey, {
+            headerFrom: hf, envelopeFrom: ef,
+            count: rec.count,
+            pass: isFullPass ? rec.count : 0,
+            fail: isFullPass ? 0 : rec.count
+          });
+        }
+      }
     }
 
     return {
@@ -310,10 +450,20 @@ const ArParser = (() => {
       topSourceIps: [...sourceIps.entries()]
         .sort((a, b) => b[1] - a[1]).slice(0, 20)
         .map(([ip, count]) => ({ ip, count })),
-      topIpRanges: computeDetailedStats(ipRangeEntries),
+      topIpRanges: mergeIpRanges(computeDetailedStats(ipRangeEntries)),
       overrideReasons: [...overrideReasons.entries()]
         .sort((a, b) => b[1] - a[1])
-        .map(([type, count]) => ({ type, count }))
+        .map(([type, count]) => ({ type, count })),
+      // DKIM 署名ドメイン+セレクタの一覧 (件数順)
+      dkimSignatures: [...dkimSigMap.values()]
+        .sort((a, b) => b.count - a.count),
+      // SPF 認証ドメインの一覧 (件数順、scopes を配列に変換)
+      spfDomains: [...spfDomainMap.values()]
+        .sort((a, b) => b.count - a.count)
+        .map(s => ({ ...s, scopes: [...s.scopes] })),
+      // Header From / Envelope From の不一致ペア (件数順)
+      envelopeMismatches: [...envelopeMap.values()]
+        .sort((a, b) => b.count - a.count)
     };
   };
 
@@ -333,6 +483,11 @@ const ArParser = (() => {
     let dateRangeMin = Infinity, dateRangeMax = 0;
     let totalWarnings = 0, reportsWithWarnings = 0, reportsWithMetadataErrors = 0;
     const warningFieldCounts = new Map();
+
+    // 集約用: DKIM 署名 / SPF ドメイン / Envelope 不一致
+    const dkimSigMap = new Map();
+    const spfDomainMap = new Map();
+    const envelopeMap = new Map();
 
     for (const report of reports) {
       const s = report.summary;
@@ -391,6 +546,45 @@ const ArParser = (() => {
         overrideReasons.set(reason.type, existing + reason.count);
       }
 
+      // DKIM 署名の集約: 各レポートの dkimSignatures をマージ
+      for (const sig of (s.dkimSignatures || [])) {
+        const sigKey = `${sig.domain}/${sig.selector}`;
+        const existing = dkimSigMap.get(sigKey);
+        if (existing) {
+          existing.count += sig.count;
+          existing.pass += sig.pass;
+          existing.fail += sig.fail;
+        } else {
+          dkimSigMap.set(sigKey, { ...sig });
+        }
+      }
+
+      // SPF ドメインの集約
+      for (const sp of (s.spfDomains || [])) {
+        const existing = spfDomainMap.get(sp.domain);
+        if (existing) {
+          existing.count += sp.count;
+          existing.pass += sp.pass;
+          existing.fail += sp.fail;
+          for (const sc of sp.scopes) { if (!existing.scopes.includes(sc)) existing.scopes.push(sc); }
+        } else {
+          spfDomainMap.set(sp.domain, { ...sp, scopes: [...sp.scopes] });
+        }
+      }
+
+      // Envelope 不一致の集約
+      for (const em of (s.envelopeMismatches || [])) {
+        const emKey = `${em.headerFrom}|${em.envelopeFrom}`;
+        const existing = envelopeMap.get(emKey);
+        if (existing) {
+          existing.count += em.count;
+          existing.pass += em.pass;
+          existing.fail += em.fail;
+        } else {
+          envelopeMap.set(emKey, { ...em });
+        }
+      }
+
       if (report.warnings && report.warnings.length > 0) {
         reportsWithWarnings++;
         totalWarnings += report.warnings.length;
@@ -421,7 +615,7 @@ const ArParser = (() => {
       topSourceIps: [...sourceIps.entries()]
         .sort((a, b) => b[1] - a[1]).slice(0, 20)
         .map(([ip, count]) => ({ ip, count })),
-      topIpRanges: computeDetailedStats(ipRangeEntries),
+      topIpRanges: mergeIpRanges(computeDetailedStats(ipRangeEntries)),
       topReporters: computeDetailedStats(reporterEntries),
       reporters: [...reporters.entries()]
         .sort((a, b) => b[1] - a[1])
@@ -432,6 +626,12 @@ const ArParser = (() => {
       overrideReasons: [...overrideReasons.entries()]
         .sort((a, b) => b[1] - a[1])
         .map(([type, count]) => ({ type, count })),
+      // DKIM 署名の集約結果
+      dkimSignatures: [...dkimSigMap.values()].sort((a, b) => b.count - a.count),
+      // SPF ドメインの集約結果
+      spfDomains: [...spfDomainMap.values()].sort((a, b) => b.count - a.count),
+      // Envelope 不一致の集約結果
+      envelopeMismatches: [...envelopeMap.values()].sort((a, b) => b.count - a.count),
       warningsSummary: {
         totalWarnings, reportsWithWarnings, reportsWithMetadataErrors,
         byField: [...warningFieldCounts.entries()]
