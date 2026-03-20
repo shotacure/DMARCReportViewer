@@ -1,4 +1,4 @@
-// DMARCReportViewer - dashboard/dashboard.js v1.0.0
+// DMARCReportViewer - dashboard/dashboard.js v1.0.1
 
 (() => {
   "use strict";
@@ -11,10 +11,20 @@
       if (text && text !== key) el.textContent = text;
     });
   };
-  const escapeHTML = (str) => {
-    const div = document.createElement("div");
-    div.appendChild(document.createTextNode(String(str)));
-    return div.innerHTML;
+  // HTML エスケープ: innerHTML を使わず手動で特殊文字を変換
+  const escapeHTML = (str) => String(str)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
+  // innerHTML の代替: DOMParser で安全にパースして子要素を置換
+  const safeHTML = (parent, htmlString) => {
+    const doc = new DOMParser().parseFromString(htmlString, "text/html");
+    parent.replaceChildren(...doc.body.childNodes);
+  };
+  // innerHTML += の代替: 既存の子要素を維持して追加
+  const safeAppendHTML = (parent, htmlString) => {
+    const doc = new DOMParser().parseFromString(htmlString, "text/html");
+    while (doc.body.firstChild) parent.appendChild(doc.body.firstChild);
   };
   const $ = (id) => document.getElementById(id);
   const show = (el) => el.classList.remove("drv-hidden");
@@ -551,9 +561,9 @@
   const renderResults = (results) => {
     lastResults = results;
     // 全セクションを初期化してから再描画
-    $("domains-container").innerHTML = "";
-    $("pie-row").innerHTML = "";
-    $("summary-cards").innerHTML = "";
+    $("domains-container").replaceChildren();
+    $("pie-row").replaceChildren();
+    $("summary-cards").replaceChildren();
     hide($("period-info"));
     hide($("summary-section"));
     hide($("fr-section"));
@@ -565,7 +575,7 @@
         $("period-info").textContent = `${formatUnixDate(agg.dateRangeMin)} – ${formatUnixDate(agg.dateRangeMax)} | ${agg.reportCount} ${msg("colReports")} | ${agg.uniqueIpRanges} ${msg("ipRangeCountLabel")}`;
         show($("period-info"));
       }
-      $("summary-cards").innerHTML = buildStatCards(agg, results.previousAggregate || null);
+      safeHTML($("summary-cards"), buildStatCards(agg, results.previousAggregate || null));
       renderPieCharts(agg);
       show($("summary-section"));
       show($("btn-export"));
@@ -595,7 +605,7 @@
 
   const showStatus = (text, isLoading = false) => {
     $("status-bar").classList.remove("drv-hidden");
-    $("status-message").innerHTML = isLoading ? `<span class="drv-spinner"></span>${escapeHTML(text)}` : escapeHTML(text);
+    safeHTML($("status-message"), isLoading ? `<span class="drv-spinner"></span>${escapeHTML(text)}` : escapeHTML(text));
   };
 
   $("btn-settings").addEventListener("click", () => browser.runtime.openOptionsPage());
@@ -620,18 +630,18 @@
   // 円グラフ3つ (Disposition は4区分)
   // =========================================================
   const renderPieCharts = (agg) => {
-    const pieRow = $("pie-row"); pieRow.innerHTML = "";
+    const pieRow = $("pie-row"); pieRow.replaceChildren();
     if (agg.domains?.length > 0)
-      pieRow.innerHTML += buildPieChart(msg("colDomain"), agg.domains.map((d,i) => ({label:d.domain,value:d.count,color:PALETTE[i%PALETTE.length]})));
+      safeAppendHTML(pieRow, buildPieChart(msg("colDomain"), agg.domains.map((d,i) => ({label:d.domain,value:d.count,color:PALETTE[i%PALETTE.length]}))));
     const dispSegs = [
       {label:msg("deliveredPass"),value:agg.deliveredPassCount,color:COLOR_DELIVERED},
       {label:msg("deliveredFail"),value:agg.deliveredFailCount,color:COLOR_DELIVERED_FAIL},
       {label:msg("quarantined"),value:agg.quarantineCount,color:COLOR_QUARANTINE},
       {label:msg("rejected"),value:agg.rejectCount,color:COLOR_REJECT}
     ].filter(s=>s.value>0);
-    if (dispSegs.length > 0) pieRow.innerHTML += buildPieChart(msg("dispositionTitle"), dispSegs);
+    if (dispSegs.length > 0) safeAppendHTML(pieRow, buildPieChart(msg("dispositionTitle"), dispSegs));
     if (agg.reporters?.length > 0)
-      pieRow.innerHTML += buildPieChart(msg("colReporter"), agg.reporters.map((r,i) => ({label:r.name,value:r.count,color:PALETTE[i%PALETTE.length]})));
+      safeAppendHTML(pieRow, buildPieChart(msg("colReporter"), agg.reporters.map((r,i) => ({label:r.name,value:r.count,color:PALETTE[i%PALETTE.length]}))));
   };
 
   // =========================================================
@@ -732,7 +742,7 @@
 
     html += '</div></div></div>';
 
-    section.innerHTML = html;
+    safeHTML(section, html);
     $("domains-container").appendChild(section);
 
     // 折りたたみイベント
@@ -749,11 +759,11 @@
   // フォレンジックレポート
   // =========================================================
   const renderFrTable = (frReports) => {
-    const tbody = $("fr-table").querySelector("tbody"); tbody.innerHTML = "";
+    const tbody = $("fr-table").querySelector("tbody"); tbody.replaceChildren();
     const sorted = [...frReports].sort((a,b) => new Date(b.messageDate)-new Date(a.messageDate));
     for (const r of sorted) {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${escapeHTML(r.messageDate?new Date(r.messageDate).toLocaleDateString():"-")}</td><td>${escapeHTML(r.reportedDomain)}</td><td><code>${escapeHTML(r.sourceIp)}</code></td><td>${escapeHTML(r.authFailure||"-")}</td>`;
+      safeHTML(tr, `<td>${escapeHTML(r.messageDate?new Date(r.messageDate).toLocaleDateString():"-")}</td><td>${escapeHTML(r.reportedDomain)}</td><td><code>${escapeHTML(r.sourceIp)}</code></td><td>${escapeHTML(r.authFailure||"-")}</td>`);
       tbody.appendChild(tr);
     }
     show($("fr-section"));
@@ -779,10 +789,10 @@
       all.push({date:i.date,cat:msg("issueIncomplete"),cls:"",subj:i.subject||"-",det:wt.join("; ")+(rem>0?` (+${rem})`:"")} );
     }
     all.sort((a,b)=>{if(!a.date)return 1;if(!b.date)return -1;return new Date(b.date)-new Date(a.date);});
-    const tbody = $("issues-table").querySelector("tbody"); tbody.innerHTML = "";
+    const tbody = $("issues-table").querySelector("tbody"); tbody.replaceChildren();
     for (const i of all) {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${escapeHTML(i.date?new Date(i.date).toLocaleDateString():"-")}</td><td class="${i.cls}">${escapeHTML(i.cat)}</td><td>${escapeHTML(i.subj)}</td><td>${escapeHTML(i.det)}</td>`;
+      safeHTML(tr, `<td>${escapeHTML(i.date?new Date(i.date).toLocaleDateString():"-")}</td><td class="${escapeHTML(i.cls)}">${escapeHTML(i.cat)}</td><td>${escapeHTML(i.subj)}</td><td>${escapeHTML(i.det)}</td>`);
       tbody.appendChild(tr);
     }
     show($("issues-section"));
