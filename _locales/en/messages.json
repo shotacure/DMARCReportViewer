@@ -1,330 +1,98 @@
 {
-  "extensionName": {
-    "message": "DMARC Report Viewer",
-    "description": "Name of the extension"
-  },
-  "extensionDescription": {
-    "message": "Visualize and analyze DMARC aggregate and forensic reports locally within Thunderbird.",
-    "description": "Description of the extension"
-  },
-  "btnScan": {
-    "message": "Scan Reports",
-    "description": "Button to start scanning"
-  },
-  "btnSettings": {
-    "message": "Settings",
-    "description": "Button to open settings"
-  },
-  "btnSave": {
-    "message": "Save",
-    "description": "Save settings button"
-  },
-  "msgSaved": {
-    "message": "✓ Saved",
-    "description": "Settings saved confirmation"
-  },
-  "noFolderNotice": {
-    "message": "No DMARC folders configured. Please open Settings to select your report folders, or create folders matching the naming convention (e.g. DMARC/Aggregate, DMARC/Forensic) for auto-detection.",
-    "description": "Notice when no folders are set"
-  },
-  "statusScanning": {
-    "message": "Scanning folders…",
-    "description": "Status while scanning"
-  },
-  "statusComplete": {
-    "message": "Scan complete.",
-    "description": "Status when scan finishes"
-  },
-  "statusErrors": {
-    "message": "errors",
-    "description": "Error count label in status bar"
-  },
-  "statusCached": {
-    "message": "cached",
-    "description": "Label indicating results are from cache"
-  },
-  "arReports": {
-    "message": "aggregate reports",
-    "description": "Label for aggregate report count"
-  },
-  "frReports": {
-    "message": "forensic reports",
-    "description": "Label for forensic report count"
-  },
-  "period1w": {
-    "message": "1 Week",
-    "description": "Period selector: 1 week"
-  },
-  "period1m": {
-    "message": "1 Month",
-    "description": "Period selector: 1 month"
-  },
-  "period3m": {
-    "message": "3 Months",
-    "description": "Period selector: 3 months"
-  },
-  "period6m": {
-    "message": "6 Months",
-    "description": "Period selector: 6 months"
-  },
-  "period1y": {
-    "message": "1 Year",
-    "description": "Period selector: 1 year"
-  },
-  "periodAll": {
-    "message": "All",
-    "description": "Period selector: all time"
-  },
-  "sectionSummary": {
-    "message": "Summary",
-    "description": "Summary section title"
-  },
-  "sectionReporters": {
-    "message": "By Reporter",
-    "description": "Reporter section title"
-  },
-  "sectionTopIps": {
-    "message": "IP Address Ranges",
-    "description": "Source IP ranges section title"
-  },
-  "sectionForensic": {
-    "message": "Forensic Reports",
-    "description": "Forensic reports section title"
-  },
-  "sectionOverrides": {
-    "message": "Policy Override Reasons",
-    "description": "Policy override reasons section title"
-  },
-  "sectionIssues": {
-    "message": "Unreadable Reports",
-    "description": "Unreadable reports section title"
-  },
-  "totalEmails": {
-    "message": "Total Emails",
-    "description": "Total emails card label"
-  },
-  "dispositionDelivered": {
-    "message": "Delivered",
-    "description": "Disposition label for none (message delivered normally)"
-  },
-  "dispositionTitle": {
-    "message": "Disposition",
-    "description": "Disposition pie chart title"
-  },
-  "quarantined": {
-    "message": "Quarantined",
-    "description": "Quarantined count card label"
-  },
-  "rejected": {
-    "message": "Rejected",
-    "description": "Rejected count card label"
-  },
-  "dkimSpfPass": {
-    "message": "DKIM+SPF Pass",
-    "description": "Card label: both DKIM and SPF passed"
-  },
-  "dkimPass": {
-    "message": "DKIM Pass",
-    "description": "Card label: DKIM passed"
-  },
-  "spfPass": {
-    "message": "SPF Pass",
-    "description": "Card label: SPF passed"
-  },
-  "colDomain": {
-    "message": "Domain",
-    "description": "Table column: Domain"
-  },
-  "colTotal": {
-    "message": "Total",
-    "description": "Table column: Total"
-  },
-  "colPassRate": {
-    "message": "Pass Rate",
-    "description": "Table column: Pass Rate"
-  },
-  "colReports": {
-    "message": "Reports",
-    "description": "Table column: Reports"
-  },
-  "colReporter": {
-    "message": "Reporter",
-    "description": "Table column: Reporter"
-  },
-  "colSourceIp": {
-    "message": "Source IP",
-    "description": "Table column: Source IP"
-  },
-  "colIpRange": {
-    "message": "IP Address Range",
-    "description": "Table column: IP address range (Class C)"
-  },
-  "colCount": {
-    "message": "Count",
-    "description": "Table column: Count"
-  },
-  "colDate": {
-    "message": "Date",
-    "description": "Table column: Date"
-  },
-  "colAuthFailure": {
-    "message": "Auth Failure",
-    "description": "Table column: Auth Failure"
-  },
-  "colOverrideType": {
-    "message": "Reason",
-    "description": "Table column: policy override reason type"
-  },
-  "colIssueCategory": {
-    "message": "Category",
-    "description": "Table column: issue category"
-  },
-  "colIssueDetail": {
-    "message": "Detail",
-    "description": "Table column: issue detail"
-  },
-  "labelArFolder": {
-    "message": "Aggregate Report Folder",
-    "description": "Settings label for aggregate report folder"
-  },
-  "labelFrFolder": {
-    "message": "Forensic Report Folder",
-    "description": "Settings label for forensic report folder"
-  },
-  "hintArFolder": {
-    "message": "Select the IMAP folder where DMARC aggregate reports are delivered.",
-    "description": "Hint text for aggregate report folder selection"
-  },
-  "hintFrFolder": {
-    "message": "Select the IMAP folder where DMARC forensic reports are delivered. Optional.",
-    "description": "Hint text for forensic report folder selection"
-  },
-  "issueParseFailed": {
-    "message": "Parse Failed",
-    "description": "Issue category: XML parse failure"
-  },
-  "issueDecompressFailed": {
-    "message": "Decompress Failed",
-    "description": "Issue category: ZIP/GZ decompression failure"
-  },
-  "issueIncomplete": {
-    "message": "Incomplete Data",
-    "description": "Issue category: report parsed but missing fields"
-  },
-  "issueNoAttachment": {
-    "message": "No Attachment",
-    "description": "Issue category: no DMARC report attachment found"
-  },
-  "issueNoAttachmentDetail": {
-    "message": "No DMARC report attachment found in this message",
-    "description": "Detail text for no attachment issue"
-  },
-  "issueUnknownFormat": {
-    "message": "Unknown Format",
-    "description": "Issue category: unrecognized file format"
-  },
-  "ispMetadataErrors": {
-    "message": "ISP Metadata Errors",
-    "description": "ISP metadata errors subsection title"
-  },
-  "ispMetadataErrorsDetail": {
-    "message": "report(s) contain ISP-side metadata errors",
-    "description": "ISP metadata errors detail text"
-  },
-  "privacyNote": {
-    "message": "All processing is local. No external requests.",
-    "description": "Privacy footer note"
-  },
-  "warnOrgName": {
-    "message": "Reporter organization name is missing",
-    "description": "Warning: org_name missing"
-  },
-  "warnReportId": {
-    "message": "Report ID is missing",
-    "description": "Warning: report_id missing"
-  },
-  "warnEmail": {
-    "message": "Reporter contact email is missing",
-    "description": "Warning: email missing"
-  },
-  "warnDateRangeBegin": {
-    "message": "Report date range begin is missing",
-    "description": "Warning: date_range begin missing"
-  },
-  "warnDateRangeEnd": {
-    "message": "Report date range end is missing",
-    "description": "Warning: date_range end missing"
-  },
-  "warnPolicyDomain": {
-    "message": "Published policy domain is missing",
-    "description": "Warning: policy domain missing"
-  },
-  "warnPolicyP": {
-    "message": "Published policy disposition (p=) is missing",
-    "description": "Warning: policy p missing"
-  },
-  "warnNoRecords": {
-    "message": "Report contains no record entries",
-    "description": "Warning: no records"
-  },
-  "warnRecordSourceIp": {
-    "message": "Source IP is missing in record",
-    "description": "Warning: record source_ip missing"
-  },
-  "warnRecordCount": {
-    "message": "Message count is zero in record",
-    "description": "Warning: record count zero"
-  },
-  "warnRecordDkim": {
-    "message": "DKIM evaluation result is missing in record",
-    "description": "Warning: record DKIM missing"
-  },
-  "warnRecordSpf": {
-    "message": "SPF evaluation result is missing in record",
-    "description": "Warning: record SPF missing"
-  },
-  "warnRecordDisposition": {
-    "message": "Disposition is missing in record",
-    "description": "Warning: record disposition missing"
-  },
-  "warnRecordAuthResults": {
-    "message": "No DKIM or SPF auth_results in record",
-    "description": "Warning: record auth_results missing"
-  },
-  "warnRecordHeaderFrom": {
-    "message": "header_from identifier is missing in record",
-    "description": "Warning: record header_from missing"
-  },
-  "warnFrDomain": {
-    "message": "Reported domain could not be determined",
-    "description": "Warning: forensic reported-domain missing"
-  },
-  "warnFrSourceIp": {
-    "message": "Source IP is missing",
-    "description": "Warning: forensic source-ip missing"
-  },
-  "warnFrAuthResults": {
-    "message": "Authentication-Results header is missing",
-    "description": "Warning: forensic auth-results missing"
-  },
-  "warnFrAuthFailure": {
-    "message": "Auth-Failure type is missing",
-    "description": "Warning: forensic auth-failure missing"
-  },
-  "warnFrFrom": {
-    "message": "Report sender (From) is missing",
-    "description": "Warning: forensic from missing"
-  },
-  "warnFrArrivalDate": {
-    "message": "Arrival date could not be determined",
-    "description": "Warning: forensic arrival-date missing"
-  },
-  "warnFrMailFrom": {
-    "message": "Original MAIL FROM is missing",
-    "description": "Warning: forensic original-mail-from missing"
-  },
-  "chartTimeSeries": {
-    "message": "Disposition Over Time",
-    "description": "Time series chart title"
-  }
+  "extensionName": { "message": "DMARC Report Viewer", "description": "Name of the extension" },
+  "extensionDescription": { "message": "Analyze DMARC aggregate and forensic reports locally within Thunderbird. Identify threats, validate your email authentication, and take action.", "description": "Description of the extension" },
+  "btnScan": { "message": "Scan Reports", "description": "Button to start scanning" },
+  "btnSettings": { "message": "Settings", "description": "Button to open settings" },
+  "btnSave": { "message": "Save", "description": "Save settings button" },
+  "msgSaved": { "message": "✓ Saved", "description": "Settings saved confirmation" },
+  "noFolderNotice": { "message": "No DMARC folders configured. Please open Settings to select your report folders, or create folders matching the naming convention (e.g. DMARC/Aggregate, DMARC/Forensic) for auto-detection.", "description": "Notice when no folders are set" },
+  "statusScanning": { "message": "Scanning folders…", "description": "Status while scanning" },
+  "statusComplete": { "message": "Scan complete.", "description": "Status when scan finishes" },
+  "statusErrors": { "message": "errors", "description": "Error count label in status bar" },
+  "statusCached": { "message": "cached", "description": "Label indicating results are from cache" },
+  "arReports": { "message": "aggregate reports", "description": "Label for aggregate report count" },
+  "frReports": { "message": "forensic reports", "description": "Label for forensic report count" },
+  "period1w": { "message": "1 Week", "description": "Period selector: 1 week" },
+  "period1m": { "message": "1 Month", "description": "Period selector: 1 month" },
+  "period3m": { "message": "3 Months", "description": "Period selector: 3 months" },
+  "period6m": { "message": "6 Months", "description": "Period selector: 6 months" },
+  "period1y": { "message": "1 Year", "description": "Period selector: 1 year" },
+  "periodAll": { "message": "All", "description": "Period selector: all time" },
+  "sectionSummary": { "message": "Summary", "description": "Summary section title" },
+  "sectionReporters": { "message": "By Reporter", "description": "Reporter section title" },
+  "sectionTopIps": { "message": "IP Address Ranges", "description": "Source IP ranges section title" },
+  "sectionForensic": { "message": "Forensic Reports", "description": "Forensic reports section title" },
+  "sectionOverrides": { "message": "Policy Override Reasons", "description": "Policy override reasons section title" },
+  "sectionIssues": { "message": "Unreadable Reports", "description": "Unreadable reports section title" },
+  "totalEmails": { "message": "Total Emails", "description": "Total emails card label" },
+  "deliveredPass": { "message": "Delivered (Auth OK)", "description": "Disposition: delivered with authentication passed" },
+  "deliveredFail": { "message": "Delivered (Auth Fail)", "description": "Disposition: delivered but authentication failed — dangerous if p=none" },
+  "dispositionTitle": { "message": "Disposition", "description": "Disposition pie chart title" },
+  "quarantined": { "message": "Quarantined", "description": "Quarantined count card label" },
+  "rejected": { "message": "Rejected", "description": "Rejected count card label" },
+  "dkimSpfPass": { "message": "DKIM+SPF Pass", "description": "Card label: both DKIM and SPF passed" },
+  "dkimPass": { "message": "DKIM Pass", "description": "Card label: DKIM passed" },
+  "spfPass": { "message": "SPF Pass", "description": "Card label: SPF passed" },
+  "colDomain": { "message": "Domain", "description": "Table column: Domain" },
+  "colTotal": { "message": "Total", "description": "Table column: Total" },
+  "colPassRate": { "message": "Pass Rate", "description": "Table column: Pass Rate" },
+  "colReports": { "message": "Reports", "description": "Table column: Reports" },
+  "colReporter": { "message": "Reporter", "description": "Table column: Reporter" },
+  "colSourceIp": { "message": "Source IP", "description": "Table column: Source IP" },
+  "colIpRange": { "message": "IP Address Range", "description": "Table column: IP address range" },
+  "colClassification": { "message": "Classification", "description": "Table column: IP range classification tag" },
+  "colCount": { "message": "Count", "description": "Table column: Count" },
+  "colDate": { "message": "Date", "description": "Table column: Date" },
+  "colAuthFailure": { "message": "Auth Failure", "description": "Table column: Auth Failure" },
+  "colOverrideType": { "message": "Reason", "description": "Table column: policy override reason type" },
+  "colIssueCategory": { "message": "Category", "description": "Table column: issue category" },
+  "colIssueDetail": { "message": "Detail", "description": "Table column: issue detail" },
+  "labelArFolder": { "message": "Aggregate Report Folder", "description": "Settings label for aggregate report folder" },
+  "labelFrFolder": { "message": "Forensic Report Folder", "description": "Settings label for forensic report folder" },
+  "hintArFolder": { "message": "Select the IMAP folder where DMARC aggregate reports are delivered.", "description": "Hint text for aggregate report folder selection" },
+  "hintFrFolder": { "message": "Select the IMAP folder where DMARC forensic reports are delivered. Optional.", "description": "Hint text for forensic report folder selection" },
+  "tagLegitimate": { "message": "✅ Legitimate", "description": "IP classification: all pass, all delivered" },
+  "tagLegitimateDesc": { "message": "All messages passed authentication and were delivered normally. This is a legitimate sending source.", "description": "IP classification tooltip" },
+  "tagBlocked": { "message": "🛡️ Blocked", "description": "IP classification: all fail, all rejected" },
+  "tagBlockedDesc": { "message": "All messages failed authentication and were rejected. Your DMARC policy is working correctly against this source.", "description": "IP classification tooltip" },
+  "tagMisconfigured": { "message": "⚠️ Misconfigured", "description": "IP classification: mixed pass/reject" },
+  "tagMisconfiguredDesc": { "message": "Some messages passed but others were rejected or quarantined. Check SPF/DKIM configuration for this sending source.", "description": "IP classification tooltip" },
+  "tagThreat": { "message": "🔴 Threat (Unblocked)", "description": "IP classification: auth fail but delivered" },
+  "tagThreatDesc": { "message": "Authentication failed but messages were delivered anyway. This source may be spoofing your domain. Consider setting p=reject.", "description": "IP classification tooltip" },
+  "healthHealthy": { "message": "Healthy", "description": "Domain health: all good" },
+  "healthUnderAttack": { "message": "Under Attack", "description": "Domain health: attacks are being blocked" },
+  "healthNeedsAttention": { "message": "Needs Attention", "description": "Domain health: unblocked auth failures or weak policy" },
+  "healthAtRisk": { "message": "At Risk", "description": "Domain health: significant unblocked threats" },
+  "chartTimeSeries": { "message": "Disposition Over Time", "description": "Time series chart title" },
+  "issueParseFailed": { "message": "Parse Failed", "description": "Issue category: XML parse failure" },
+  "issueDecompressFailed": { "message": "Decompress Failed", "description": "Issue category: decompression failure" },
+  "issueIncomplete": { "message": "Incomplete Data", "description": "Issue category: missing fields" },
+  "issueNoAttachment": { "message": "No Attachment", "description": "Issue category: no attachment found" },
+  "issueNoAttachmentDetail": { "message": "No DMARC report attachment found in this message", "description": "Detail text for no attachment issue" },
+  "issueUnknownFormat": { "message": "Unknown Format", "description": "Issue category: unrecognized format" },
+  "ispMetadataErrors": { "message": "ISP Metadata Errors", "description": "ISP metadata errors subsection title" },
+  "ispMetadataErrorsDetail": { "message": "report(s) contain ISP-side metadata errors", "description": "ISP metadata errors detail" },
+  "privacyNote": { "message": "All processing is local. No external requests.", "description": "Privacy footer note" },
+  "warnOrgName": { "message": "Reporter organization name is missing", "description": "Warning" },
+  "warnReportId": { "message": "Report ID is missing", "description": "Warning" },
+  "warnEmail": { "message": "Reporter contact email is missing", "description": "Warning" },
+  "warnDateRangeBegin": { "message": "Report date range begin is missing", "description": "Warning" },
+  "warnDateRangeEnd": { "message": "Report date range end is missing", "description": "Warning" },
+  "warnPolicyDomain": { "message": "Published policy domain is missing", "description": "Warning" },
+  "warnPolicyP": { "message": "Published policy disposition (p=) is missing", "description": "Warning" },
+  "warnNoRecords": { "message": "Report contains no record entries", "description": "Warning" },
+  "warnRecordSourceIp": { "message": "Source IP is missing in record", "description": "Warning" },
+  "warnRecordCount": { "message": "Message count is zero in record", "description": "Warning" },
+  "warnRecordDkim": { "message": "DKIM evaluation result is missing in record", "description": "Warning" },
+  "warnRecordSpf": { "message": "SPF evaluation result is missing in record", "description": "Warning" },
+  "warnRecordDisposition": { "message": "Disposition is missing in record", "description": "Warning" },
+  "warnRecordAuthResults": { "message": "No DKIM or SPF auth_results in record", "description": "Warning" },
+  "warnRecordHeaderFrom": { "message": "header_from identifier is missing in record", "description": "Warning" },
+  "warnFrDomain": { "message": "Reported domain could not be determined", "description": "Warning" },
+  "warnFrSourceIp": { "message": "Source IP is missing", "description": "Warning" },
+  "warnFrAuthResults": { "message": "Authentication-Results header is missing", "description": "Warning" },
+  "warnFrAuthFailure": { "message": "Auth-Failure type is missing", "description": "Warning" },
+  "warnFrFrom": { "message": "Report sender (From) is missing", "description": "Warning" },
+  "warnFrArrivalDate": { "message": "Arrival date could not be determined", "description": "Warning" },
+  "warnFrMailFrom": { "message": "Original MAIL FROM is missing", "description": "Warning" }
 }

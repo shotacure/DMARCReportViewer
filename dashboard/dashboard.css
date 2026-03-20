@@ -1,331 +1,165 @@
-/* DMARCReportViewer - dashboard.css */
+/* DMARCReportViewer - dashboard.css v0.1.2 */
 
-/* === CSS カスタムプロパティ (ライトモード) === */
 :root {
-  --drv-bg: #f5f6f8;
-  --drv-surface: #ffffff;
-  --drv-border: #ddd;
-  --drv-text: #333;
-  --drv-text-secondary: #555;
-  --drv-text-muted: #888;
-  --drv-text-strong: #111;
-  --drv-accent: #1565c0;
-  --drv-accent-hover: #0d47a1;
-  --drv-pass: #2e7d32;
-  --drv-pass-bg: #e8f5e9;
-  --drv-fail: #c62828;
-  --drv-fail-bg: #ffebee;
-  --drv-warn: #e65100;
-  --drv-warn-bg: #fff3e0;
-  --drv-shadow: rgba(0, 0, 0, 0.06);
-  --drv-table-stripe: #f9f9fb;
-  --drv-table-hover: #f0f4ff;
-  --drv-notice-bg: #e3f2fd;
-  --drv-notice-text: #1565c0;
-  --drv-status-bg: #e8f5e9;
-  --drv-status-text: #2e7d32;
-  --drv-bar-bg: #e0e0e0;
-  --drv-color-delivered: #4caf50;
-  --drv-color-quarantine: #ff9800;
-  --drv-color-reject: #f44336;
+  --drv-bg: #f5f6f8; --drv-surface: #ffffff; --drv-border: #ddd;
+  --drv-text: #333; --drv-text-secondary: #555; --drv-text-muted: #888;
+  --drv-text-strong: #111; --drv-accent: #1565c0; --drv-accent-hover: #0d47a1;
+  --drv-pass: #2e7d32; --drv-fail: #c62828; --drv-warn: #e65100;
+  --drv-shadow: rgba(0,0,0,0.06); --drv-table-stripe: #f9f9fb; --drv-table-hover: #f0f4ff;
+  --drv-notice-bg: #e3f2fd; --drv-notice-text: #1565c0;
+  --drv-status-bg: #e8f5e9; --drv-status-text: #2e7d32; --drv-bar-bg: #e0e0e0;
+  --drv-color-delivered: #4caf50; --drv-color-delivered-fail: #e53935;
+  --drv-color-quarantine: #ff9800; --drv-color-reject: #f44336;
 }
-
 @media (prefers-color-scheme: dark) {
   :root {
-    --drv-bg: #1e1e1e;
-    --drv-surface: #2b2b2b;
-    --drv-border: #444;
-    --drv-text: #e0e0e0;
-    --drv-text-secondary: #bbb;
-    --drv-text-muted: #888;
-    --drv-text-strong: #f0f0f0;
-    --drv-accent: #64b5f6;
-    --drv-accent-hover: #90caf9;
-    --drv-pass: #66bb6a;
-    --drv-pass-bg: #1b3a1b;
-    --drv-fail: #ef5350;
-    --drv-fail-bg: #3a1b1b;
-    --drv-warn: #ffb74d;
-    --drv-warn-bg: #3a2e1b;
-    --drv-shadow: rgba(0, 0, 0, 0.3);
-    --drv-table-stripe: #323232;
-    --drv-table-hover: #2a3a4a;
-    --drv-notice-bg: #1a2a3a;
-    --drv-notice-text: #64b5f6;
-    --drv-status-bg: #1b3a1b;
-    --drv-status-text: #66bb6a;
-    --drv-bar-bg: #444;
-    --drv-color-delivered: #66bb6a;
-    --drv-color-quarantine: #ffb74d;
-    --drv-color-reject: #ef5350;
+    --drv-bg: #1e1e1e; --drv-surface: #2b2b2b; --drv-border: #444;
+    --drv-text: #e0e0e0; --drv-text-secondary: #bbb; --drv-text-muted: #888;
+    --drv-text-strong: #f0f0f0; --drv-accent: #64b5f6; --drv-accent-hover: #90caf9;
+    --drv-pass: #66bb6a; --drv-fail: #ef5350; --drv-warn: #ffb74d;
+    --drv-shadow: rgba(0,0,0,0.3); --drv-table-stripe: #323232; --drv-table-hover: #2a3a4a;
+    --drv-notice-bg: #1a2a3a; --drv-notice-text: #64b5f6;
+    --drv-status-bg: #1b3a1b; --drv-status-text: #66bb6a; --drv-bar-bg: #444;
+    --drv-color-delivered: #66bb6a; --drv-color-delivered-fail: #ef5350;
+    --drv-color-quarantine: #ffb74d; --drv-color-reject: #ef5350;
   }
 }
 
-/* === 基本レイアウト === */
 * { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Segoe UI", Meiryo, sans-serif; background: var(--drv-bg); color: var(--drv-text); font-size: 14px; line-height: 1.5; }
+.drv-container { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
 
-body {
-  font-family: "Segoe UI", Meiryo, sans-serif;
-  background: var(--drv-bg);
-  color: var(--drv-text);
-  font-size: 14px;
-  line-height: 1.5;
-  min-width: 600px;
-  min-height: 400px;
-}
-
-.drv-container { max-width: 960px; margin: 0 auto; padding: 16px 20px; }
-
-/* === ヘッダー === */
-.drv-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--drv-accent);
-}
-
-.drv-title {
-  font-size: 18px; font-weight: bold; color: var(--drv-text-strong);
-  display: flex; align-items: center; gap: 8px;
-}
-
-.drv-icon { font-size: 22px; }
+/* ヘッダー */
+.drv-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--drv-accent); }
+.drv-title { font-size: 20px; font-weight: bold; color: var(--drv-text-strong); display: flex; align-items: center; gap: 8px; }
+.drv-icon { font-size: 24px; }
 .drv-header-actions { display: flex; align-items: center; gap: 8px; }
+.drv-period-select { padding: 5px 8px; border: 1px solid var(--drv-border); border-radius: 4px; font-size: 12px; font-family: inherit; background: var(--drv-surface); color: var(--drv-text); }
 
-.drv-period-select {
-  padding: 5px 8px; border: 1px solid var(--drv-border); border-radius: 4px;
-  font-size: 12px; font-family: inherit; background: var(--drv-surface); color: var(--drv-text);
-}
-
-/* === ボタン === */
-.drv-btn {
-  padding: 6px 16px; border: 1px solid var(--drv-border); border-radius: 4px;
-  font-size: 13px; cursor: pointer; font-family: inherit;
-  transition: background 0.15s, border-color 0.15s;
-}
+/* ボタン */
+.drv-btn { padding: 6px 16px; border: 1px solid var(--drv-border); border-radius: 4px; font-size: 13px; cursor: pointer; font-family: inherit; transition: background 0.15s; }
 .drv-btn-primary { background: var(--drv-accent); color: white; border-color: var(--drv-accent); }
 .drv-btn-primary:hover { background: var(--drv-accent-hover); }
 .drv-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 .drv-btn-secondary { background: var(--drv-surface); color: var(--drv-text); }
 .drv-btn-secondary:hover { border-color: var(--drv-accent); }
 
-/* === ステータスバー === */
-.drv-status-bar {
-  background: var(--drv-status-bg); color: var(--drv-status-text);
-  padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; font-size: 13px;
-}
+/* ステータスバー・通知 */
+.drv-status-bar { background: var(--drv-status-bg); color: var(--drv-status-text); padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; font-size: 13px; }
+.drv-notice { background: var(--drv-notice-bg); color: var(--drv-notice-text); padding: 16px; border-radius: 6px; text-align: center; margin-bottom: 16px; }
 
-/* === 通知 === */
-.drv-notice {
-  background: var(--drv-notice-bg); color: var(--drv-notice-text);
-  padding: 16px; border-radius: 6px; text-align: center; margin-bottom: 16px;
-}
-
-/* === セクション === */
+/* セクション */
 .drv-section { margin-bottom: 20px; }
+.drv-section-title { font-size: 16px; font-weight: bold; color: var(--drv-text-strong); margin-bottom: 10px; padding-bottom: 4px; border-bottom: 1px solid var(--drv-border); }
 
-.drv-section-title {
-  font-size: 15px; font-weight: bold; color: var(--drv-text-strong);
-  margin-bottom: 10px; padding-bottom: 4px; border-bottom: 1px solid var(--drv-border);
-}
+/* 8枠カードグリッド (大サマリー) */
+.drv-card-grid-8 { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
 
-/* === 7枠カードグリッド (大サマリー) === */
-.drv-card-grid-7 {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-}
+/* 3列カードグリッド (Issues等) */
+.drv-card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
-/* === 3列カードグリッド (Issues 等) === */
-.drv-card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-/* === カード共通 === */
-.drv-card {
-  background: var(--drv-surface); border: 1px solid var(--drv-border);
-  border-radius: 6px; padding: 10px 6px; text-align: center;
-  box-shadow: 0 1px 3px var(--drv-shadow);
-}
-
-.drv-card-label {
-  font-size: 10px; text-transform: uppercase; color: var(--drv-text-muted); margin-bottom: 2px;
-}
-
+/* カード共通 */
+.drv-card { background: var(--drv-surface); border: 1px solid var(--drv-border); border-radius: 6px; padding: 10px 6px; text-align: center; box-shadow: 0 1px 3px var(--drv-shadow); }
+.drv-card-label { font-size: 10px; text-transform: uppercase; color: var(--drv-text-muted); margin-bottom: 2px; }
 .drv-card-value { font-size: 20px; font-weight: bold; color: var(--drv-text-strong); }
-
-/* カード値の下のパーセンテージ表示 */
 .drv-card-pct { font-size: 11px; color: var(--drv-text-muted); margin-top: 1px; }
-
 .drv-card-pass .drv-card-value { color: var(--drv-pass); }
 .drv-card-fail .drv-card-value { color: var(--drv-fail); }
 
-/* === 円グラフ === */
-.drv-pie-row {
-  display: flex; gap: 16px; margin-top: 14px; flex-wrap: wrap;
-}
-
-.drv-pie-box {
-  flex: 1; min-width: 200px;
-  background: var(--drv-surface); border: 1px solid var(--drv-border);
-  border-radius: 6px; padding: 12px; text-align: center;
-}
-
-.drv-pie-title {
-  font-size: 12px; font-weight: bold; text-transform: uppercase;
-  color: var(--drv-text-muted); margin-bottom: 8px;
-}
-
-.drv-pie-svg {
-  display: block; margin: 0 auto 8px;
-}
-
-/* 凡例: 左揃え、適度な余白 */
-.drv-pie-legend {
-  display: flex; flex-direction: column; align-items: flex-start;
-  gap: 4px; font-size: 11px; color: var(--drv-text-muted);
-  padding-left: 12px;
-}
-
+/* 円グラフ */
+.drv-pie-row { display: flex; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
+.drv-pie-box { flex: 1; min-width: 200px; background: var(--drv-surface); border: 1px solid var(--drv-border); border-radius: 6px; padding: 12px; text-align: center; }
+.drv-pie-title { font-size: 12px; font-weight: bold; text-transform: uppercase; color: var(--drv-text-muted); margin-bottom: 8px; }
+.drv-pie-svg { display: block; margin: 0 auto 8px; }
+.drv-pie-legend { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; font-size: 11px; color: var(--drv-text-muted); padding-left: 12px; }
 .drv-pie-legend-item { display: flex; align-items: center; gap: 6px; }
+.drv-legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
 
-.drv-legend-dot {
-  width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0;
-}
-
-/* === コンパクトカード (ドメインセクション内 7枠) === */
-.drv-card-grid-compact {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-}
-
-.drv-card-compact {
-  background: var(--drv-surface); border: 1px solid var(--drv-border);
-  border-radius: 4px; padding: 6px 4px; text-align: center;
-}
+/* 8枠コンパクトカード (ドメインセクション内) */
+.drv-card-grid-compact { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+.drv-card-compact { background: var(--drv-surface); border: 1px solid var(--drv-border); border-radius: 4px; padding: 6px 4px; text-align: center; }
 .drv-card-compact .drv-card-label { font-size: 9px; margin-bottom: 1px; }
 .drv-card-compact .drv-card-value { font-size: 16px; }
 .drv-card-compact .drv-card-pct { font-size: 10px; }
 
-/* === テーブル === */
-.drv-table {
-  width: 100%; border-collapse: collapse; background: var(--drv-surface);
-  border: 1px solid var(--drv-border); border-radius: 6px; overflow: hidden; font-size: 13px;
-}
-
-.drv-table th {
-  background: var(--drv-bg); font-weight: bold; text-transform: uppercase;
-  font-size: 11px; color: var(--drv-text-muted); padding: 8px 10px;
-  text-align: left; border-bottom: 1px solid var(--drv-border);
-}
-
-.drv-table td {
-  padding: 6px 10px; border-bottom: 1px solid var(--drv-border); color: var(--drv-text-secondary);
-}
-
+/* テーブル */
+.drv-table { width: 100%; border-collapse: collapse; background: var(--drv-surface); border: 1px solid var(--drv-border); border-radius: 6px; overflow: hidden; font-size: 13px; }
+.drv-table th { background: var(--drv-bg); font-weight: bold; text-transform: uppercase; font-size: 11px; color: var(--drv-text-muted); padding: 8px 8px; text-align: left; border-bottom: 1px solid var(--drv-border); white-space: nowrap; }
+.drv-table td { padding: 5px 8px; border-bottom: 1px solid var(--drv-border); color: var(--drv-text-secondary); }
 .drv-table tbody tr:nth-child(even) { background: var(--drv-table-stripe); }
 .drv-table tbody tr:hover { background: var(--drv-table-hover); }
 
-/* === Disposition 積み上げバー === */
-.drv-stacked-bar {
-  display: flex; height: 20px; border-radius: 4px; overflow: hidden; margin: 8px 0;
+/* IP 分類タグ */
+.drv-ip-tag { display: inline-block; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 3px; margin-left: 6px; white-space: nowrap; }
+.drv-ip-tag-legitimate { background: #e8f5e9; color: #2e7d32; }
+.drv-ip-tag-blocked { background: #e3f2fd; color: #1565c0; }
+.drv-ip-tag-misconfigured { background: #fff3e0; color: #e65100; }
+.drv-ip-tag-threat { background: #ffebee; color: #c62828; }
+@media (prefers-color-scheme: dark) {
+  .drv-ip-tag-legitimate { background: #1b3a1b; color: #66bb6a; }
+  .drv-ip-tag-blocked { background: #1a2a3a; color: #64b5f6; }
+  .drv-ip-tag-misconfigured { background: #3a2e1b; color: #ffb74d; }
+  .drv-ip-tag-threat { background: #3a1b1b; color: #ef5350; }
 }
 
-.drv-stacked-bar-segment {
-  height: 100%; display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: bold; color: white; min-width: 2px;
+/* ドメイン健全度バッジ */
+.drv-health-badge { font-size: 12px; font-weight: bold; padding: 2px 10px; border-radius: 10px; margin-left: 8px; white-space: nowrap; }
+.drv-health-healthy { background: #e8f5e9; color: #2e7d32; }
+.drv-health-under-attack { background: #e3f2fd; color: #1565c0; }
+.drv-health-needs-attention { background: #fff3e0; color: #e65100; }
+.drv-health-at-risk { background: #ffebee; color: #c62828; }
+@media (prefers-color-scheme: dark) {
+  .drv-health-healthy { background: #1b3a1b; color: #66bb6a; }
+  .drv-health-under-attack { background: #1a2a3a; color: #64b5f6; }
+  .drv-health-needs-attention { background: #3a2e1b; color: #ffb74d; }
+  .drv-health-at-risk { background: #3a1b1b; color: #ef5350; }
 }
 
+/* Disposition 積み上げバー */
+.drv-stacked-bar { display: flex; height: 20px; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+.drv-stacked-bar-segment { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; min-width: 2px; }
 .drv-stacked-delivered { background: var(--drv-color-delivered); }
+.drv-stacked-delivered-fail { background: var(--drv-color-delivered-fail); }
 .drv-stacked-quarantine { background: var(--drv-color-quarantine); }
 .drv-stacked-reject { background: var(--drv-color-reject); }
 
-/* === ドメインセクション === */
-.drv-domain-section {
-  background: var(--drv-surface); border: 1px solid var(--drv-border);
-  border-radius: 6px; padding: 14px; margin-bottom: 14px;
-}
+/* ドメインセクション */
+.drv-domain-section { background: var(--drv-surface); border: 1px solid var(--drv-border); border-radius: 6px; margin-bottom: 14px; overflow: hidden; }
+.drv-domain-header { font-size: 15px; font-weight: bold; color: var(--drv-text-strong); padding: 12px 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; transition: opacity 0.2s; }
+.drv-domain-header:hover { opacity: 0.8; }
+.drv-domain-policy { font-size: 11px; color: var(--drv-text-muted); font-weight: normal; background: var(--drv-bg); padding: 2px 8px; border-radius: 3px; }
+.drv-toggle-icon { margin-left: auto; font-size: 12px; color: var(--drv-text-muted); transition: transform 0.3s ease; }
+.drv-toggle-icon.expanded { transform: rotate(180deg); }
 
-.drv-domain-header {
-  font-size: 15px; font-weight: bold; color: var(--drv-text-strong);
-  margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
-}
-
-.drv-domain-policy {
-  font-size: 11px; color: var(--drv-text-muted); font-weight: normal;
-  background: var(--drv-bg); padding: 2px 8px; border-radius: 3px;
-}
+/* 折りたたみアニメーション */
+.drv-domain-body { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 0.35s ease; }
+.drv-domain-body.collapsed { grid-template-rows: 0fr; }
+.drv-domain-body-inner { overflow: hidden; }
+.drv-domain-body-content { padding: 0 14px 14px; }
 
 .drv-domain-subsection { margin-top: 10px; }
+.drv-domain-subtitle { font-size: 12px; font-weight: bold; color: var(--drv-text-muted); text-transform: uppercase; margin-bottom: 4px; }
 
-.drv-domain-subtitle {
-  font-size: 12px; font-weight: bold; color: var(--drv-text-muted);
-  text-transform: uppercase; margin-bottom: 4px;
-}
+/* 折れ線グラフ */
+.drv-chart-container { margin-top: 10px; background: var(--drv-bg); border: 1px solid var(--drv-border); border-radius: 4px; padding: 10px; overflow-x: auto; }
+.drv-chart-title { font-size: 12px; font-weight: bold; text-transform: uppercase; color: var(--drv-text-muted); margin-bottom: 6px; }
+.drv-chart-svg { display: block; width: 100%; height: auto; }
+.drv-chart-svg text { font-family: "Segoe UI", Meiryo, sans-serif; fill: var(--drv-text-muted); }
+.drv-chart-svg .drv-grid-line { stroke: var(--drv-border); stroke-dasharray: 3 3; }
+.drv-chart-svg .drv-axis-line { stroke: var(--drv-text-muted); stroke-width: 1; }
+.drv-chart-legend-row { display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--drv-text-muted); }
 
-/* === 色ユーティリティ === */
+/* ユーティリティ */
 .drv-period-info { font-size: 12px; color: var(--drv-text-muted); margin-bottom: 12px; }
-
-.drv-footer {
-  margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--drv-border);
-  font-size: 11px; color: var(--drv-text-muted); text-align: center;
-}
+.drv-footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--drv-border); font-size: 11px; color: var(--drv-text-muted); text-align: center; }
 .drv-footer-sep { margin: 0 8px; }
-
 .drv-hidden { display: none !important; }
 .drv-pass-text { color: var(--drv-pass); font-weight: bold; }
 .drv-fail-text { color: var(--drv-fail); font-weight: bold; }
 .drv-warn-text { color: var(--drv-warn); font-weight: bold; }
 .drv-delivered-text { color: var(--drv-color-delivered); font-weight: bold; }
+.drv-delivered-fail-text { color: var(--drv-color-delivered-fail); font-weight: bold; }
 .drv-quarantine-text { color: var(--drv-color-quarantine); font-weight: bold; }
 .drv-reject-text { color: var(--drv-color-reject); font-weight: bold; }
-
-/* === 折れ線グラフ === */
-.drv-chart-container {
-  margin-top: 10px;
-  background: var(--drv-bg);
-  border: 1px solid var(--drv-border);
-  border-radius: 4px;
-  padding: 10px;
-  overflow-x: auto;
-}
-
-.drv-chart-title {
-  font-size: 12px; font-weight: bold; text-transform: uppercase;
-  color: var(--drv-text-muted); margin-bottom: 6px;
-}
-
-.drv-chart-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.drv-chart-svg text {
-  font-family: "Segoe UI", Meiryo, sans-serif;
-  fill: var(--drv-text-muted);
-}
-
-.drv-chart-svg .drv-grid-line {
-  stroke: var(--drv-border);
-  stroke-dasharray: 3 3;
-}
-
-.drv-chart-svg .drv-axis-line {
-  stroke: var(--drv-text-muted);
-  stroke-width: 1;
-}
-
-.drv-chart-legend-row {
-  display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--drv-text-muted);
-}
-
-.drv-spinner {
-  display: inline-block; width: 14px; height: 14px;
-  border: 2px solid var(--drv-border); border-top-color: var(--drv-accent);
-  border-radius: 50%; animation: drv-spin 0.6s linear infinite;
-  vertical-align: middle; margin-right: 6px;
-}
-
+.drv-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--drv-border); border-top-color: var(--drv-accent); border-radius: 50%; animation: drv-spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
 @keyframes drv-spin { to { transform: rotate(360deg); } }
