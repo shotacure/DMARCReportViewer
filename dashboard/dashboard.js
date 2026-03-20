@@ -44,6 +44,8 @@
   const reporterSection = $("reporter-section");
   const ipSection = $("ip-section");
   const rufSection = $("ruf-section");
+  const issuesSection = $("issues-section");
+  const overrideSection = $("override-section");
 
   // =========================================================
   // ステータス表示
@@ -112,10 +114,20 @@
         renderDomainTable(results.domainDetails || []);
         renderReporterTable(results.aggregate);
         renderIpTable(results.aggregate);
+
+        // ポリシーオーバーライド理由の表示
+        if (results.aggregate.overrideReasons?.length > 0) {
+          renderOverrideTable(results.aggregate.overrideReasons);
+        }
       }
 
       if (results.ruf.length > 0) {
         renderRufTable(results.ruf);
+      }
+
+      // Issues セクション: 問題のあるメールをカテゴリ別に表示
+      if (results.issuesSummary && results.issuesSummary.totalIssues > 0) {
+        renderIssues(results.issuesSummary, results.issues);
       }
 
       // 3. ステータス更新
@@ -244,6 +256,118 @@
     }
 
     show(rufSection);
+  };
+
+  // =========================================================
+  // ポリシーオーバーライド理由テーブル描画
+  // =========================================================
+  const renderOverrideTable = (overrideReasons) => {
+    const tbody = $("override-table").querySelector("tbody");
+    tbody.innerHTML = "";
+
+    for (const entry of overrideReasons) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHTML(entry.type)}</td>
+        <td>${entry.count.toLocaleString()}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    show(overrideSection);
+  };
+
+  // =========================================================
+  // Issues セクション描画: 問題のあるメールをカテゴリ別に表示
+  // =========================================================
+  const renderIssues = (summary, issues) => {
+    // サマリーカードの値を設定
+    $("issue-parse-failed").textContent = summary.parseFailed.toLocaleString();
+    $("issue-decompress-failed").textContent = summary.decompressFailed.toLocaleString();
+    $("issue-incomplete").textContent = summary.incompleteReport.toLocaleString();
+    $("issue-no-attachment").textContent = summary.noAttachment.toLocaleString();
+    $("issue-unknown-format").textContent = summary.unknownFormat.toLocaleString();
+
+    // 詳細テーブルの構築 (全カテゴリを統合して日付降順で表示)
+    const allIssues = [];
+
+    // カテゴリ別に行データを生成
+    for (const item of issues.parseFailed) {
+      allIssues.push({
+        date: item.date,
+        category: msg("issueParseFailed") || "Parse Failed",
+        categoryClass: "drv-fail-text",
+        subject: item.subject || "-",
+        detail: item.error || "-"
+      });
+    }
+    for (const item of issues.decompressFailed) {
+      allIssues.push({
+        date: item.date,
+        category: msg("issueDecompressFailed") || "Decompress Failed",
+        categoryClass: "drv-fail-text",
+        subject: item.subject || "-",
+        detail: `${item.attachment}: ${item.error || "-"}`
+      });
+    }
+    for (const item of issues.noAttachment) {
+      allIssues.push({
+        date: item.date,
+        category: msg("issueNoAttachment") || "No Attachment",
+        categoryClass: "drv-warn-text",
+        subject: item.subject || "-",
+        detail: msg("issueNoAttachmentDetail") || "No DMARC report attachment found in this message"
+      });
+    }
+    for (const item of issues.unknownFormat) {
+      allIssues.push({
+        date: item.date,
+        category: msg("issueUnknownFormat") || "Unknown Format",
+        categoryClass: "drv-warn-text",
+        subject: item.subject || "-",
+        detail: `${item.attachment} (${item.contentType || "unknown"})`
+      });
+    }
+    for (const item of issues.incompleteReport) {
+      // 警告内容を要約 (最初の3件 + 残件数)
+      const warnTexts = item.warnings.slice(0, 3).map(w => w.message);
+      const remaining = item.warnings.length - 3;
+      let detail = warnTexts.join("; ");
+      if (remaining > 0) detail += ` (+${remaining} more)`;
+      allIssues.push({
+        date: item.date,
+        category: msg("issueIncomplete") || "Incomplete Data",
+        categoryClass: "",
+        subject: item.subject || "-",
+        detail
+      });
+    }
+
+    // 日付降順でソート
+    allIssues.sort((a, b) => {
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return new Date(b.date) - new Date(a.date);
+    });
+
+    const tbody = $("issues-table").querySelector("tbody");
+    tbody.innerHTML = "";
+
+    for (const issue of allIssues) {
+      const tr = document.createElement("tr");
+      const dateStr = issue.date
+        ? new Date(issue.date).toLocaleDateString()
+        : "-";
+      tr.innerHTML = `
+        <td>${escapeHTML(dateStr)}</td>
+        <td class="${issue.categoryClass}">${escapeHTML(issue.category)}</td>
+        <td>${escapeHTML(issue.subject)}</td>
+        <td>${escapeHTML(issue.detail)}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    show(issuesSection);
   };
 
   // =========================================================

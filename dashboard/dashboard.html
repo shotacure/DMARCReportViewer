@@ -126,6 +126,60 @@
       </table>
     </div>
 
+    <!-- Issues (問題のあるメール) -->
+    <div id="issues-section" class="drv-section drv-hidden">
+      <h2 class="drv-section-title" data-i18n="sectionIssues">Issues</h2>
+      <!-- Issues サマリーカード -->
+      <div class="drv-card-grid" id="issues-cards" style="margin-bottom: 12px;">
+        <div class="drv-card drv-card-warn">
+          <div class="drv-card-label" data-i18n="issueParseFailed">Parse Failed</div>
+          <div class="drv-card-value" id="issue-parse-failed">0</div>
+        </div>
+        <div class="drv-card drv-card-warn">
+          <div class="drv-card-label" data-i18n="issueDecompressFailed">Decompress Failed</div>
+          <div class="drv-card-value" id="issue-decompress-failed">0</div>
+        </div>
+        <div class="drv-card">
+          <div class="drv-card-label" data-i18n="issueIncomplete">Incomplete Data</div>
+          <div class="drv-card-value" id="issue-incomplete">0</div>
+        </div>
+        <div class="drv-card">
+          <div class="drv-card-label" data-i18n="issueNoAttachment">No Attachment</div>
+          <div class="drv-card-value" id="issue-no-attachment">0</div>
+        </div>
+        <div class="drv-card">
+          <div class="drv-card-label" data-i18n="issueUnknownFormat">Unknown Format</div>
+          <div class="drv-card-value" id="issue-unknown-format">0</div>
+        </div>
+      </div>
+      <!-- Issues 詳細テーブル -->
+      <table class="drv-table" id="issues-table">
+        <thead>
+          <tr>
+            <th data-i18n="colDate">Date</th>
+            <th data-i18n="colIssueCategory">Category</th>
+            <th>Subject</th>
+            <th data-i18n="colIssueDetail">Detail</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- ポリシーオーバーライド理由 -->
+    <div id="override-section" class="drv-section drv-hidden">
+      <h2 class="drv-section-title" data-i18n="sectionOverrides">Policy Override Reasons</h2>
+      <table class="drv-table" id="override-table">
+        <thead>
+          <tr>
+            <th data-i18n="colOverrideType">Reason</th>
+            <th data-i18n="colCount">Count</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
     <!-- フッター -->
     <div class="drv-footer">
       <span>DMARC Report Viewer v<span id="version"></span></span>

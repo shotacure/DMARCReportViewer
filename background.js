@@ -207,6 +207,15 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const results = { rua: [], ruf: [], errors: [] };
         const seenKeys = new Set(); // 重複排除用
 
+        // 問題のあるメールをカテゴリ別に分類
+        results.issues = {
+          noAttachment: [],       // DMARC レポートの添付がないメール
+          decompressFailed: [],   // 解凍失敗
+          parseFailed: [],        // XML パース失敗
+          incompleteReport: [],   // パースできたが情報欠落あり (warnings)
+          unknownFormat: []       // 拡張子/MIME が想定外
+        };
+
         // rua フォルダのスキャン
         if (settings.ruaFolderId) {
           try {
@@ -215,8 +224,46 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             for (const msg of messages) {
               try {
                 const attachments = await extractReportAttachments(msg.id);
+
+                // 添付ファイルが1つもない場合を記録
+                if (attachments.length === 0) {
+                  results.issues.noAttachment.push({
+                    messageId: msg.id,
+                    date: msg.date?.toISOString(),
+                    subject: msg.subject,
+                    folder: "rua"
+                  });
+                  continue;
+                }
+
                 for (const att of attachments) {
-                  const xmlTexts = await decompressAttachment(att);
+                  let xmlTexts;
+                  try {
+                    xmlTexts = await decompressAttachment(att);
+                  } catch (decompErr) {
+                    // 解凍失敗を個別に記録
+                    results.issues.decompressFailed.push({
+                      messageId: msg.id,
+                      date: msg.date?.toISOString(),
+                      subject: msg.subject,
+                      attachment: att.name,
+                      error: decompErr.message || decompErr.toString()
+                    });
+                    continue;
+                  }
+
+                  // 解凍できたが XML が空 (想定外フォーマットの可能性)
+                  if (xmlTexts.length === 0) {
+                    results.issues.unknownFormat.push({
+                      messageId: msg.id,
+                      date: msg.date?.toISOString(),
+                      subject: msg.subject,
+                      attachment: att.name,
+                      contentType: att.contentType
+                    });
+                    continue;
+                  }
+
                   for (const xml of xmlTexts) {
                     try {
                       const report = RuaParser.parse(xml);
@@ -224,12 +271,28 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                       if (!seenKeys.has(report.reportKey)) {
                         seenKeys.add(report.reportKey);
                         results.rua.push(report);
+
+                        // 警告があるレポートを issues に記録
+                        if (report.warnings.length > 0) {
+                          results.issues.incompleteReport.push({
+                            messageId: msg.id,
+                            date: msg.date?.toISOString(),
+                            subject: msg.subject,
+                            reportKey: report.reportKey,
+                            reporter: report.reporter.orgName,
+                            domain: report.policy.domain,
+                            warningCount: report.warnings.length,
+                            warnings: report.warnings
+                          });
+                        }
                       }
                     } catch (parseErr) {
-                      results.errors.push({
+                      results.issues.parseFailed.push({
                         messageId: msg.id,
+                        date: msg.date?.toISOString(),
                         subject: msg.subject,
-                        error: `XML parse: ${parseErr.message}`
+                        attachment: att.name,
+                        error: parseErr.message
                       });
                     }
                   }
@@ -264,6 +327,20 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 if (!seenKeys.has(report.reportKey)) {
                   seenKeys.add(report.reportKey);
                   results.ruf.push(report);
+
+                  // 警告がある ruf レポートを issues に記録
+                  if (report.warnings.length > 0) {
+                    results.issues.incompleteReport.push({
+                      messageId: msg.id,
+                      date: msg.date?.toISOString(),
+                      subject: msg.subject,
+                      reportKey: report.reportKey,
+                      reporter: "(ruf)",
+                      domain: report.reportedDomain,
+                      warningCount: report.warnings.length,
+                      warnings: report.warnings
+                    });
+                  }
                 }
               } catch (e) {
                 results.errors.push({
@@ -277,6 +354,21 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             results.errors.push({ folder: "ruf", error: e.toString() });
           }
         }
+
+        // issues の件数サマリーを事前計算
+        results.issuesSummary = {
+          noAttachment: results.issues.noAttachment.length,
+          decompressFailed: results.issues.decompressFailed.length,
+          parseFailed: results.issues.parseFailed.length,
+          incompleteReport: results.issues.incompleteReport.length,
+          unknownFormat: results.issues.unknownFormat.length,
+          totalIssues: results.issues.noAttachment.length +
+                       results.issues.decompressFailed.length +
+                       results.issues.parseFailed.length +
+                       results.issues.incompleteReport.length +
+                       results.issues.unknownFormat.length,
+          fatalErrors: results.errors.length
+        };
 
         // 集約サマリーを事前計算して含める
         if (results.rua.length > 0) {

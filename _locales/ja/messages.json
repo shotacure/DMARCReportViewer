@@ -142,5 +142,49 @@
   "privacyNote": {
     "message": "すべての処理はローカルで完結します。外部通信は一切行いません。",
     "description": "プライバシーフッター"
+  },
+  "sectionIssues": {
+    "message": "問題のあるメール",
+    "description": "Issuesセクションタイトル"
+  },
+  "sectionOverrides": {
+    "message": "ポリシーオーバーライド理由",
+    "description": "ポリシーオーバーライド理由セクションタイトル"
+  },
+  "issueParseFailed": {
+    "message": "パース失敗",
+    "description": "問題カテゴリ: XMLパース失敗"
+  },
+  "issueDecompressFailed": {
+    "message": "解凍失敗",
+    "description": "問題カテゴリ: ZIP/GZ解凍失敗"
+  },
+  "issueIncomplete": {
+    "message": "情報欠落",
+    "description": "問題カテゴリ: パース成功だがフィールド欠落あり"
+  },
+  "issueNoAttachment": {
+    "message": "添付なし",
+    "description": "問題カテゴリ: DMARCレポートの添付がない"
+  },
+  "issueNoAttachmentDetail": {
+    "message": "このメールにDMARCレポートの添付ファイルが見つかりません",
+    "description": "添付なし問題の詳細テキスト"
+  },
+  "issueUnknownFormat": {
+    "message": "不明な形式",
+    "description": "問題カテゴリ: 認識できないファイル形式"
+  },
+  "colIssueCategory": {
+    "message": "カテゴリ",
+    "description": "テーブル列: 問題カテゴリ"
+  },
+  "colIssueDetail": {
+    "message": "詳細",
+    "description": "テーブル列: 問題の詳細"
+  },
+  "colOverrideType": {
+    "message": "理由",
+    "description": "テーブル列: ポリシーオーバーライド理由"
   }
 }

@@ -2,6 +2,7 @@
 // ruf (フォレンジックレポート) パーサー
 // AFRF (RFC 6591) 形式のフォレンジックレポートを正規化データに変換する。
 // ruf は来る ISP が少なく形式もバラつくため、防御的にパースする。
+// 全要素を網羅的に取得し、情報欠落を warnings として報告する。
 
 const RufParser = (() => {
   "use strict";
@@ -43,11 +44,25 @@ const RufParser = (() => {
     const dkimIdentity = extractFirst(headers, "dkim-identity") || "";
     const dkimSelector = extractFirst(headers, "dkim-selector") || "";
 
+    // 追加フィールド: 一部 ISP が付与する拡張情報
+    const reportedUri = extractFirst(headers, "reported-uri") || "";
+    const incidents = parseInt(extractFirst(headers, "incidents") || "1", 10) || 1;
+    const deliveryResult = extractFirst(headers, "delivery-result") || "";
+    const identityAlignment = extractFirst(headers, "identity-alignment") || "";
+    const userAgent = extractFirst(headers, "user-agent") || "";
+    const version = extractFirst(headers, "version") || "";
+
     // 認証結果のパース (Authentication-Results ヘッダ)
     const parsedAuth = parseAuthenticationResults(authResults);
 
     // 一意キー
     const reportKey = `ruf!${messageId}!${sourceIp}!${reportedDomain}`;
+
+    // 情報欠落チェック
+    const warnings = validateRufReport({
+      reportedDomain, sourceIp, authResults, authFailure,
+      from, arrivalDate, originalMailFrom
+    });
 
     return {
       reportKey,
@@ -72,10 +87,50 @@ const RufParser = (() => {
         identity: dkimIdentity,
         selector: dkimSelector
       },
+      // 追加の拡張フィールド
+      reportedUri,
+      incidents,
+      deliveryResult,
+      identityAlignment,
+      userAgent,
+      version,
       authResults: parsedAuth,
+      // 情報欠落の警告
+      warnings,
       // 通報用: 生ヘッダを保全
       rawHeaders: headers
     };
+  };
+
+  // =========================================================
+  // 情報欠落チェック: ruf レポートの完全性を検証
+  // =========================================================
+  const validateRufReport = (fields) => {
+    const warnings = [];
+
+    if (!fields.reportedDomain) {
+      warnings.push({ field: "reported-domain", message: "Reported domain could not be determined" });
+    }
+    if (!fields.sourceIp) {
+      warnings.push({ field: "source-ip", message: "Source IP is missing" });
+    }
+    if (!fields.authResults) {
+      warnings.push({ field: "authentication-results", message: "Authentication-Results header is missing" });
+    }
+    if (!fields.authFailure) {
+      warnings.push({ field: "auth-failure", message: "Auth-Failure type is missing" });
+    }
+    if (!fields.from) {
+      warnings.push({ field: "from", message: "Report sender (From) is missing" });
+    }
+    if (!fields.arrivalDate) {
+      warnings.push({ field: "arrival-date", message: "Arrival date could not be determined" });
+    }
+    if (!fields.originalMailFrom) {
+      warnings.push({ field: "original-mail-from", message: "Original MAIL FROM is missing" });
+    }
+
+    return warnings;
   };
 
   // =========================================================

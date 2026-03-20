@@ -142,5 +142,49 @@
   "privacyNote": {
     "message": "All processing is local. No external requests.",
     "description": "Privacy footer note"
+  },
+  "sectionIssues": {
+    "message": "Issues",
+    "description": "Issues section title"
+  },
+  "sectionOverrides": {
+    "message": "Policy Override Reasons",
+    "description": "Policy override reasons section title"
+  },
+  "issueParseFailed": {
+    "message": "Parse Failed",
+    "description": "Issue category: XML parse failure"
+  },
+  "issueDecompressFailed": {
+    "message": "Decompress Failed",
+    "description": "Issue category: ZIP/GZ decompression failure"
+  },
+  "issueIncomplete": {
+    "message": "Incomplete Data",
+    "description": "Issue category: report parsed but missing fields"
+  },
+  "issueNoAttachment": {
+    "message": "No Attachment",
+    "description": "Issue category: no DMARC report attachment found"
+  },
+  "issueNoAttachmentDetail": {
+    "message": "No DMARC report attachment found in this message",
+    "description": "Detail text for no attachment issue"
+  },
+  "issueUnknownFormat": {
+    "message": "Unknown Format",
+    "description": "Issue category: unrecognized file format"
+  },
+  "colIssueCategory": {
+    "message": "Category",
+    "description": "Table column: issue category"
+  },
+  "colIssueDetail": {
+    "message": "Detail",
+    "description": "Table column: issue detail"
+  },
+  "colOverrideType": {
+    "message": "Reason",
+    "description": "Table column: policy override reason type"
   }
 }
