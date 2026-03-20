@@ -1,3 +1,4 @@
+.resources/
 .release/
 node_modules/
 lib/jszip.min.js

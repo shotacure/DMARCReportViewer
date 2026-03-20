@@ -1,5 +1,6 @@
 // DMARCReportViewer - options/options.js
 // 設定画面のロジック: フォルダ一覧取得、選択保存、復元
+// パスに "dmarc" を含むフォルダのみ選択肢に表示する
 
 (() => {
   "use strict";
@@ -14,13 +15,13 @@
     });
   };
 
-  const ruaSelect = document.getElementById("rua-folder");
-  const rufSelect = document.getElementById("ruf-folder");
+  const arSelect = document.getElementById("ar-folder");
+  const frSelect = document.getElementById("fr-folder");
   const btnSave = document.getElementById("btn-save");
   const savedMsg = document.getElementById("saved-msg");
 
   // =========================================================
-  // フォルダ一覧をドロップダウンに追加
+  // フォルダ一覧をドロップダウンに追加 (dmarc を含むフォルダのみ)
   // =========================================================
   const populateFolders = async () => {
     const folders = await browser.runtime.sendMessage({ command: "getFolders" });
@@ -28,15 +29,15 @@
     for (const folder of folders) {
       const value = JSON.stringify({ accountId: folder.accountId, path: folder.path });
 
-      const optRua = document.createElement("option");
-      optRua.value = value;
-      optRua.textContent = folder.label;
-      ruaSelect.appendChild(optRua);
+      const optAr = document.createElement("option");
+      optAr.value = value;
+      optAr.textContent = folder.label;
+      arSelect.appendChild(optAr);
 
-      const optRuf = document.createElement("option");
-      optRuf.value = value;
-      optRuf.textContent = folder.label;
-      rufSelect.appendChild(optRuf);
+      const optFr = document.createElement("option");
+      optFr.value = value;
+      optFr.textContent = folder.label;
+      frSelect.appendChild(optFr);
     }
   };
 
@@ -46,11 +47,11 @@
   const restoreSettings = async () => {
     const settings = await browser.runtime.sendMessage({ command: "getSettings" });
 
-    if (settings.ruaFolderId) {
-      ruaSelect.value = JSON.stringify(settings.ruaFolderId);
+    if (settings.arFolderId) {
+      arSelect.value = JSON.stringify(settings.arFolderId);
     }
-    if (settings.rufFolderId) {
-      rufSelect.value = JSON.stringify(settings.rufFolderId);
+    if (settings.frFolderId) {
+      frSelect.value = JSON.stringify(settings.frFolderId);
     }
   };
 
@@ -59,13 +60,12 @@
   // =========================================================
   btnSave.addEventListener("click", async () => {
     const settings = {
-      ruaFolderId: ruaSelect.value ? JSON.parse(ruaSelect.value) : null,
-      rufFolderId: rufSelect.value ? JSON.parse(rufSelect.value) : null
+      arFolderId: arSelect.value ? JSON.parse(arSelect.value) : null,
+      frFolderId: frSelect.value ? JSON.parse(frSelect.value) : null
     };
 
     await browser.runtime.sendMessage({ command: "saveSettings", settings });
 
-    // 保存完了のフィードバック
     savedMsg.classList.add("show");
     setTimeout(() => savedMsg.classList.remove("show"), 2000);
   });

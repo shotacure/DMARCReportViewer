@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "__MSG_extensionName__",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "__MSG_extensionDescription__",
   "default_locale": "en",
   "browser_specific_settings": {
@@ -26,8 +26,8 @@
     "scripts": [
       "lib/pako.min.js",
       "lib/jszip.min.js",
-      "parser/rua_parser.js",
-      "parser/ruf_parser.js",
+      "parser/ar_parser.js",
+      "parser/fr_parser.js",
       "background.js"
     ]
   },
