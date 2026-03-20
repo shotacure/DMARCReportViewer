@@ -141,7 +141,7 @@ lib/
 └─ pako.min.js              GZIP decompression (user-provided)
 _locales/
 ├─ ar/  de/  en/  es/  fr/  it/  ja/  ko/  pt_BR/  ru/  zh_CN/  zh_TW/
-└─ (124 keys per locale, 12 languages)
+└─ (122 keys per locale, 12 languages)
 ```
 
 ### Processing Pipeline

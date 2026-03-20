@@ -1,4 +1,4 @@
-// DMARCReportViewer - dashboard/dashboard.js v0.1.3
+// DMARCReportViewer - dashboard/dashboard.js v1.0.0
 
 (() => {
   "use strict";
