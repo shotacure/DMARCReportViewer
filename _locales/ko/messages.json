@@ -3,79 +3,79 @@
     "message": "DMARC Report Viewer"
   },
   "extensionDescription": {
-    "message": "Analyze DMARC aggregate and forensic reports locally within Thunderbird. Identify threats, validate your email authentication, and take action."
+    "message": "Thunderbird에서 DMARC 집계 및 포렌식 보고서를 로컬로 분석합니다. 위협을 식별하고 이메일 인증을 검증하세요."
   },
   "btnScan": {
-    "message": "Scan Reports"
+    "message": "보고서 스캔"
   },
   "btnSettings": {
-    "message": "Settings"
+    "message": "설정"
   },
   "btnSave": {
-    "message": "Save"
+    "message": "저장"
   },
   "btnExport": {
-    "message": "Export CSV"
+    "message": "CSV 내보내기"
   },
   "msgSaved": {
-    "message": "✓ Saved"
+    "message": "✓ 저장됨"
   },
   "noFolderNotice": {
     "message": "No DMARC folders configured. Please open Settings to select your report folders, or create folders matching the naming convention (e.g. DMARC/Aggregate, DMARC/Forensic) for auto-detection."
   },
   "statusScanning": {
-    "message": "Scanning folders…"
+    "message": "폴더 스캔 중…"
   },
   "statusComplete": {
-    "message": "Scan complete."
+    "message": "스캔 완료."
   },
   "statusErrors": {
-    "message": "errors"
+    "message": "오류"
   },
   "statusCached": {
-    "message": "cached"
+    "message": "캐시"
   },
   "arReports": {
-    "message": "aggregate reports"
+    "message": "집계 보고서"
   },
   "frReports": {
-    "message": "forensic reports"
+    "message": "포렌식 보고서"
   },
   "period1w": {
-    "message": "1 Week"
+    "message": "1주"
   },
   "period1m": {
-    "message": "1 Month"
+    "message": "1개월"
   },
   "period3m": {
-    "message": "3 Months"
+    "message": "3개월"
   },
   "period6m": {
-    "message": "6 Months"
+    "message": "6개월"
   },
   "period1y": {
-    "message": "1 Year"
+    "message": "1년"
   },
   "periodAll": {
-    "message": "All"
+    "message": "전체"
   },
   "sectionSummary": {
-    "message": "Summary"
+    "message": "요약"
   },
   "sectionReporters": {
-    "message": "By Reporter"
+    "message": "보고자별"
   },
   "sectionTopIps": {
-    "message": "By IP Address"
+    "message": "IP 주소별"
   },
   "sectionForensic": {
-    "message": "Forensic Reports"
+    "message": "포렌식 보고서"
   },
   "sectionOverrides": {
     "message": "Policy Override Reasons"
   },
   "sectionIssues": {
-    "message": "Unreadable Reports"
+    "message": "읽을 수 없는 보고서"
   },
   "sectionDkimSignatures": {
     "message": "DKIM Signatures"
@@ -87,25 +87,25 @@
     "message": "Envelope Alignment"
   },
   "sectionSubdomains": {
-    "message": "Subdomains"
+    "message": "하위 도메인"
   },
   "totalEmails": {
-    "message": "Total Emails"
+    "message": "전체 이메일"
   },
   "deliveredPass": {
-    "message": "Delivered (Auth OK)"
+    "message": "배달됨 (인증 성공)"
   },
   "deliveredFail": {
-    "message": "Delivered (Auth Fail)"
+    "message": "배달됨 (인증 실패)"
   },
   "dispositionTitle": {
     "message": "Disposition"
   },
   "quarantined": {
-    "message": "Quarantined"
+    "message": "격리"
   },
   "rejected": {
-    "message": "Rejected"
+    "message": "거부"
   },
   "dkimSpfPass": {
     "message": "DKIM+SPF Pass"
@@ -117,7 +117,7 @@
     "message": "SPF Pass"
   },
   "colDomain": {
-    "message": "Domain"
+    "message": "도메인"
   },
   "colTotal": {
     "message": "Total"
@@ -126,7 +126,7 @@
     "message": "Pass Rate"
   },
   "colReports": {
-    "message": "Reports"
+    "message": "보고서"
   },
   "colReporter": {
     "message": "Reporter"
@@ -138,13 +138,13 @@
     "message": "IP Address Range"
   },
   "colClassification": {
-    "message": "Classification"
+    "message": "분류"
   },
   "colCount": {
-    "message": "Count"
+    "message": "건수"
   },
   "colDate": {
-    "message": "Date"
+    "message": "날짜"
   },
   "colAuthFailure": {
     "message": "Auth Failure"
@@ -168,7 +168,7 @@
     "message": "SPF Domain"
   },
   "colSubdomain": {
-    "message": "Subdomain"
+    "message": "하위 도메인"
   },
   "labelArFolder": {
     "message": "Aggregate Report Folder"
@@ -267,7 +267,7 @@
     "message": "Policy is only applied to $1% of messages (pct=$1). If no issues are observed, consider setting pct=100."
   },
   "ipRangeCountLabel": {
-    "message": "IP ranges"
+    "message": "IP 범위"
   },
   "chartTimeSeries": {
     "message": "Disposition Over Time"
@@ -297,7 +297,7 @@
     "message": "report(s) contain ISP-side metadata errors"
   },
   "privacyNote": {
-    "message": "All processing is local. No external requests."
+    "message": "모든 처리는 로컬에서 수행됩니다. 외부 요청 없음."
   },
   "warnOrgName": {
     "message": "Reporter organization name is missing"

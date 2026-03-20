@@ -9,7 +9,7 @@
   --drv-notice-bg: #e3f2fd; --drv-notice-text: #1565c0;
   --drv-status-bg: #e8f5e9; --drv-status-text: #2e7d32; --drv-bar-bg: #e0e0e0;
   --drv-color-delivered: #4caf50; --drv-color-delivered-fail: #e53935;
-  --drv-color-quarantine: #ff9800; --drv-color-reject: #f44336;
+  --drv-color-quarantine: #ff9800; --drv-color-reject: #1976d2;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -21,7 +21,7 @@
     --drv-notice-bg: #1a2a3a; --drv-notice-text: #64b5f6;
     --drv-status-bg: #1b3a1b; --drv-status-text: #66bb6a; --drv-bar-bg: #444;
     --drv-color-delivered: #66bb6a; --drv-color-delivered-fail: #ef5350;
-    --drv-color-quarantine: #ffb74d; --drv-color-reject: #ef5350;
+    --drv-color-quarantine: #ffb74d; --drv-color-reject: #64b5f6;
   }
 }
 
@@ -183,5 +183,12 @@ body { font-family: "Segoe UI", Meiryo, sans-serif; background: var(--drv-bg); c
 .drv-delivered-fail-text { color: var(--drv-color-delivered-fail); font-weight: bold; }
 .drv-quarantine-text { color: var(--drv-color-quarantine); font-weight: bold; }
 .drv-reject-text { color: var(--drv-color-reject); font-weight: bold; }
+/* 前期比較の変化率表示 */
+.drv-change { font-size: 10px; margin-top: 1px; }
+.drv-change-pos { color: var(--drv-pass); }
+.drv-change-neg { color: var(--drv-fail); }
+.drv-change-flat { color: var(--drv-text-muted); }
+.drv-change-surge { color: var(--drv-fail); font-weight: bold; }
+
 .drv-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--drv-border); border-top-color: var(--drv-accent); border-radius: 50%; animation: drv-spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
 @keyframes drv-spin { to { transform: rotate(360deg); } }
