@@ -364,5 +364,14 @@
   },
   "warnFrMailFrom": {
     "message": "Original MAIL FROM is missing"
+  },
+  "btnExpandAll": {
+    "message": "Alle aufklappen"
+  },
+  "btnCollapseAll": {
+    "message": "Alle zuklappen"
+  },
+  "noResultsNotice": {
+    "message": "Keine Berichte im gewählten Zeitraum gefunden. Versuchen Sie einen längeren Zeitraum oder überprüfen Sie die Ordnereinstellungen."
   }
 }

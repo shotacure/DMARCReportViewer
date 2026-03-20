@@ -364,5 +364,14 @@
   },
   "warnFrMailFrom": {
     "message": "Original MAIL FROM is missing"
+  },
+  "btnExpandAll": {
+    "message": "Развернуть все"
+  },
+  "btnCollapseAll": {
+    "message": "Свернуть все"
+  },
+  "noResultsNotice": {
+    "message": "Отчёты за выбранный период не найдены. Попробуйте более длинный период или проверьте настройки папок."
   }
 }

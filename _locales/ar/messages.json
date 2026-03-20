@@ -364,5 +364,14 @@
   },
   "warnFrMailFrom": {
     "message": "Original MAIL FROM is missing"
+  },
+  "btnExpandAll": {
+    "message": "توسيع الكل"
+  },
+  "btnCollapseAll": {
+    "message": "طي الكل"
+  },
+  "noResultsNotice": {
+    "message": "لم يتم العثور على تقارير في الفترة المحددة. جرب فترة أطول أو تحقق من إعدادات المجلد."
   }
 }

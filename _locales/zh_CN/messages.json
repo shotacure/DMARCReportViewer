@@ -364,5 +364,14 @@
   },
   "warnFrMailFrom": {
     "message": "Original MAIL FROM is missing"
+  },
+  "btnExpandAll": {
+    "message": "全部展开"
+  },
+  "btnCollapseAll": {
+    "message": "全部折叠"
+  },
+  "noResultsNotice": {
+    "message": "在所选时间段内未找到报告。请尝试更长的时间段或检查文件夹设置。"
   }
 }

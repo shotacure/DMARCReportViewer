@@ -1,4 +1,4 @@
-/* DMARCReportViewer - dashboard.css v1.0.1 */
+/* DMARCReportViewer - dashboard.css v1.0.2 */
 
 :root {
   --drv-bg: #f5f6f8; --drv-surface: #ffffff; --drv-border: #ddd;
@@ -55,8 +55,11 @@ body { font-family: "Segoe UI", Meiryo, sans-serif; background: var(--drv-bg); c
 /* 8枠カードグリッド (大サマリー) */
 .drv-card-grid-8 { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
 
-/* 3列カードグリッド (Issues等) */
+/* 3列カードグリッド */
 .drv-card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+/* 5列カードグリッド (Issues等) */
+.drv-card-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 
 /* カード共通 */
 .drv-card { background: var(--drv-surface); border: 1px solid var(--drv-border); border-radius: 6px; padding: 10px 6px; text-align: center; box-shadow: 0 1px 3px var(--drv-shadow); }

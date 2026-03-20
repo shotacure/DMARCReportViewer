@@ -1,4 +1,4 @@
-// DMARCReportViewer - dashboard/dashboard.js v1.0.1
+// DMARCReportViewer - dashboard/dashboard.js v1.0.2
 
 (() => {
   "use strict";
@@ -25,6 +25,14 @@
   const safeAppendHTML = (parent, htmlString) => {
     const doc = new DOMParser().parseFromString(htmlString, "text/html");
     while (doc.body.firstChild) parent.appendChild(doc.body.firstChild);
+  };
+  // テーブル行用: <td> をテーブルコンテキスト内でパースする
+  // DOMParser は <td> を <table> 外に置くと正しくパースしないため専用ヘルパーが必要
+  const safeTableRow = (tr, cellsHtml) => {
+    const doc = new DOMParser().parseFromString(
+      `<table><tbody><tr>${cellsHtml}</tr></tbody></table>`, "text/html");
+    const parsed = doc.querySelector("tr");
+    if (parsed) tr.replaceChildren(...parsed.childNodes);
   };
   const $ = (id) => document.getElementById(id);
   const show = (el) => el.classList.remove("drv-hidden");
@@ -515,37 +523,80 @@
   };
 
   // =========================================================
-  // CSV エクスポート: 全ドメインの IP 範囲統計を CSV で出力
+  // CSV エクスポート: 全分析データを CSV で出力
   // =========================================================
+  const csvEscape = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
   const exportCsv = (results) => {
     if (!results || !results.domainDetails) return;
     const rows = [];
-    // ヘッダー行
+
+    // === IP アドレス範囲 ===
+    rows.push("# IP Address Ranges");
     rows.push(["Domain","IP Range","Classification","Count",
       "Delivered (Auth OK)","Delivered (Auth Fail)","Quarantined","Rejected",
       "DKIM+SPF Pass","DKIM Pass","SPF Pass"].join(","));
     for (const dd of results.domainDetails) {
-      const agg = dd.aggregate;
-      for (const e of (agg.topIpRanges || [])) {
+      for (const e of (dd.aggregate.topIpRanges || [])) {
         const cl = classifyIpRange(e);
-        rows.push([
-          `"${dd.domain}"`, `"${e.key}"`, `"${cl.tag}"`,
+        rows.push([csvEscape(dd.domain), csvEscape(e.key), csvEscape(cl.tag),
           e.count, e.deliveredPass, e.deliveredFail,
-          e.quarantine, e.reject, e.fullPass, e.dkimPass, e.spfPass
-        ].join(","));
+          e.quarantine, e.reject, e.fullPass, e.dkimPass, e.spfPass].join(","));
       }
     }
-    // フォレンジックレポート
+
+    // === DKIM 署名 ===
+    rows.push("", "# DKIM Signatures");
+    rows.push(["Domain","Signing Domain","Selector","Count","Pass","Fail","Third-party"].join(","));
+    for (const dd of results.domainDetails) {
+      for (const s of (dd.aggregate.dkimSignatures || [])) {
+        rows.push([csvEscape(dd.domain), csvEscape(s.domain), csvEscape(s.selector),
+          s.count, s.pass, s.fail, s.isThirdParty ? "yes" : "no"].join(","));
+      }
+    }
+
+    // === SPF ドメイン ===
+    rows.push("", "# SPF Domains");
+    rows.push(["Domain","SPF Domain","Scopes","Count","Pass","Fail"].join(","));
+    for (const dd of results.domainDetails) {
+      for (const s of (dd.aggregate.spfDomains || [])) {
+        rows.push([csvEscape(dd.domain), csvEscape(s.domain), csvEscape(s.scopes.join(";")),
+          s.count, s.pass, s.fail].join(","));
+      }
+    }
+
+    // === Envelope 不一致 ===
+    rows.push("", "# Envelope Mismatches");
+    rows.push(["Domain","Header From","Envelope From","Count","Pass","Fail"].join(","));
+    for (const dd of results.domainDetails) {
+      for (const m of (dd.aggregate.envelopeMismatches || [])) {
+        rows.push([csvEscape(dd.domain), csvEscape(m.headerFrom), csvEscape(m.envelopeFrom),
+          m.count, m.pass, m.fail].join(","));
+      }
+    }
+
+    // === サブドメイン ===
+    const hasSubdomains = results.domainDetails.some(dd => dd.aggregate.subdomains?.length > 0);
+    if (hasSubdomains) {
+      rows.push("", "# Subdomains");
+      rows.push(["Domain","Subdomain","Count","Pass","Fail","Rejected"].join(","));
+      for (const dd of results.domainDetails) {
+        for (const s of (dd.aggregate.subdomains || [])) {
+          rows.push([csvEscape(dd.domain), csvEscape(s.subdomain),
+            s.count, s.pass, s.fail, s.reject].join(","));
+        }
+      }
+    }
+
+    // === フォレンジックレポート ===
     if (results.fr && results.fr.length > 0) {
-      rows.push(""); // 空行
+      rows.push("", "# Forensic Reports");
       rows.push(["Date","Domain","Source IP","Auth Failure","Feedback Type"].join(","));
       for (const r of results.fr) {
-        rows.push([
-          `"${r.messageDate || ""}"`, `"${r.reportedDomain}"`, `"${r.sourceIp}"`,
-          `"${r.authFailure || ""}"`, `"${r.feedbackType || ""}"`
-        ].join(","));
+        rows.push([csvEscape(r.messageDate), csvEscape(r.reportedDomain), csvEscape(r.sourceIp),
+          csvEscape(r.authFailure), csvEscape(r.feedbackType)].join(","));
       }
     }
+
     const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -569,6 +620,15 @@
     hide($("fr-section"));
     hide($("issues-section"));
     hide($("btn-export"));
+    hide($("btn-toggle-all"));
+    allExpanded = true;
+    $("btn-toggle-all").textContent = msg("btnCollapseAll");
+    hide($("no-results-notice"));
+    if (results.ar.length === 0 && results.fr.length === 0) {
+      // スキャン完了したが結果が 0 件
+      show($("no-results-notice"));
+      return;
+    }
     if (results.ar.length > 0 && results.aggregate) {
       const agg = results.aggregate;
       if (agg.dateRangeMin && agg.dateRangeMax) {
@@ -582,6 +642,8 @@
       if (results.domainDetails) {
         const pd = results.scanPeriodDays || 0;
         for (const dd of results.domainDetails) renderDomainSection(dd, pd);
+        // ドメインが2つ以上あれば全展開/折りたたみボタンを表示
+        if (results.domainDetails.length >= 2) show($("btn-toggle-all"));
       }
     }
     if (results.fr.length > 0) renderFrTable(results.fr);
@@ -589,10 +651,20 @@
   };
 
   // =========================================================
+  // 期間選択の記憶キー
+  // =========================================================
+  const PERIOD_STORAGE_KEY = "dmarcrvPeriod";
+
+  // =========================================================
   // 初期化
   // =========================================================
   const init = async () => {
     applyI18n();
+    // 前回選択した期間を復元
+    try {
+      const stored = await browser.storage.local.get(PERIOD_STORAGE_KEY);
+      if (stored[PERIOD_STORAGE_KEY]) $("period-select").value = stored[PERIOD_STORAGE_KEY];
+    } catch (e) { /* 初回起動時はストレージが空 */ }
     const settings = await browser.runtime.sendMessage({ command: "resolveSettings" });
     if (!settings.arFolderId && !settings.frFolderId) show($("no-folder-notice"));
     else hide($("no-folder-notice"));
@@ -610,6 +682,22 @@
 
   $("btn-settings").addEventListener("click", () => browser.runtime.openOptionsPage());
   $("btn-export").addEventListener("click", () => exportCsv(lastResults));
+
+  // 期間変更時にストレージに保存
+  $("period-select").addEventListener("change", () => {
+    browser.storage.local.set({ [PERIOD_STORAGE_KEY]: $("period-select").value });
+  });
+
+  // 全展開/全折りたたみトグル
+  let allExpanded = true;
+  $("btn-toggle-all").addEventListener("click", () => {
+    allExpanded = !allExpanded;
+    const bodies = $("domains-container").querySelectorAll(".drv-domain-body");
+    const icons = $("domains-container").querySelectorAll(".drv-toggle-icon");
+    bodies.forEach(b => { if (allExpanded) b.classList.remove("collapsed"); else b.classList.add("collapsed"); });
+    icons.forEach(ic => { if (allExpanded) ic.classList.add("expanded"); else ic.classList.remove("expanded"); });
+    $("btn-toggle-all").textContent = allExpanded ? msg("btnCollapseAll") : msg("btnExpandAll");
+  });
 
   $("btn-scan").addEventListener("click", async () => {
     $("btn-scan").disabled = true;
@@ -763,7 +851,7 @@
     const sorted = [...frReports].sort((a,b) => new Date(b.messageDate)-new Date(a.messageDate));
     for (const r of sorted) {
       const tr = document.createElement("tr");
-      safeHTML(tr, `<td>${escapeHTML(r.messageDate?new Date(r.messageDate).toLocaleDateString():"-")}</td><td>${escapeHTML(r.reportedDomain)}</td><td><code>${escapeHTML(r.sourceIp)}</code></td><td>${escapeHTML(r.authFailure||"-")}</td>`);
+      safeTableRow(tr, `<td>${escapeHTML(r.messageDate?new Date(r.messageDate).toLocaleDateString():"-")}</td><td>${escapeHTML(r.reportedDomain)}</td><td><code>${escapeHTML(r.sourceIp)}</code></td><td>${escapeHTML(r.authFailure||"-")}</td>`);
       tbody.appendChild(tr);
     }
     show($("fr-section"));
@@ -792,7 +880,7 @@
     const tbody = $("issues-table").querySelector("tbody"); tbody.replaceChildren();
     for (const i of all) {
       const tr = document.createElement("tr");
-      safeHTML(tr, `<td>${escapeHTML(i.date?new Date(i.date).toLocaleDateString():"-")}</td><td class="${escapeHTML(i.cls)}">${escapeHTML(i.cat)}</td><td>${escapeHTML(i.subj)}</td><td>${escapeHTML(i.det)}</td>`);
+      safeTableRow(tr, `<td>${escapeHTML(i.date?new Date(i.date).toLocaleDateString():"-")}</td><td class="${escapeHTML(i.cls)}">${escapeHTML(i.cat)}</td><td>${escapeHTML(i.subj)}</td><td>${escapeHTML(i.det)}</td>`);
       tbody.appendChild(tr);
     }
     show($("issues-section"));
