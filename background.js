@@ -313,6 +313,10 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const results = { ar: [], fr: [], errors: [] };
         const seenKeys = new Set();
 
+        // スキャン期間(日数)を結果に含める (折れ線グラフの集計単位決定用)
+        const sinceDay = request.sinceDay || 0;
+        results.scanPeriodDays = sinceDay;
+
         results.issues = {
           noAttachment: [],
           decompressFailed: [],
@@ -501,7 +505,14 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
               reportCount: domainReports.length,
               policy: latestReport.policy,
               // ドメインごとの完全な統計 (IP範囲集約含む)
-              aggregate: ArParser.aggregateSummaries(domainReports)
+              aggregate: ArParser.aggregateSummaries(domainReports),
+              // 折れ線グラフ用: 各レポートの期間開始日と disposition 件数
+              timeSeries: domainReports.map(r => ({
+                begin: r.dateRange.begin,
+                delivered: r.summary.noneCount,
+                quarantine: r.summary.quarantineCount,
+                reject: r.summary.rejectCount
+              }))
             });
           }
           results.domainDetails.sort((a, b) =>

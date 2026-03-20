@@ -14,7 +14,6 @@
         <span data-i18n="extensionName">DMARC Report Viewer</span>
       </h1>
       <div class="drv-header-actions">
-        <!-- スキャン期間セレクタ -->
         <select id="period-select" class="drv-period-select">
           <option value="7" data-i18n="period1w">1 Week</option>
           <option value="30" selected data-i18n="period1m">1 Month</option>
@@ -23,107 +22,53 @@
           <option value="365" data-i18n="period1y">1 Year</option>
           <option value="0" data-i18n="periodAll">All</option>
         </select>
-        <button id="btn-scan" class="drv-btn drv-btn-primary" data-i18n="btnScan">
-          Scan Reports
-        </button>
-        <button id="btn-settings" class="drv-btn drv-btn-secondary" data-i18n="btnSettings">
-          Settings
-        </button>
+        <button id="btn-scan" class="drv-btn drv-btn-primary" data-i18n="btnScan">Scan Reports</button>
+        <button id="btn-settings" class="drv-btn drv-btn-secondary" data-i18n="btnSettings">Settings</button>
       </div>
     </div>
 
-    <!-- ステータスバー -->
-    <div id="status-bar" class="drv-status-bar drv-hidden">
-      <span id="status-message"></span>
-    </div>
+    <div id="status-bar" class="drv-status-bar drv-hidden"><span id="status-message"></span></div>
 
-    <!-- フォルダ未設定時の案内 -->
     <div id="no-folder-notice" class="drv-notice drv-hidden">
-      <p data-i18n="noFolderNotice">
-        No DMARC folders configured.
-      </p>
+      <p data-i18n="noFolderNotice">No DMARC folders configured.</p>
     </div>
 
-    <!-- レポート期間 -->
     <div id="period-info" class="drv-period-info drv-hidden"></div>
 
-    <!-- 大サマリーカード -->
+    <!-- 大サマリー: 7枠カード -->
     <div id="summary-section" class="drv-section drv-hidden">
       <h2 class="drv-section-title" data-i18n="sectionSummary">Summary</h2>
-      <div class="drv-card-grid">
-        <div class="drv-card">
-          <div class="drv-card-label" data-i18n="totalEmails">Total Emails</div>
-          <div class="drv-card-value" id="stat-total">0</div>
-        </div>
-        <div class="drv-card drv-card-pass">
-          <div class="drv-card-label" data-i18n="fullPassRate">Full Pass Rate</div>
-          <div class="drv-card-value" id="stat-pass-rate">0%</div>
-        </div>
-        <div class="drv-card">
-          <div class="drv-card-label" data-i18n="dkimPassRate">DKIM Pass Rate</div>
-          <div class="drv-card-value" id="stat-dkim-rate">0%</div>
-        </div>
-        <div class="drv-card">
-          <div class="drv-card-label" data-i18n="spfPassRate">SPF Pass Rate</div>
-          <div class="drv-card-value" id="stat-spf-rate">0%</div>
-        </div>
-        <div class="drv-card drv-card-warn">
-          <div class="drv-card-label" data-i18n="rejected">Rejected</div>
-          <div class="drv-card-value" id="stat-reject">0</div>
-        </div>
-        <div class="drv-card">
-          <div class="drv-card-label" data-i18n="quarantined">Quarantined</div>
-          <div class="drv-card-value" id="stat-quarantine">0</div>
-        </div>
-      </div>
-      <!-- ドメイン別メール数割合グラフ -->
-      <div id="domain-chart" style="margin-top: 12px;"></div>
-      <!-- Disposition 分布バー -->
-      <div id="disposition-bar" style="margin-top: 8px;"></div>
+      <div class="drv-card-grid-7" id="summary-cards"></div>
+      <!-- 円グラフ3つ -->
+      <div class="drv-pie-row" id="pie-row"></div>
     </div>
 
-    <!-- レポーター別 (全体) -->
-    <div id="reporter-section" class="drv-section drv-hidden">
-      <h2 class="drv-section-title" data-i18n="sectionReporters">By Reporter</h2>
-      <table class="drv-table" id="reporter-table">
-        <thead>
-          <tr>
-            <th data-i18n="colReporter">Reporter</th>
-            <th data-i18n="colReports">Reports</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- ドメイン別詳細セクション (動的に生成される) -->
+    <!-- ドメイン別詳細セクション (動的に生成) -->
     <div id="domains-container"></div>
 
-    <!-- フォレンジックレポート一覧 -->
+    <!-- フォレンジックレポート -->
     <div id="fr-section" class="drv-section drv-hidden">
       <h2 class="drv-section-title" data-i18n="sectionForensic">Forensic Reports</h2>
       <table class="drv-table" id="fr-table">
-        <thead>
-          <tr>
-            <th data-i18n="colDate">Date</th>
-            <th data-i18n="colDomain">Domain</th>
-            <th data-i18n="colSourceIp">Source IP</th>
-            <th data-i18n="colAuthFailure">Auth Failure</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th data-i18n="colDate">Date</th>
+          <th data-i18n="colDomain">Domain</th>
+          <th data-i18n="colSourceIp">Source IP</th>
+          <th data-i18n="colAuthFailure">Auth Failure</th>
+        </tr></thead>
         <tbody></tbody>
       </table>
     </div>
 
-    <!-- Issues (問題のあるメール) -->
+    <!-- 読み取り不能なレポート -->
     <div id="issues-section" class="drv-section drv-hidden">
-      <h2 class="drv-section-title" data-i18n="sectionIssues">Issues</h2>
+      <h2 class="drv-section-title" data-i18n="sectionIssues">Unreadable Reports</h2>
       <div class="drv-card-grid" style="margin-bottom: 12px;">
-        <div class="drv-card drv-card-warn">
+        <div class="drv-card drv-card-fail">
           <div class="drv-card-label" data-i18n="issueParseFailed">Parse Failed</div>
           <div class="drv-card-value" id="issue-parse-failed">0</div>
         </div>
-        <div class="drv-card drv-card-warn">
+        <div class="drv-card drv-card-fail">
           <div class="drv-card-label" data-i18n="issueDecompressFailed">Decompress Failed</div>
           <div class="drv-card-value" id="issue-decompress-failed">0</div>
         </div>
@@ -141,19 +86,16 @@
         </div>
       </div>
       <table class="drv-table" id="issues-table">
-        <thead>
-          <tr>
-            <th data-i18n="colDate">Date</th>
-            <th data-i18n="colIssueCategory">Category</th>
-            <th>Subject</th>
-            <th data-i18n="colIssueDetail">Detail</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th data-i18n="colDate">Date</th>
+          <th data-i18n="colIssueCategory">Category</th>
+          <th>Subject</th>
+          <th data-i18n="colIssueDetail">Detail</th>
+        </tr></thead>
         <tbody></tbody>
       </table>
     </div>
 
-    <!-- フッター -->
     <div class="drv-footer">
       <span>DMARC Report Viewer v<span id="version"></span></span>
       <span class="drv-footer-sep">|</span>

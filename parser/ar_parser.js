@@ -41,7 +41,6 @@ const ArParser = (() => {
 
     // IPv6 判定: 先頭3グループ (/48相当) を残す
     try {
-      // :: を展開して正規化
       let expanded = ip;
       if (expanded.includes("::")) {
         const halves = expanded.split("::");
@@ -53,7 +52,6 @@ const ArParser = (() => {
       }
       const groups = expanded.split(":");
       if (groups.length >= 3) {
-        // 先頭3グループを16進正規化して表示
         const prefix = groups.slice(0, 3).map(g =>
           g.replace(/^0+/, "") || "0"
         ).join(":");
@@ -66,17 +64,52 @@ const ArParser = (() => {
   };
 
   // =========================================================
+  // 詳細統計ヘルパー: レコード群をキー別にグループ化し、各キーの統計を算出
+  // IP 範囲テーブルやレポーター別テーブルで
+  // パス率・隔離数・拒否数を表示するために使用
+  // =========================================================
+  const computeDetailedStats = (entries) => {
+    // entries: [{ key, count, dkimPass, spfPass, fullPass, delivered, quarantine, reject }]
+    // → キー別に集約して実数ベースの統計を返す
+    const map = new Map();
+    for (const e of entries) {
+      const existing = map.get(e.key);
+      if (existing) {
+        existing.count += e.count;
+        existing.dkimPass += e.dkimPass;
+        existing.spfPass += e.spfPass;
+        existing.fullPass += e.fullPass;
+        existing.delivered += e.delivered;
+        existing.quarantine += e.quarantine;
+        existing.reject += e.reject;
+      } else {
+        map.set(e.key, { ...e });
+      }
+    }
+
+    return [...map.values()]
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 20)
+      .map(s => ({
+        key: s.key,
+        count: s.count,
+        fullPass: s.fullPass,
+        dkimPass: s.dkimPass,
+        spfPass: s.spfPass,
+        delivered: s.delivered,
+        quarantine: s.quarantine,
+        reject: s.reject
+      }));
+  };
+
+  // =========================================================
   // XML サニタイズ: ISP 固有の XML 不整合を DOMParser に渡す前に修正
   // =========================================================
   const sanitizeXml = (xmlText) => {
     let sanitized = xmlText;
 
     // Microsoft の既知の typo: <diskim> → <dkim> (開始タグの誤記)
-    // 例: <diskim>fail</dkim> → <dkim>fail</dkim>
     sanitized = sanitized.replace(/<diskim>/g, "<dkim>");
-
-    // 開始・終了タグの不一致を汎用的に検出・修正するのは危険なため、
-    // 個別の既知パターンのみ対応する。新たな不整合が見つかり次第追加する。
 
     return sanitized;
   };
@@ -87,7 +120,6 @@ const ArParser = (() => {
   const validateReport = (report) => {
     const warnings = [];
 
-    // --- レポートメタデータの検証 ---
     if (!report.reporter.orgName) {
       warnings.push({ field: "org_name", message: "Reporter organization name is missing" });
     }
@@ -103,16 +135,12 @@ const ArParser = (() => {
     if (report.dateRange.end === 0) {
       warnings.push({ field: "date_range.end", message: "Report date range end is missing or zero" });
     }
-
-    // --- ポリシー公開情報の検証 ---
     if (!report.policy.domain) {
       warnings.push({ field: "policy.domain", message: "Published policy domain is missing" });
     }
     if (!report.policy.p) {
       warnings.push({ field: "policy.p", message: "Published policy disposition (p=) is missing" });
     }
-
-    // --- レコードの検証 ---
     if (report.records.length === 0) {
       warnings.push({ field: "records", message: "Report contains no record entries" });
     }
@@ -151,12 +179,10 @@ const ArParser = (() => {
   // メイン: XML テキスト → 正規化済みレポートオブジェクト
   // =========================================================
   const parse = (xmlText) => {
-    // ISP 固有の XML 不整合を修正してからパースする
     const sanitizedXml = sanitizeXml(xmlText);
     const parser = new DOMParser();
     const doc = parser.parseFromString(sanitizedXml, "text/xml");
 
-    // パースエラーチェック
     const parseError = doc.querySelector("parsererror");
     if (parseError) {
       throw new Error(`XML parse error: ${parseError.textContent}`);
@@ -177,7 +203,6 @@ const ArParser = (() => {
     const dateBegin = getInt(dateRange, "begin");
     const dateEnd = getInt(dateRange, "end");
 
-    // report_metadata > error: ISP がレポート生成時のエラーを記載する場合がある
     const metadataErrors = [];
     const errorElements = metadata?.querySelectorAll("error") || [];
     for (const errEl of errorElements) {
@@ -194,7 +219,6 @@ const ArParser = (() => {
     const policySp = getText(policy, "sp") || policyP;
     const policyPct = getInt(policy, "pct") || 100;
     const policyFo = getText(policy, "fo") || "0";
-    // np: サブドメインが存在しない場合のポリシー (一部 ISP が実装)
     const policyNp = getText(policy, "np");
 
     // --- records ---
@@ -209,15 +233,11 @@ const ArParser = (() => {
       const envelopeFrom = getText(rec, "identifiers > envelope_from");
       const envelopeTo = getText(rec, "identifiers > envelope_to");
 
-      // policy_evaluated
       const pe = row?.querySelector("policy_evaluated");
       const disposition = getText(pe, "disposition");
       const dkimPolicyResult = getText(pe, "dkim");
       const spfPolicyResult = getText(pe, "spf");
 
-      // policy_evaluated > reason (複数ある場合がある)
-      // ポリシーオーバーライドの理由: forwarded, sampled_out, mailing_list,
-      // trusted_forwarder, local_policy, other 等
       const reasons = [];
       const reasonElements = pe?.querySelectorAll("reason") || [];
       for (const r of reasonElements) {
@@ -227,10 +247,8 @@ const ArParser = (() => {
         });
       }
 
-      // auth_results
       const authResults = rec.querySelector("auth_results");
 
-      // auth_results > dkim (複数署名に対応)
       const dkimResults = [];
       const dkimElements = authResults?.querySelectorAll("dkim") || [];
       for (const d of dkimElements) {
@@ -243,7 +261,6 @@ const ArParser = (() => {
         });
       }
 
-      // auth_results > spf (複数ある場合がある)
       const spfResults = [];
       const spfElements = authResults?.querySelectorAll("spf") || [];
       for (const s of spfElements) {
@@ -256,45 +273,22 @@ const ArParser = (() => {
       }
 
       records.push({
-        sourceIp,
-        count,
-        headerFrom,
-        envelopeFrom,
-        envelopeTo,
-        disposition,
-        dkimPolicyResult,
-        spfPolicyResult,
-        reasons,
-        dkimResults,
-        spfResults
+        sourceIp, count, headerFrom, envelopeFrom, envelopeTo,
+        disposition, dkimPolicyResult, spfPolicyResult,
+        reasons, dkimResults, spfResults
       });
     }
 
-    // --- 一意な reportKey (重複排除用) ---
     const reportKey = `${orgName}!${domain}!${dateBegin}!${dateEnd}!${reportId}`;
 
     const report = {
-      reportKey,
-      reportId,
-      reporter: {
-        orgName,
-        email,
-        extraContactInfo
-      },
-      dateRange: {
-        begin: dateBegin,
-        end: dateEnd
-      },
+      reportKey, reportId,
+      reporter: { orgName, email, extraContactInfo },
+      dateRange: { begin: dateBegin, end: dateEnd },
       metadataErrors,
       policy: {
-        domain,
-        adkim: policyAdkim,
-        aspf: policyAspf,
-        p: policyP,
-        sp: policySp,
-        pct: policyPct,
-        fo: policyFo,
-        np: policyNp
+        domain, adkim: policyAdkim, aspf: policyAspf,
+        p: policyP, sp: policySp, pct: policyPct, fo: policyFo, np: policyNp
       },
       records,
       summary: computeSummary(records),
@@ -317,17 +311,22 @@ const ArParser = (() => {
     let quarantineCount = 0;
     let noneCount = 0;
     const sourceIps = new Map();
-    const ipRanges = new Map();  // Class C 範囲 → 合計カウント
+    const ipRanges = new Map();
     const overrideReasons = new Map();
+
+    // IP範囲別・詳細統計用の生データ
+    const ipRangeEntries = [];
 
     for (const rec of records) {
       totalCount += rec.count;
 
-      if (rec.dkimPolicyResult === "pass") dkimPassCount += rec.count;
-      if (rec.spfPolicyResult === "pass") spfPassCount += rec.count;
-      if (rec.dkimPolicyResult === "pass" && rec.spfPolicyResult === "pass") {
-        passCount += rec.count;
-      }
+      const isDkimPass = rec.dkimPolicyResult === "pass";
+      const isSpfPass = rec.spfPolicyResult === "pass";
+      const isFullPass = isDkimPass && isSpfPass;
+
+      if (isDkimPass) dkimPassCount += rec.count;
+      if (isSpfPass) spfPassCount += rec.count;
+      if (isFullPass) passCount += rec.count;
 
       switch (rec.disposition) {
         case "reject":     rejectCount += rec.count;     break;
@@ -335,16 +334,25 @@ const ArParser = (() => {
         default:           noneCount += rec.count;        break;
       }
 
-      // 個別 IP の集計
       const ipTotal = sourceIps.get(rec.sourceIp) || 0;
       sourceIps.set(rec.sourceIp, ipTotal + rec.count);
 
-      // Class C 範囲での集約
       const range = toIpRange(rec.sourceIp);
       const rangeTotal = ipRanges.get(range) || 0;
       ipRanges.set(range, rangeTotal + rec.count);
 
-      // ポリシーオーバーライド理由
+      // IP範囲別の詳細統計データ
+      ipRangeEntries.push({
+        key: range,
+        count: rec.count,
+        dkimPass: isDkimPass ? rec.count : 0,
+        spfPass: isSpfPass ? rec.count : 0,
+        fullPass: isFullPass ? rec.count : 0,
+        delivered: (rec.disposition !== "quarantine" && rec.disposition !== "reject") ? rec.count : 0,
+        quarantine: rec.disposition === "quarantine" ? rec.count : 0,
+        reject: rec.disposition === "reject" ? rec.count : 0
+      });
+
       for (const reason of rec.reasons) {
         if (reason.type) {
           const existing = overrideReasons.get(reason.type) || 0;
@@ -354,27 +362,18 @@ const ArParser = (() => {
     }
 
     return {
-      totalCount,
-      passCount,
-      dkimPassCount,
-      spfPassCount,
-      rejectCount,
-      quarantineCount,
-      noneCount,
+      totalCount, passCount, dkimPassCount, spfPassCount,
+      rejectCount, quarantineCount, noneCount,
       dkimPassRate: totalCount > 0 ? (dkimPassCount / totalCount * 100) : 0,
       spfPassRate: totalCount > 0 ? (spfPassCount / totalCount * 100) : 0,
       fullPassRate: totalCount > 0 ? (passCount / totalCount * 100) : 0,
       uniqueSourceIps: sourceIps.size,
       uniqueIpRanges: ipRanges.size,
       topSourceIps: [...sourceIps.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 20)
+        .sort((a, b) => b[1] - a[1]).slice(0, 20)
         .map(([ip, count]) => ({ ip, count })),
-      // Class C 範囲で集約した IP アドレス範囲トップ20
-      topIpRanges: [...ipRanges.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 20)
-        .map(([range, count]) => ({ range, count })),
+      // Class C 範囲ごとの詳細統計 (パス率、隔離、拒否を含む)
+      topIpRanges: computeDetailedStats(ipRangeEntries),
       overrideReasons: [...overrideReasons.entries()]
         .sort((a, b) => b[1] - a[1])
         .map(([type, count]) => ({ type, count }))
@@ -393,16 +392,17 @@ const ArParser = (() => {
     let quarantineCount = 0;
     let noneCount = 0;
     const sourceIps = new Map();
-    const ipRanges = new Map();
     const reporters = new Map();
     const domains = new Map();
     const overrideReasons = new Map();
 
-    // レポート期間の最小・最大を追跡
+    // 詳細統計用の生データ集約
+    const ipRangeEntries = [];
+    const reporterEntries = [];
+
     let dateRangeMin = Infinity;
     let dateRangeMax = 0;
 
-    // 警告の集計カウンタ
     let totalWarnings = 0;
     let reportsWithWarnings = 0;
     let reportsWithMetadataErrors = 0;
@@ -418,7 +418,6 @@ const ArParser = (() => {
       quarantineCount += s.quarantineCount;
       noneCount += s.noneCount;
 
-      // レポート期間の追跡
       if (report.dateRange.begin > 0 && report.dateRange.begin < dateRangeMin) {
         dateRangeMin = report.dateRange.begin;
       }
@@ -426,7 +425,7 @@ const ArParser = (() => {
         dateRangeMax = report.dateRange.end;
       }
 
-      // レポーター別
+      // レポーター別: レポート数のみ (reporters Map)
       const rCount = reporters.get(report.reporter.orgName) || 0;
       reporters.set(report.reporter.orgName, rCount + 1);
 
@@ -440,10 +439,36 @@ const ArParser = (() => {
         sourceIps.set(ipEntry.ip, existing + ipEntry.count);
       }
 
-      // Class C 範囲
-      for (const rangeEntry of s.topIpRanges) {
-        const existing = ipRanges.get(rangeEntry.range) || 0;
-        ipRanges.set(rangeEntry.range, existing + rangeEntry.count);
+      // IP 範囲詳細統計: 各レポートの topIpRanges を集約 (実数ベース)
+      for (const entry of s.topIpRanges) {
+        ipRangeEntries.push({
+          key: entry.key,
+          count: entry.count,
+          dkimPass: entry.dkimPass,
+          spfPass: entry.spfPass,
+          fullPass: entry.fullPass,
+          delivered: entry.delivered,
+          quarantine: entry.quarantine,
+          reject: entry.reject
+        });
+      }
+
+      // レポーター別の詳細統計: レコードごとにレポーター名をキーにして集計
+      for (const rec of report.records) {
+        const isDkimPass = rec.dkimPolicyResult === "pass";
+        const isSpfPass = rec.spfPolicyResult === "pass";
+        const isFullPass = isDkimPass && isSpfPass;
+        const isDelivered = rec.disposition !== "quarantine" && rec.disposition !== "reject";
+        reporterEntries.push({
+          key: report.reporter.orgName,
+          count: rec.count,
+          dkimPass: isDkimPass ? rec.count : 0,
+          spfPass: isSpfPass ? rec.count : 0,
+          fullPass: isFullPass ? rec.count : 0,
+          delivered: isDelivered ? rec.count : 0,
+          quarantine: rec.disposition === "quarantine" ? rec.count : 0,
+          reject: rec.disposition === "reject" ? rec.count : 0
+        });
       }
 
       // ポリシーオーバーライド
@@ -473,30 +498,24 @@ const ArParser = (() => {
     }
 
     return {
-      totalCount,
-      passCount,
-      dkimPassCount,
-      spfPassCount,
-      rejectCount,
-      quarantineCount,
-      noneCount,
+      totalCount, passCount, dkimPassCount, spfPassCount,
+      rejectCount, quarantineCount, noneCount,
       dkimPassRate: totalCount > 0 ? (dkimPassCount / totalCount * 100) : 0,
       spfPassRate: totalCount > 0 ? (spfPassCount / totalCount * 100) : 0,
       fullPassRate: totalCount > 0 ? (passCount / totalCount * 100) : 0,
       reportCount: reports.length,
       uniqueSourceIps: sourceIps.size,
-      uniqueIpRanges: ipRanges.size,
-      // レポート期間 (Unix 秒)
+      uniqueIpRanges: new Set(ipRangeEntries.map(e => e.key)).size,
       dateRangeMin: dateRangeMin === Infinity ? 0 : dateRangeMin,
       dateRangeMax,
       topSourceIps: [...sourceIps.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 20)
+        .sort((a, b) => b[1] - a[1]).slice(0, 20)
         .map(([ip, count]) => ({ ip, count })),
-      topIpRanges: [...ipRanges.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 20)
-        .map(([range, count]) => ({ range, count })),
+      // IP 範囲別の詳細統計
+      topIpRanges: computeDetailedStats(ipRangeEntries),
+      // レポーター別の詳細統計 (パス率・隔離・拒否を含む)
+      topReporters: computeDetailedStats(reporterEntries),
+      // レポーター別のレポート数 (従来互換)
       reporters: [...reporters.entries()]
         .sort((a, b) => b[1] - a[1])
         .map(([name, count]) => ({ name, count })),
@@ -507,9 +526,7 @@ const ArParser = (() => {
         .sort((a, b) => b[1] - a[1])
         .map(([type, count]) => ({ type, count })),
       warningsSummary: {
-        totalWarnings,
-        reportsWithWarnings,
-        reportsWithMetadataErrors,
+        totalWarnings, reportsWithWarnings, reportsWithMetadataErrors,
         byField: [...warningFieldCounts.entries()]
           .sort((a, b) => b[1] - a[1])
           .map(([field, count]) => ({ field, count }))
