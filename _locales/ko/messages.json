@@ -198,13 +198,13 @@
     "message": "⚠️ Misconfigured"
   },
   "tagMisconfiguredDesc": {
-    "message": "Some messages passed but others were rejected or quarantined. Check SPF/DKIM configuration for this sending source."
+    "message": "이 발신원은 유효한 DKIM 키를 보유하고 있지만(일부 메시지 통과) 인증 실패도 발생합니다. SPF/DKIM 설정을 확인하세요."
   },
   "tagThreat": {
     "message": "🔴 Threat (Unblocked)"
   },
   "tagThreatDesc": {
-    "message": "Authentication failed but messages were delivered anyway. This source may be spoofing your domain. Consider setting p=reject."
+    "message": "이 발신원의 메시지는 DKIM+SPF 인증을 통과한 적이 없지만 일부가 배달되었습니다. p=reject 설정을 고려하세요."
   },
   "tagThirdParty": {
     "message": "Third-party"
