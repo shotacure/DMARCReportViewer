@@ -1,4 +1,4 @@
-// DMARCReportViewer - dashboard/dashboard.js v1.0.2
+// DMARCReportViewer - dashboard/dashboard.js v1.0.3
 
 (() => {
   "use strict";
@@ -245,24 +245,26 @@
   const buildDispositionBar = (agg) => {
     if (agg.totalCount === 0) return "";
     const t = agg.totalCount;
-    const dpPct = agg.deliveredPassCount / t * 100;
-    const dfPct = agg.deliveredFailCount / t * 100;
-    const qPct = agg.quarantineCount / t * 100;
-    const rPct = agg.rejectCount / t * 100;
-    const dpL = msg("deliveredPass"), dfL = msg("deliveredFail"), qL = msg("quarantined"), rL = msg("rejected");
-    const segText = (l, p) => p > 10 ? `${l} ${p.toFixed(1)}%` : (p > 5 ? `${p.toFixed(1)}%` : "");
-    return `<div class="drv-stacked-bar">
-      ${dpPct > 0 ? `<div class="drv-stacked-bar-segment drv-stacked-delivered" style="width:${dpPct}%" title="${dpL}: ${agg.deliveredPassCount.toLocaleString()}">${segText(dpL, dpPct)}</div>` : ""}
-      ${dfPct > 0 ? `<div class="drv-stacked-bar-segment drv-stacked-delivered-fail" style="width:${dfPct}%" title="${dfL}: ${agg.deliveredFailCount.toLocaleString()}">${segText(dfL, dfPct)}</div>` : ""}
-      ${qPct > 0 ? `<div class="drv-stacked-bar-segment drv-stacked-quarantine" style="width:${qPct}%" title="${qL}: ${agg.quarantineCount.toLocaleString()}">${segText(qL, qPct)}</div>` : ""}
-      ${rPct > 0 ? `<div class="drv-stacked-bar-segment drv-stacked-reject" style="width:${rPct}%" title="${rL}: ${agg.rejectCount.toLocaleString()}">${segText(rL, rPct)}</div>` : ""}
-    </div>
-    <div class="drv-pie-legend" style="flex-direction:row;flex-wrap:wrap;gap:8px;padding-left:0;">
-      <span class="drv-pie-legend-item"><span class="drv-legend-dot drv-stacked-delivered"></span>${dpL} ${agg.deliveredPassCount.toLocaleString()}</span>
-      <span class="drv-pie-legend-item"><span class="drv-legend-dot drv-stacked-delivered-fail"></span>${dfL} ${agg.deliveredFailCount.toLocaleString()}</span>
-      <span class="drv-pie-legend-item"><span class="drv-legend-dot drv-stacked-quarantine"></span>${qL} ${agg.quarantineCount.toLocaleString()}</span>
-      <span class="drv-pie-legend-item"><span class="drv-legend-dot drv-stacked-reject"></span>${rL} ${agg.rejectCount.toLocaleString()}</span>
-    </div>`;
+    // 4区分のデータ定義
+    const segs = [
+      { count: agg.deliveredPassCount, label: msg("deliveredPass"), cls: "drv-stacked-delivered", dotCls: "drv-stacked-delivered" },
+      { count: agg.deliveredFailCount, label: msg("deliveredFail"), cls: "drv-stacked-delivered-fail", dotCls: "drv-stacked-delivered-fail" },
+      { count: agg.quarantineCount, label: msg("quarantined"), cls: "drv-stacked-quarantine", dotCls: "drv-stacked-quarantine" },
+      { count: agg.rejectCount, label: msg("rejected"), cls: "drv-stacked-reject", dotCls: "drv-stacked-reject" }
+    ];
+    // 各セグメントのパーセンテージ
+    const withPct = segs.map(s => ({ ...s, pct: s.count / t * 100, pctStr: (s.count / t * 100).toFixed(2) }));
+    // 棒グラフ: テキストなし、ツールチップに件数+パーセンテージ
+    const bar = withPct
+      .filter(s => s.count > 0)
+      .map(s => `<div class="drv-stacked-bar-segment ${s.cls}" style="width:${s.pct}%" title="${escapeHTML(s.label)}: ${s.count.toLocaleString()} (${s.pctStr}%)"></div>`)
+      .join("");
+    // 凡例: 常に4区分すべて表示、件数 (XX.XX%) 形式
+    const legend = withPct.map(s =>
+      `<span class="drv-pie-legend-item"><span class="drv-legend-dot ${s.dotCls}"></span>${escapeHTML(s.label)} ${s.count.toLocaleString()} (${s.pctStr}%)</span>`
+    ).join("");
+    return `<div class="drv-stacked-bar">${bar}</div>
+    <div class="drv-pie-legend" style="flex-direction:row;flex-wrap:wrap;gap:8px;padding-left:0;">${legend}</div>`;
   };
 
   // =========================================================
@@ -476,25 +478,26 @@
       if (!entry.begin) continue;
       const key = bucketKeyFn(entry.begin);
       const ex = buckets.get(key);
-      if (ex) { ex.delivered += entry.delivered; ex.quarantine += entry.quarantine; ex.reject += entry.reject; }
-      else buckets.set(key, { key, delivered: entry.delivered, quarantine: entry.quarantine, reject: entry.reject });
+      if (ex) { ex.delivered += entry.delivered; ex.deliveredFail += (entry.deliveredFail || 0); ex.quarantine += entry.quarantine; ex.reject += entry.reject; }
+      else buckets.set(key, { key, delivered: entry.delivered, deliveredFail: entry.deliveredFail || 0, quarantine: entry.quarantine, reject: entry.reject });
     }
     if (buckets.size === 0) return "";
     const allKeys = [...buckets.keys()].sort();
     const filled = [];
+    const emptyBucket = (k) => ({key:k,delivered:0,deliveredFail:0,quarantine:0,reject:0});
     if (unitLabel === "daily") {
       const s = new Date(allKeys[0]+"T00:00:00"), e = new Date(allKeys[allKeys.length-1]+"T00:00:00");
-      for (let d = new Date(s); d <= e; d.setDate(d.getDate()+1)) { const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; filled.push(buckets.get(k)||{key:k,delivered:0,quarantine:0,reject:0}); }
+      for (let d = new Date(s); d <= e; d.setDate(d.getDate()+1)) { const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; filled.push(buckets.get(k)||emptyBucket(k)); }
     } else if (unitLabel === "weekly") {
       const s = new Date(allKeys[0]+"T00:00:00"), e = new Date(allKeys[allKeys.length-1]+"T00:00:00");
-      for (let d = new Date(s); d <= e; d.setDate(d.getDate()+7)) { const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; filled.push(buckets.get(k)||{key:k,delivered:0,quarantine:0,reject:0}); }
+      for (let d = new Date(s); d <= e; d.setDate(d.getDate()+7)) { const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; filled.push(buckets.get(k)||emptyBucket(k)); }
     } else {
       const [sy,sm] = allKeys[0].split("-").map(Number), [ey,em] = allKeys[allKeys.length-1].split("-").map(Number);
-      let y=sy,m=sm; while(y<ey||(y===ey&&m<=em)){const k=`${y}-${String(m).padStart(2,"0")}`;filled.push(buckets.get(k)||{key:k,delivered:0,quarantine:0,reject:0});m++;if(m>12){m=1;y++;}}
+      let y=sy,m=sm; while(y<ey||(y===ey&&m<=em)){const k=`${y}-${String(m).padStart(2,"0")}`;filled.push(buckets.get(k)||emptyBucket(k));m++;if(m>12){m=1;y++;}}
     }
     if (filled.length < 2) return "";
     let maxVal = 0;
-    for (const b of filled) maxVal = Math.max(maxVal, b.delivered, b.quarantine, b.reject);
+    for (const b of filled) maxVal = Math.max(maxVal, b.delivered, b.deliveredFail, b.quarantine, b.reject);
     if (maxVal === 0) maxVal = 1;
     const w=860,h=200,padL=50,padR=40,padT=12,padB=40;
     const chartW=w-padL-padR,chartH=h-padT-padB,n=filled.length;
@@ -505,20 +508,23 @@
     let xLabels="";const step=Math.max(1,Math.floor(n/10));
     for(let i=0;i<n;i+=step){const x=xAt(i),label=unitLabel==="monthly"?filled[i].key:filled[i].key.slice(5);xLabels+=`<text x="${x}" y="${h-padB+16}" text-anchor="middle" font-size="11">${label}</text>`;}
     if((n-1)%step!==0){const x=xAt(n-1),label=unitLabel==="monthly"?filled[n-1].key:filled[n-1].key.slice(5);xLabels+=`<text x="${x}" y="${h-padB+16}" text-anchor="end" font-size="11">${label}</text>`;}
+    // 4系列: 配送済(認証成功) / 配送済(認証失敗) / 隔離 / 拒否
+    const series = [
+      {f:"delivered",c:COLOR_DELIVERED,l:msg("deliveredPass")},
+      {f:"deliveredFail",c:COLOR_DELIVERED_FAIL,l:msg("deliveredFail")},
+      {f:"quarantine",c:COLOR_QUARANTINE,l:msg("quarantined")},
+      {f:"reject",c:COLOR_REJECT,l:msg("rejected")}
+    ];
     let dots="";
-    for(let i=0;i<n;i++){const b=filled[i],x=xAt(i);[{f:"delivered",c:COLOR_DELIVERED,l:msg("deliveredPass")},{f:"quarantine",c:COLOR_QUARANTINE,l:msg("quarantined")},{f:"reject",c:COLOR_REJECT,l:msg("rejected")}].forEach(e=>{const y=yAt(b[e.f]);dots+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${e.c}" opacity="0.8"><title>${escapeHTML(b.key+" — "+e.l+": "+b[e.f].toLocaleString())}</title></circle>`;});}
+    for(let i=0;i<n;i++){const b=filled[i],x=xAt(i);series.forEach(e=>{const y=yAt(b[e.f]);dots+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${e.c}" opacity="0.8"><title>${escapeHTML(b.key+" — "+e.l+": "+b[e.f].toLocaleString())}</title></circle>`;});}
     return `<div class="drv-chart-container"><div class="drv-chart-title">${escapeHTML(msg("chartTimeSeries"))}</div>
       <svg class="drv-chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">${gridLines}
         <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+chartH}" class="drv-axis-line"/>
         <line x1="${padL}" y1="${padT+chartH}" x2="${w-padR}" y2="${padT+chartH}" class="drv-axis-line"/>${xLabels}
-        <polyline points="${toPolyline("delivered")}" fill="none" stroke="${COLOR_DELIVERED}" stroke-width="2"/>
-        <polyline points="${toPolyline("quarantine")}" fill="none" stroke="${COLOR_QUARANTINE}" stroke-width="2"/>
-        <polyline points="${toPolyline("reject")}" fill="none" stroke="${COLOR_REJECT}" stroke-width="2"/>${dots}
+        ${series.map(e => `<polyline points="${toPolyline(e.f)}" fill="none" stroke="${e.c}" stroke-width="2"/>`).join("\n        ")}${dots}
       </svg>
       <div class="drv-chart-legend-row">
-        <span class="drv-pie-legend-item"><span class="drv-legend-dot" style="background:${COLOR_DELIVERED}"></span>${msg("deliveredPass")}</span>
-        <span class="drv-pie-legend-item"><span class="drv-legend-dot" style="background:${COLOR_QUARANTINE}"></span>${msg("quarantined")}</span>
-        <span class="drv-pie-legend-item"><span class="drv-legend-dot" style="background:${COLOR_REJECT}"></span>${msg("rejected")}</span>
+        ${series.map(e => `<span class="drv-pie-legend-item"><span class="drv-legend-dot" style="background:${e.c}"></span>${e.l}</span>`).join("\n        ")}
       </div></div>`;
   };
 

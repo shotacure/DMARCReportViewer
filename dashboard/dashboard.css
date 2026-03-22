@@ -1,4 +1,4 @@
-/* DMARCReportViewer - dashboard.css v1.0.2 */
+/* DMARCReportViewer - dashboard.css v1.0.3 */
 
 :root {
   --drv-bg: #f5f6f8; --drv-surface: #ffffff; --drv-border: #ddd;
@@ -142,7 +142,7 @@ body { font-family: "Segoe UI", Meiryo, sans-serif; background: var(--drv-bg); c
 
 /* Disposition 積み上げバー */
 .drv-stacked-bar { display: flex; height: 20px; border-radius: 4px; overflow: hidden; margin: 8px 0; }
-.drv-stacked-bar-segment { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; min-width: 2px; }
+.drv-stacked-bar-segment { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: white; min-width: 2px; cursor: help; }
 .drv-stacked-delivered { background: var(--drv-color-delivered); }
 .drv-stacked-delivered-fail { background: var(--drv-color-delivered-fail); }
 .drv-stacked-quarantine { background: var(--drv-color-quarantine); }

@@ -331,7 +331,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const dd = {
               domain, reportCount: domainReports.length, policy: latestReport.policy,
               aggregate: ArParser.aggregateSummaries(domainReports),
-              timeSeries: domainReports.map(r => ({ begin: r.dateRange.begin, delivered: r.summary.noneCount, quarantine: r.summary.quarantineCount, reject: r.summary.rejectCount })),
+              timeSeries: domainReports.map(r => ({ begin: r.dateRange.begin, delivered: r.summary.noneCount, deliveredFail: r.summary.deliveredFailCount, quarantine: r.summary.quarantineCount, reject: r.summary.rejectCount })),
               // ドメインに紐づくフォレンジックレポート
               forensicReports: frByDomain.get(domain.toLowerCase()) || []
             };
