@@ -198,13 +198,13 @@
     "message": "⚠️ Misconfigured"
   },
   "tagMisconfiguredDesc": {
-    "message": "Some messages passed but others were rejected or quarantined. Check SPF/DKIM configuration for this sending source."
+    "message": "Этот источник имеет действительные ключи DKIM (часть сообщений проходит), но также есть ошибки аутентификации. Проверьте конфигурацию SPF/DKIM."
   },
   "tagThreat": {
     "message": "🔴 Threat (Unblocked)"
   },
   "tagThreatDesc": {
-    "message": "Authentication failed but messages were delivered anyway. This source may be spoofing your domain. Consider setting p=reject."
+    "message": "Ни одно сообщение от этого источника не прошло аутентификацию DKIM+SPF, но некоторые были доставлены. Рассмотрите установку p=reject."
   },
   "tagThirdParty": {
     "message": "Third-party"

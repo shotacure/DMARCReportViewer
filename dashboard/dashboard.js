@@ -1,4 +1,4 @@
-// DMARCReportViewer - dashboard/dashboard.js v1.0.3
+// DMARCReportViewer - dashboard/dashboard.js v1.0.4
 
 (() => {
   "use strict";
@@ -78,15 +78,21 @@
   // IP 範囲の自動分類タグを算出
   // =========================================================
   const classifyIpRange = (e) => {
+    // 全 pass + 全配送 → 正規の送信元
     if (e.fullPass === e.count && e.deliveredPass === e.count)
       return { tag: "legitimate", label: msg("tagLegitimate"), cls: "drv-ip-tag-legitimate", tip: msg("tagLegitimateDesc") };
+    // DKIM+SPF pass の実績がある → 正規の送信元 (DKIM 秘密鍵がなければ pass は不可能)
+    if (e.fullPass > 0)
+      return { tag: "legitimate", label: msg("tagLegitimate"), cls: "drv-ip-tag-legitimate", tip: msg("tagLegitimateDesc") };
+    // 以下 fullPass === 0: この送信元は DKIM 秘密鍵を持っていない
+    // 全 fail + 全 reject → ポリシーが正しくブロック中
+    if (e.reject === e.count)
+      return { tag: "blocked", label: msg("tagBlocked"), cls: "drv-ip-tag-blocked", tip: msg("tagBlockedDesc") };
+    // 全 fail だが一部が配送されている → 不正な送信元が素通り (最も危険)
     if (e.deliveredFail > 0)
       return { tag: "threat", label: msg("tagThreat"), cls: "drv-ip-tag-threat", tip: msg("tagThreatDesc") };
-    if (e.fullPass === 0 && e.reject === e.count)
-      return { tag: "blocked", label: msg("tagBlocked"), cls: "drv-ip-tag-blocked", tip: msg("tagBlockedDesc") };
-    if (e.fullPass > 0 && (e.reject > 0 || e.quarantine > 0))
-      return { tag: "misconfigured", label: msg("tagMisconfigured"), cls: "drv-ip-tag-misconfigured", tip: msg("tagMisconfiguredDesc") };
-    if (e.fullPass === 0 && e.count > 0)
+    // 全 fail + 全 reject/quarantine (reject と quarantine の混在)
+    if (e.count > 0)
       return { tag: "blocked", label: msg("tagBlocked"), cls: "drv-ip-tag-blocked", tip: msg("tagBlockedDesc") };
     return { tag: "unknown", label: "—", cls: "", tip: "" };
   };

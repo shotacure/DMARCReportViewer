@@ -198,13 +198,13 @@
     "message": "⚠️ Misconfigured"
   },
   "tagMisconfiguredDesc": {
-    "message": "Some messages passed but others were rejected or quarantined. Check SPF/DKIM configuration for this sending source."
+    "message": "此發送源擁有有效的DKIM金鑰（部分郵件通過認證），但也存在認證失敗。請檢查SPF/DKIM設定。"
   },
   "tagThreat": {
     "message": "🔴 Threat (Unblocked)"
   },
   "tagThreatDesc": {
-    "message": "Authentication failed but messages were delivered anyway. This source may be spoofing your domain. Consider setting p=reject."
+    "message": "此發送源的郵件從未通過DKIM+SPF認證，但部分郵件仍被投遞。該源不持有有效簽署金鑰。請考慮設定p=reject。"
   },
   "tagThirdParty": {
     "message": "Third-party"
