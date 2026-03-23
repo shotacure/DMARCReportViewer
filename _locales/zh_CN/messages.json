@@ -1,6 +1,6 @@
 {
   "extensionName": {
-    "message": "DMARC Report Viewer"
+    "message": "DMARC Report Analyzer"
   },
   "extensionDescription": {
     "message": "在Thunderbird中本地分析DMARC聚合和取证报告。识别威胁，验证您的电子邮件认证，并采取行动。"

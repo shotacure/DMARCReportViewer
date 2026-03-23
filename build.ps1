@@ -11,7 +11,7 @@ if (-not $version) {
 
 # --- 出力パス定義 ---
 $outDir = ".release"
-$fileName = "DMARCReportViewer-$version.xpi"
+$fileName = "DMARCReportAnalyzer-$version.xpi"
 $outFile = Join-Path $outDir $fileName
 $stageDir = Join-Path $outDir "_stage"
 

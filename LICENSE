@@ -5,7 +5,7 @@
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
 
-    DMARCReportViewer - a Thunderbird add-on to visualize DMARC reports
+    DMARCReportAnalyzer - a Thunderbird add-on to analyze DMARC reports
     Copyright (C) 2025  Shota (SHOWTIME)
 
     This program is free software: you can redistribute it and/or modify

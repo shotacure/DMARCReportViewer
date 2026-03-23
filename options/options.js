@@ -1,4 +1,4 @@
-// DMARCReportViewer - options/options.js
+// DMARCReportAnalyzer - options/options.js
 // 設定画面のロジック: フォルダ一覧取得、選択保存、復元
 // パスに "dmarc" を含むフォルダのみ選択肢に表示する
 

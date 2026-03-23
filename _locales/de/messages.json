@@ -1,6 +1,6 @@
 {
   "extensionName": {
-    "message": "DMARC Report Viewer"
+    "message": "DMARC Report Analyzer"
   },
   "extensionDescription": {
     "message": "Analysieren Sie DMARC-Gesamt- und Forensikberichte lokal in Thunderbird. Erkennen Sie Bedrohungen, überprüfen Sie Ihre E-Mail-Authentifizierung und ergreifen Sie Maßnahmen."
