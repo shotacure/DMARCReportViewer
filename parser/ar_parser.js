@@ -1,4 +1,4 @@
-// DMARCReportViewer - parser/ar_parser.js
+// DMARCReportAnalyzer - parser/ar_parser.js
 // 集約レポート (Aggregate Report) XML パーサー
 // RFC 7489 に準拠した DMARC 集約レポート XML を正規化データに変換する。
 // DOMParser を使用し、外部ライブラリに依存しない。

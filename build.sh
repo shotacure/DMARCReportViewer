@@ -13,7 +13,7 @@ fi
 
 # --- 出力パス定義 ---
 OUT_DIR=".release"
-FILE_NAME="DMARCReportViewer-${VERSION}.xpi"
+FILE_NAME="DMARCReportAnalyzer-${VERSION}.xpi"
 OUT_FILE="${OUT_DIR}/${FILE_NAME}"
 STAGE_DIR="${OUT_DIR}/_stage"
 

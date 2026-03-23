@@ -1,4 +1,4 @@
-// DMARCReportViewer - parser/fr_parser.js
+// DMARCReportAnalyzer - parser/fr_parser.js
 // フォレンジックレポート (Forensic Report) パーサー
 // AFRF (RFC 6591) 形式のフォレンジックレポートを正規化データに変換する。
 // フォレンジックレポートは来る ISP が少なく形式もバラつくため、防御的にパースする。

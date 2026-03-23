@@ -1,4 +1,4 @@
-// DMARCReportViewer - dashboard/dashboard.js v1.0.4
+// DMARCReportAnalyzer - dashboard/dashboard.js v1.0.5
 
 (() => {
   "use strict";
@@ -613,7 +613,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `dmarc-report-${new Date().toISOString().slice(0,10)}.csv`;
+    a.download = `dmarc-analysis-${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -665,7 +665,7 @@
   // =========================================================
   // 期間選択の記憶キー
   // =========================================================
-  const PERIOD_STORAGE_KEY = "dmarcrvPeriod";
+  const PERIOD_STORAGE_KEY = "dmarcraPeriod";
 
   // =========================================================
   // 初期化

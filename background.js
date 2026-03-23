@@ -1,4 +1,4 @@
-// DMARCReportViewer - background.js
+// DMARCReportAnalyzer - background.js
 // バックグラウンドスクリプト: フォルダ内メッセージのスキャン、添付ファイル抽出、
 // レポート解析パイプラインの管理を担当する。
 // 外部通信は一切行わない。すべての処理はローカルで完結する。
@@ -6,7 +6,7 @@
 // =========================================================
 // 定数
 // =========================================================
-const STORAGE_KEY_SETTINGS = "dmarcrvSettings";
+const STORAGE_KEY_SETTINGS = "dmarcraSettings";
 const DASHBOARD_PATH = "dashboard/dashboard.html";
 const DEFAULT_SETTINGS = {
   arFolderId: null,
@@ -197,7 +197,7 @@ const decompressAttachment = async (attachment) => {
 const decompressGzip = (arrayBuffer) => {
   if (typeof pako === "undefined") return null;
   try { return new TextDecoder("utf-8").decode(pako.inflate(new Uint8Array(arrayBuffer))); }
-  catch (e) { console.error("DMARCReportViewer: gzip decompression failed:", e); return null; }
+  catch (e) { console.error("DMARCReportAnalyzer: gzip decompression failed:", e); return null; }
 };
 
 // =========================================================
