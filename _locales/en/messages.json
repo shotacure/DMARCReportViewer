@@ -245,9 +245,6 @@
   "healthNeedsAttention": {
     "message": "Needs Attention"
   },
-  "healthAtRisk": {
-    "message": "At Risk"
-  },
   "advicePNone": {
     "message": "Your policy is p=none — authentication failures are not being enforced. Consider migrating to p=quarantine, then p=reject."
   },
@@ -264,7 +261,7 @@
     "message": "DKIM alignment is set to relaxed (adkim=r). Consider strict alignment (adkim=s) for stronger protection."
   },
   "advicePctPartial": {
-    "message": "Policy is only applied to $1% of messages (pct=$1). If no issues are observed, consider setting pct=100."
+    "message": "Policy is only applied to #1% of messages (pct=#1). If no issues are observed, consider setting pct=100."
   },
   "ipRangeCountLabel": {
     "message": "IP ranges"
@@ -373,5 +370,26 @@
   },
   "noResultsNotice": {
     "message": "No reports found in the selected period. Try selecting a longer period or check your folder settings."
+  },
+  "healthReasonBlocking": {
+    "message": "#1 blocked"
+  },
+  "healthReasonDeliveredFail": {
+    "message": "#1 delivered without authentication"
+  },
+  "healthReasonNotReject": {
+    "message": "Policy is p=#1"
+  },
+  "alignNoteSpfMismatch": {
+    "message": "SPF misaligned: #1"
+  },
+  "alignNoteDkimMismatch": {
+    "message": "DKIM misaligned: #1"
+  },
+  "healthAtRisk": {
+    "message": "At Risk"
+  },
+  "adviceAlignNote": {
+    "message": " alignment mismatch detected"
   }
 }

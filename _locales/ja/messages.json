@@ -245,9 +245,6 @@
   "healthNeedsAttention": {
     "message": "要確認"
   },
-  "healthAtRisk": {
-    "message": "危険"
-  },
   "advicePNone": {
     "message": "ポリシーが p=none です。認証失敗に対する強制措置が取られていません。p=quarantine を経て p=reject への段階的な移行を検討してください。"
   },
@@ -264,7 +261,7 @@
     "message": "DKIMアライメントが relaxed (adkim=r) です。より強固な保護のために strict (adkim=s) への変更を検討してください。"
   },
   "advicePctPartial": {
-    "message": "ポリシーはメッセージの $1% にのみ適用されています (pct=$1)。問題がなければ pct=100 への移行を検討してください。"
+    "message": "ポリシーはメッセージの #1% にのみ適用されています (pct=#1)。問題がなければ pct=100 への移行を検討してください。"
   },
   "ipRangeCountLabel": {
     "message": "IPアドレス範囲"
@@ -373,5 +370,26 @@
   },
   "noResultsNotice": {
     "message": "選択した期間にレポートが見つかりませんでした。期間を長くするか、フォルダ設定を確認してください。"
+  },
+  "healthReasonBlocking": {
+    "message": "#1 件ブロック"
+  },
+  "healthReasonDeliveredFail": {
+    "message": "#1 件が未認証で配送"
+  },
+  "healthReasonNotReject": {
+    "message": "ポリシー p=#1"
+  },
+  "alignNoteSpfMismatch": {
+    "message": "SPF非整合: #1"
+  },
+  "alignNoteDkimMismatch": {
+    "message": "DKIM非整合: #1"
+  },
+  "healthAtRisk": {
+    "message": "危険"
+  },
+  "adviceAlignNote": {
+    "message": "アライメント非整合あり"
   }
 }

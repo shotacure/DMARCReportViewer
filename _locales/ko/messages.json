@@ -245,9 +245,6 @@
   "healthNeedsAttention": {
     "message": "Needs Attention"
   },
-  "healthAtRisk": {
-    "message": "At Risk"
-  },
   "advicePNone": {
     "message": "Your policy is p=none — authentication failures are not being enforced. Consider migrating to p=quarantine, then p=reject."
   },
@@ -264,7 +261,7 @@
     "message": "DKIM alignment is set to relaxed (adkim=r). Consider strict alignment (adkim=s) for stronger protection."
   },
   "advicePctPartial": {
-    "message": "Policy is only applied to $1% of messages (pct=$1). If no issues are observed, consider setting pct=100."
+    "message": "Policy is only applied to #1% of messages (pct=#1). If no issues are observed, consider setting pct=100."
   },
   "ipRangeCountLabel": {
     "message": "IP 범위"
@@ -373,5 +370,26 @@
   },
   "noResultsNotice": {
     "message": "선택한 기간에 보고서가 없습니다. 기간을 늘리거나 폴더 설정을 확인하세요."
+  },
+  "healthReasonBlocking": {
+    "message": "#1건 차단"
+  },
+  "healthReasonDeliveredFail": {
+    "message": "#1건 미인증 배달"
+  },
+  "healthReasonNotReject": {
+    "message": "정책 p=#1"
+  },
+  "alignNoteSpfMismatch": {
+    "message": "SPF 미정렬: #1"
+  },
+  "alignNoteDkimMismatch": {
+    "message": "DKIM 미정렬: #1"
+  },
+  "healthAtRisk": {
+    "message": "위험"
+  },
+  "adviceAlignNote": {
+    "message": " 정렬 불일치 감지"
   }
 }

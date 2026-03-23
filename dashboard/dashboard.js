@@ -1,4 +1,4 @@
-// DMARCReportAnalyzer - dashboard/dashboard.js v1.0.5
+// DMARCReportAnalyzer - dashboard/dashboard.js v1.0.6
 
 (() => {
   "use strict";
@@ -78,20 +78,22 @@
   // IP 範囲の自動分類タグを算出
   // =========================================================
   const classifyIpRange = (e) => {
-    // 全 pass + 全配送 → 正規の送信元
-    if (e.fullPass === e.count && e.deliveredPass === e.count)
+    // DMARC pass (DKIM or SPF) の実績で判定
+    const dp = e.dmarcPass || 0;
+    // 全 DMARC pass + 全配送 → 正規の送信元
+    if (dp === e.count && e.deliveredPass === e.count)
       return { tag: "legitimate", label: msg("tagLegitimate"), cls: "drv-ip-tag-legitimate", tip: msg("tagLegitimateDesc") };
-    // DKIM+SPF pass の実績がある → 正規の送信元 (DKIM 秘密鍵がなければ pass は不可能)
-    if (e.fullPass > 0)
+    // DMARC pass の実績がある → 正規の送信元 (DKIM 秘密鍵がなければ pass は不可能)
+    if (dp > 0)
       return { tag: "legitimate", label: msg("tagLegitimate"), cls: "drv-ip-tag-legitimate", tip: msg("tagLegitimateDesc") };
-    // 以下 fullPass === 0: この送信元は DKIM 秘密鍵を持っていない
-    // 全 fail + 全 reject → ポリシーが正しくブロック中
+    // 以下 dmarcPass === 0: この送信元は認証に一度も成功していない
+    // 全 reject → ポリシーが正しくブロック中
     if (e.reject === e.count)
       return { tag: "blocked", label: msg("tagBlocked"), cls: "drv-ip-tag-blocked", tip: msg("tagBlockedDesc") };
-    // 全 fail だが一部が配送されている → 不正な送信元が素通り (最も危険)
+    // 一部が配送されている → 不正な送信元が素通り (最も危険)
     if (e.deliveredFail > 0)
       return { tag: "threat", label: msg("tagThreat"), cls: "drv-ip-tag-threat", tip: msg("tagThreatDesc") };
-    // 全 fail + 全 reject/quarantine (reject と quarantine の混在)
+    // 全 reject/quarantine (混在)
     if (e.count > 0)
       return { tag: "blocked", label: msg("tagBlocked"), cls: "drv-ip-tag-blocked", tip: msg("tagBlockedDesc") };
     return { tag: "unknown", label: "—", cls: "", tip: "" };
@@ -101,17 +103,42 @@
   // ドメイン健全度バッジを算出
   // =========================================================
   const computeHealthBadge = (agg, policy) => {
-    const hasDeliveredFail = agg.deliveredFailCount > 0;
-    const isRejectPolicy = policy.p === "reject";
-    const isHighPassRate = agg.fullPassRate >= 95;
+    const deliveredFail = Number(agg.deliveredFailCount) || 0;
+    const rejectCount = Number(agg.rejectCount) || 0;
+    const policyP = policy.p || "none";
 
-    if (!hasDeliveredFail && isRejectPolicy && isHighPassRate && agg.rejectCount === 0)
-      return { cls: "drv-health-healthy", label: msg("healthHealthy"), icon: "✅" };
-    if (!hasDeliveredFail && agg.rejectCount > 0 && isRejectPolicy)
-      return { cls: "drv-health-under-attack", label: msg("healthUnderAttack"), icon: "🛡️" };
-    if (hasDeliveredFail || !isRejectPolicy)
-      return { cls: "drv-health-needs-attention", label: msg("healthNeedsAttention"), icon: "⚠️" };
-    return { cls: "drv-health-at-risk", label: msg("healthAtRisk"), icon: "🔴" };
+    // アライメント非整合の検出 (情報提示用、バッジ判定には影響しない)
+    const dkimPassN = Number(agg.dkimPassCount) || 0;
+    const spfPassN = Number(agg.spfPassCount) || 0;
+    const fullPassN = Number(agg.passCount) || 0;
+    const dkimOnly = dkimPassN - fullPassN;
+    const spfOnly = spfPassN - fullPassN;
+    const alignNotes = [];
+    if (dkimOnly > 0) alignNotes.push(msg("alignNoteSpfMismatch").replaceAll("#1", String(dkimOnly)));
+    if (spfOnly > 0) alignNotes.push(msg("alignNoteDkimMismatch").replaceAll("#1", String(spfOnly)));
+    const info = alignNotes.join(" ");
+
+    // 🔴 危険: p=none、または deliveredFail > 0 (未認証メールが受信箱に到達)
+    if (policyP === "none" || deliveredFail > 0) {
+      const reasons = [];
+      if (deliveredFail > 0)
+        reasons.push(msg("healthReasonDeliveredFail").replaceAll("#1", String(deliveredFail)));
+      if (policyP !== "reject")
+        reasons.push(msg("healthReasonNotReject").replaceAll("#1", policyP));
+      return { cls: "drv-health-at-risk", label: msg("healthAtRisk"), icon: "🔴",
+        reason: reasons.join(" "), info };
+    }
+    // ⚠️ 要確認: p=quarantine (reject より弱い)
+    if (policyP === "quarantine")
+      return { cls: "drv-health-needs-attention", label: msg("healthNeedsAttention"), icon: "⚠️",
+        reason: msg("healthReasonNotReject").replaceAll("#1", policyP), info };
+    // 以下 p=reject, deliveredFail=0
+    // 🛡️ 攻撃検知中: 不正メールをブロックしている
+    if (rejectCount > 0)
+      return { cls: "drv-health-under-attack", label: msg("healthUnderAttack"), icon: "🛡️",
+        reason: msg("healthReasonBlocking").replaceAll("#1", String(rejectCount)), info };
+    // ✅ 健全: 全メール認証成功、reject ポリシー有効
+    return { cls: "drv-health-healthy", label: msg("healthHealthy"), icon: "✅", reason: "", info };
   };
 
   // =========================================================
@@ -164,7 +191,14 @@
         advices.push({ level: "warn", text: msg("advicePQuarantineWithFail") });
       }
     } else if (policy.p === "reject" && agg.deliveredFailCount === 0 && agg.rejectCount === 0) {
-      advices.push({ level: "ok", text: msg("advicePRejectClean") });
+      let text = msg("advicePRejectClean");
+      const dkimOnlyA = Number(agg.dkimPassCount || 0) - Number(agg.passCount || 0);
+      const spfOnlyA = Number(agg.spfPassCount || 0) - Number(agg.passCount || 0);
+      const alignParts = [];
+      if (dkimOnlyA > 0) alignParts.push("SPF");
+      if (spfOnlyA > 0) alignParts.push("DKIM");
+      if (alignParts.length > 0) text += ` (${alignParts.join("/")}${msg("adviceAlignNote")})`;
+      advices.push({ level: "ok", text });
     }
     // adkim=r の推奨
     if (policy.adkim === "r") {
@@ -172,7 +206,7 @@
     }
     // pct < 100 の推奨
     if (policy.pct < 100) {
-      advices.push({ level: "warn", text: msg("advicePctPartial").replace("$1", policy.pct) });
+      advices.push({ level: "warn", text: msg("advicePctPartial").replaceAll("#1", policy.pct) });
     }
     if (advices.length === 0) return "";
     return advices.map(a =>
@@ -759,7 +793,7 @@
     const sectionId = `domain-${dd.domain.replace(/[^a-zA-Z0-9]/g, "_")}`;
     let html = `<div class="drv-domain-header" data-target="${sectionId}">
       <span>📋 ${escapeHTML(dd.domain)}</span>
-      <span class="drv-health-badge ${health.cls}" title="${escapeHTML(health.label)}">${health.icon} ${escapeHTML(health.label)}</span>
+      <span class="drv-health-badge ${health.cls}" title="${escapeHTML(health.reason || health.label)}">${health.icon} ${escapeHTML(health.label)}</span>${health.reason ? `<span style="font-size:11px;font-weight:normal;color:var(--drv-text-muted);margin-left:4px">${escapeHTML(health.reason)}</span>` : ""}${health.info ? `<span style="font-size:11px;font-weight:normal;color:var(--drv-text-muted);margin-left:4px">ℹ️ ${escapeHTML(health.info)}</span>` : ""}
       <span class="drv-domain-policy">${escapeHTML(policyStr)}</span>
       <span style="font-size:12px;color:var(--drv-text-muted);">${agg.reportCount} ${escapeHTML(msg("colReports"))}</span>
       <span class="drv-toggle-icon expanded" data-toggle="${sectionId}">▼</span>
