@@ -245,9 +245,6 @@
   "healthNeedsAttention": {
     "message": "Needs Attention"
   },
-  "healthAtRisk": {
-    "message": "At Risk"
-  },
   "advicePNone": {
     "message": "Your policy is p=none — authentication failures are not being enforced. Consider migrating to p=quarantine, then p=reject."
   },
@@ -264,7 +261,7 @@
     "message": "DKIM alignment is set to relaxed (adkim=r). Consider strict alignment (adkim=s) for stronger protection."
   },
   "advicePctPartial": {
-    "message": "Policy is only applied to $1% of messages (pct=$1). If no issues are observed, consider setting pct=100."
+    "message": "Policy is only applied to #1% of messages (pct=#1). If no issues are observed, consider setting pct=100."
   },
   "ipRangeCountLabel": {
     "message": "نطاقات IP"
@@ -373,5 +370,26 @@
   },
   "noResultsNotice": {
     "message": "لم يتم العثور على تقارير في الفترة المحددة. جرب فترة أطول أو تحقق من إعدادات المجلد."
+  },
+  "healthReasonBlocking": {
+    "message": "تم حظر #1"
+  },
+  "healthReasonDeliveredFail": {
+    "message": "تم تسليم #1 بدون مصادقة"
+  },
+  "healthReasonNotReject": {
+    "message": "السياسة p=#1"
+  },
+  "alignNoteSpfMismatch": {
+    "message": "SPF غير متوافق: #1"
+  },
+  "alignNoteDkimMismatch": {
+    "message": "DKIM غير متوافق: #1"
+  },
+  "healthAtRisk": {
+    "message": "في خطر"
+  },
+  "adviceAlignNote": {
+    "message": " : عدم توافق"
   }
 }

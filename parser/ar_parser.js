@@ -64,12 +64,13 @@ const ArParser = (() => {
         existing.dkimPass += e.dkimPass;
         existing.spfPass += e.spfPass;
         existing.fullPass += e.fullPass;
+        existing.dmarcPass += (e.dmarcPass || 0);
         existing.deliveredPass += e.deliveredPass;
         existing.deliveredFail += e.deliveredFail;
         existing.quarantine += e.quarantine;
         existing.reject += e.reject;
       } else {
-        map.set(e.key, { ...e });
+        map.set(e.key, { ...e, dmarcPass: e.dmarcPass || 0 });
       }
     }
 
@@ -80,6 +81,7 @@ const ArParser = (() => {
         key: s.key,
         count: s.count,
         fullPass: s.fullPass,
+        dmarcPass: s.dmarcPass,
         dkimPass: s.dkimPass,
         spfPass: s.spfPass,
         deliveredPass: s.deliveredPass,
@@ -132,12 +134,13 @@ const ArParser = (() => {
       if (group.items.length >= 2) {
         // 統計値を合算してマージ
         const merged = {
-          key: group.mergedKey, count: 0, fullPass: 0, dkimPass: 0, spfPass: 0,
+          key: group.mergedKey, count: 0, fullPass: 0, dmarcPass: 0, dkimPass: 0, spfPass: 0,
           deliveredPass: 0, deliveredFail: 0, quarantine: 0, reject: 0
         };
         for (const item of group.items) {
           merged.count += item.count;
           merged.fullPass += item.fullPass;
+          merged.dmarcPass += (item.dmarcPass || 0);
           merged.dkimPass += item.dkimPass;
           merged.spfPass += item.spfPass;
           merged.deliveredPass += item.deliveredPass;
@@ -352,14 +355,17 @@ const ArParser = (() => {
       const isDkimPass = rec.dkimPolicyResult === "pass";
       const isSpfPass = rec.spfPolicyResult === "pass";
       const isFullPass = isDkimPass && isSpfPass;
+      // DMARC は DKIM か SPF のどちらか一方が pass すれば合格 (RFC 7489)
+      const isDmarcPass = isDkimPass || isSpfPass;
       const isDelivered = rec.disposition !== "quarantine" && rec.disposition !== "reject";
 
       if (isDkimPass) dkimPassCount += rec.count;
       if (isSpfPass) spfPassCount += rec.count;
       if (isFullPass) passCount += rec.count;
 
-      if (isDelivered && isFullPass) deliveredPassCount += rec.count;
-      if (isDelivered && !isFullPass) deliveredFailCount += rec.count;
+      // 配送済の認証成功/失敗は DMARC 判定 (OR) で分離
+      if (isDelivered && isDmarcPass) deliveredPassCount += rec.count;
+      if (isDelivered && !isDmarcPass) deliveredFailCount += rec.count;
 
       switch (rec.disposition) {
         case "reject":     rejectCount += rec.count;     break;
@@ -379,8 +385,9 @@ const ArParser = (() => {
         dkimPass: isDkimPass ? rec.count : 0,
         spfPass: isSpfPass ? rec.count : 0,
         fullPass: isFullPass ? rec.count : 0,
-        deliveredPass: (isDelivered && isFullPass) ? rec.count : 0,
-        deliveredFail: (isDelivered && !isFullPass) ? rec.count : 0,
+        dmarcPass: isDmarcPass ? rec.count : 0,
+        deliveredPass: (isDelivered && isDmarcPass) ? rec.count : 0,
+        deliveredFail: (isDelivered && !isDmarcPass) ? rec.count : 0,
         quarantine: rec.disposition === "quarantine" ? rec.count : 0,
         reject: rec.disposition === "reject" ? rec.count : 0
       });
@@ -454,14 +461,14 @@ const ArParser = (() => {
         const existing = envelopeMap.get(mismatchKey);
         if (existing) {
           existing.count += rec.count;
-          existing.pass += isFullPass ? rec.count : 0;
-          existing.fail += isFullPass ? 0 : rec.count;
+          existing.pass += isDmarcPass ? rec.count : 0;
+          existing.fail += isDmarcPass ? 0 : rec.count;
         } else {
           envelopeMap.set(mismatchKey, {
             headerFrom: hf, envelopeFrom: ef,
             count: rec.count,
-            pass: isFullPass ? rec.count : 0,
-            fail: isFullPass ? 0 : rec.count
+            pass: isDmarcPass ? rec.count : 0,
+            fail: isDmarcPass ? 0 : rec.count
           });
         }
       }
@@ -471,15 +478,15 @@ const ArParser = (() => {
         const existing = subdomainMap.get(hf);
         if (existing) {
           existing.count += rec.count;
-          existing.pass += isFullPass ? rec.count : 0;
-          existing.fail += isFullPass ? 0 : rec.count;
+          existing.pass += isDmarcPass ? rec.count : 0;
+          existing.fail += isDmarcPass ? 0 : rec.count;
           existing.reject += rec.disposition === "reject" ? rec.count : 0;
         } else {
           subdomainMap.set(hf, {
             subdomain: hf,
             count: rec.count,
-            pass: isFullPass ? rec.count : 0,
-            fail: isFullPass ? 0 : rec.count,
+            pass: isDmarcPass ? rec.count : 0,
+            fail: isDmarcPass ? 0 : rec.count,
             reject: rec.disposition === "reject" ? rec.count : 0
           });
         }
@@ -574,6 +581,7 @@ const ArParser = (() => {
         ipRangeEntries.push({
           key: entry.key, count: entry.count,
           dkimPass: entry.dkimPass, spfPass: entry.spfPass, fullPass: entry.fullPass,
+          dmarcPass: entry.dmarcPass || 0,
           deliveredPass: entry.deliveredPass, deliveredFail: entry.deliveredFail,
           quarantine: entry.quarantine, reject: entry.reject
         });
@@ -583,14 +591,16 @@ const ArParser = (() => {
         const isDkimPass = rec.dkimPolicyResult === "pass";
         const isSpfPass = rec.spfPolicyResult === "pass";
         const isFullPass = isDkimPass && isSpfPass;
+        const isDmarcPass = isDkimPass || isSpfPass;
         const isDelivered = rec.disposition !== "quarantine" && rec.disposition !== "reject";
         reporterEntries.push({
           key: report.reporter.orgName, count: rec.count,
           dkimPass: isDkimPass ? rec.count : 0,
           spfPass: isSpfPass ? rec.count : 0,
           fullPass: isFullPass ? rec.count : 0,
-          deliveredPass: (isDelivered && isFullPass) ? rec.count : 0,
-          deliveredFail: (isDelivered && !isFullPass) ? rec.count : 0,
+          dmarcPass: isDmarcPass ? rec.count : 0,
+          deliveredPass: (isDelivered && isDmarcPass) ? rec.count : 0,
+          deliveredFail: (isDelivered && !isDmarcPass) ? rec.count : 0,
           quarantine: rec.disposition === "quarantine" ? rec.count : 0,
           reject: rec.disposition === "reject" ? rec.count : 0
         });
