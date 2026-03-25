@@ -32,6 +32,8 @@ mkdir -p "${STAGE_DIR}/lib"
 cp manifest.json               "$STAGE_DIR/"
 cp background.js               "$STAGE_DIR/"
 cp LICENSE                     "$STAGE_DIR/"
+# サードパーティライブラリの情報ファイル
+cp VENDOR.md                  "$STAGE_DIR/"
 cp images/icon.svg             "${STAGE_DIR}/images/"
 cp dashboard/dashboard.html    "${STAGE_DIR}/dashboard/"
 cp dashboard/dashboard.css     "${STAGE_DIR}/dashboard/"

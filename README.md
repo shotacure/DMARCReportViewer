@@ -121,6 +121,7 @@ Route reports with mail filters by `To:` address.
 
 ```
 manifest.json               Extension manifest (manifest_version 2)
+VENDOR.md                    Third-party library sources and versions
 background.js               Tab management, message scanning, decompression pipeline,
                              folder auto-detection, result caching, period filtering,
                              previous-period comparison, forensic domain grouping
