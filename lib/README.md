@@ -9,7 +9,7 @@ This directory should contain the following third-party libraries:
 - **Purpose:** ZIP file decompression for rua report attachments
 
 ### pako.min.js
-- **Source:** https://github.com/nicknisi/pako
+- **Source:** https://github.com/nodeca/pako
 - **License:** MIT
 - **Purpose:** GZIP decompression for rua report attachments
 

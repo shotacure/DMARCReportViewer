@@ -30,6 +30,8 @@ New-Item -ItemType Directory -Force (Join-Path $stageDir "lib")       | Out-Null
 Copy-Item -Force "manifest.json"              $stageDir
 Copy-Item -Force "background.js"              $stageDir
 Copy-Item -Force "LICENSE"                    $stageDir
+# サードパーティライブラリの情報ファイル
+Copy-Item -Force "VENDOR.md"                 $stageDir
 Copy-Item -Force "images/icon.svg"           (Join-Path $stageDir "images")
 Copy-Item -Force "dashboard/dashboard.html"  (Join-Path $stageDir "dashboard")
 Copy-Item -Force "dashboard/dashboard.css"   (Join-Path $stageDir "dashboard")
